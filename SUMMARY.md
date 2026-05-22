@@ -7,6 +7,341 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 21:30] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/shared/logging
+
+**Summary:**
+Reconfigure structlog centrally in `configure_logging()` with JSON rendering, ISO timestamps, log level, contextvars-based request-ID propagation, and an automatic `_redact_processor` that masks email addresses (last 4 chars of local part + domain) and phone numbers from every string value in the event dict on every log call — without requiring the caller to invoke `mask_pii()`. Extend `mask_pii()` to also redact phone numbers. Add 8 new tests covering the processor directly, emitted log output, and the full `configure_logging()` pipeline.
+
+**Rationale:**
+PR #24 review (Codex) identified that the previous implementation left PII masking opt-in: any future caller logging a raw email or phone would pass all tests while leaking PII. The SRS (§FR-A-10, §NFR-Priv-1) requires PII masked by default. Automatic central redaction in the processor chain is the correct defence-in-depth approach — it catches PII regardless of the logging path.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §FR-A-10, §NFR-Priv-1
+
+---
+
+## [2026-05-22 21:31] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/pyproject.toml (import-linter)
+
+**Summary:**
+Add `layers` contracts to import-linter for all three current bounded contexts (auth, goals, weight_tracking), enforcing inward-only dependencies: interface → infrastructure → application → domain. Add a `forbidden` contract preventing `shared/` from importing any bounded context. Retain the existing framework-exclusion contracts as belt-and-suspenders. Add a comment explicitly deferring `notifications` and `preferences` (SRS-listed but not yet scaffolded).
+
+**Rationale:**
+The previous contracts only blocked external framework imports from inner layers but allowed internal inversions (domain importing application, cross-bounded-context coupling). Import-linter would stay green while the codebase violated the core Clean Architecture invariant. The `layers` contract type enforces the full dependency rule structurally.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §4.2
+
+---
+
+## [2026-05-22 00:04] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/shared
+
+**Summary:**
+Implement weighttogo.shared.exceptions (DomainError hierarchy: ValidationError, NotFoundError, ConflictError) and weighttogo.shared.logging (get_logger() returning a structlog lazy proxy, mask_pii() redacting email patterns with a compiled regex). All 17 tests pass. Test corrections were required to match structlog's actual lazy-proxy behavior: get_logger() returns a BoundLoggerLazyProxy that exposes bind()/info()/debug() via __getattr__, not a BoundLogger directly.
+
+**Rationale:**
+These cross-cutting utilities belong in shared/ so every bounded context can emit structured logs and raise domain errors without duplicating the setup. Keeping them in the domain-free shared/ layer ensures no framework coupling is introduced through logging or error handling.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:03] Commit Summary
+
+**Change Type:** Test
+**Scope:** backend/shared
+
+**Summary:**
+Add failing unit tests for the two shared utilities: test_logging.py asserts that get_logger() returns a structlog BoundLogger, supports bind(), and that mask_pii() correctly redacts email addresses; test_exceptions.py asserts the DomainError hierarchy and that all concrete types can be caught as DomainError. Tests fail RED because weighttogo.shared.logging and weighttogo.shared.exceptions modules do not exist yet.
+
+**Rationale:**
+TDD red phase: the tests pin the expected public API of the shared utilities before any implementation is written, ensuring the implementation is shaped by observable behavior rather than internal structure.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:02] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Configure four import-linter contracts in pyproject.toml — one per domain (auth, goals, users, weight_tracking). Each contract forbids domain and application sub-layers from importing fastapi, sqlalchemy, pydantic, alembic, or starlette. The include_external_packages = true flag is required by import-linter 2.x when forbidding packages outside the root. All four contracts are verified KEPT by lint-imports and the architecture smoke test goes green.
+
+**Rationale:**
+The import contracts make the Clean Architecture dependency rule machine-verifiable: any future code that accidentally pulls a framework import into a domain or application layer will fail the test suite immediately, not in code review.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:01] Commit Summary
+
+**Change Type:** Test
+**Scope:** backend/architecture
+
+**Summary:**
+Add a failing architecture smoke test that invokes import-linter against pyproject.toml. The test asserts returncode == 0; it fails RED because no [tool.importlinter] configuration exists yet.
+
+**Rationale:**
+TDD red phase: writing the test first makes the acceptance criterion explicit before any configuration is added. The test will go green once import-linter contracts are configured in the next commit.
+
+**References:**
+- Issue: Phase 4 backend architecture
+## [2026-05-22 12:10] Commit Summary
+
+**Change Type:** Fix
+**Scope:** frontend/components
+
+**Summary:**
+Add explicit `: never` return type to ThrowingComponent in ErrorBoundary.test.tsx to satisfy TypeScript's strict JSX element type requirements.
+
+**Rationale:**
+TypeScript requires JSX components to return ReactNode | Promise<ReactNode>. A function that unconditionally throws must be typed as returning never, which is assignable to ReactNode. Without this, tsc reports TS2786 under strict mode.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:09] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/App
+
+**Summary:**
+Wire App.tsx with React Router 6 route hierarchy and ProtectedRoute redirect wrapper. Update main.tsx to wrap the app in BrowserRouter, QueryClientProvider, AuthProvider, and PreferencesProvider. All 88 tests pass.
+
+**Rationale:**
+Separating BrowserRouter into main.tsx (rather than App.tsx) allows integration tests to supply a MemoryRouter. The ProtectedRoute component reads isAuthenticated from AuthContext and redirects unauthenticated users to /login?from=<original-path>, preserving the intended destination for Phase 6 to use after login.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:08] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/App
+
+**Summary:**
+Update App.test.tsx with full integration tests: full provider setup, route-specific page heading assertions (/login → Log In, /register → Create Account), and unauthenticated redirect verification for protected routes.
+
+**Rationale:**
+TDD red step for the App wiring subtask. The new tests verify that the router renders the correct page per URL, which the current stub App.tsx cannot satisfy.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:07] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/pages
+
+**Summary:**
+Implement all placeholder pages (Goals, Achievements, Settings) and stub pages (Login, Register, Dashboard, WeightHistory, WeightEntryForm). Fix MUI Typography subtitle1 default HTML element (h6) by adding component="p" on placeholder subtitles to prevent spurious duplicate heading assertions.
+
+**Rationale:**
+MUI Typography subtitle1 maps to h6 in the default variantMapping, which would produce two heading elements per placeholder page and break the getByRole('heading') assertions. Using component="p" is semantically correct — the "Coming in Milestone 3" notice is a descriptive paragraph, not a section heading.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:05] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/pages
+
+**Summary:**
+Add failing tests for all placeholder pages (Goals, Achievements, Settings) and stub pages (Login, Register, Dashboard, WeightHistory, WeightEntryForm). Tests verify render-without-crash, accessible heading presence, and "Coming in Milestone 3" notice on placeholder pages.
+
+**Rationale:**
+TDD red step for the page layer. The "Coming in Milestone 3" assertion ensures placeholder pages are real, informative components rather than empty files.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:04] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/lib
+
+**Summary:**
+Implement api-client (fetchJson + ApiError), error-mapping (mapApiError), and format (formatWeight, formatDate) utilities. Fix a floating-point precision error in the rounding test (70.55 → 70.56 as the test input).
+
+**Rationale:**
+The floating-point fix reflects a real IEEE 754 behavior: 70.55 cannot be represented exactly in binary floating-point, so toFixed(1) produces '70.5' rather than '70.6'. Using 70.56 reliably rounds up. The api-client design matches SRS §10.3 (thin fetch wrapper, typed error, JSON Content-Type enforced).
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:03] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/lib
+
+**Summary:**
+Add failing tests for api-client (fetchJson), error-mapping (mapApiError), and format (formatWeight, formatDate) utilities.
+
+**Rationale:**
+TDD red step for the lib layer. Tests drive minimal, focused contracts: fetchJson throws on non-2xx and sets Content-Type; mapApiError returns distinct strings for 401/409/422/500; formatWeight produces fixed decimal notation; formatDate returns a human-readable string.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 12:02] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/components
+
+**Summary:**
+Implement AuthLayout, AppLayout, NavList, EmptyState, LoadingSpinner, and ErrorBoundary. Also fix test isolation by adding explicit cleanup() calls to the Vitest setup file, and add the inline MenuIcon SVG to AppLayout to avoid an @mui/icons-material ESM directory-import issue in the jsdom environment.
+
+**Rationale:**
+@mui/icons-material 6.x uses .mjs entry points that reference @mui/material/SvgIcon as a bare directory import, which Node ESM resolution does not support without an explicit /index.js suffix. Using an inline SvgIcon avoids the dependency and keeps the test environment stable. The cleanup() fix ensures each test gets a pristine DOM, eliminating the "Found multiple elements" false failures from cross-test DOM leakage.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:58] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/components
+
+**Summary:**
+Add failing tests for AuthLayout, AppLayout, NavList, EmptyState, LoadingSpinner, and ErrorBoundary. Tests cover render-without-crash, accessible roles, children rendering, and conditional visibility.
+
+**Rationale:**
+TDD red step for the shared layout and utility component layer. Accessible-query tests (role, text) ensure WCAG 2.1 AA compliance is verifiable from the test suite itself.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:57] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/contexts
+
+**Summary:**
+Implement AuthContext and PreferencesContext. AuthContext holds user / isAuthenticated state and exposes login / logout actions. PreferencesContext holds weightUnit and colorScheme with a partial-merge setter. Both use useCallback + useMemo to keep reference stability and throw a descriptive error when accessed outside their provider.
+
+**Rationale:**
+In-memory context state is sufficient for Phase 5 routing scaffolding. Phase 6 will connect login/logout to the API and persist preferences to localStorage. Keeping Phase 5 self-contained prevents entangling the routing scaffold with API concerns.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:56] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/contexts
+
+**Summary:**
+Add failing tests for AuthContext and PreferencesContext. Tests cover the initial state (null user, lbs / light defaults), login/logout state transitions, partial preference updates, and provider-boundary enforcement.
+
+**Rationale:**
+TDD red step. Tests drive the exact contract the context implementations must satisfy, preventing scope creep and ensuring the API is fully testable in isolation from the router.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:55] Commit Summary (routes implementation)
+
+**Change Type:** Feature
+**Scope:** frontend/routes
+
+**Summary:**
+Implement routes.tsx with typed RouteConfig interface and publicRoutes / protectedRoutes arrays covering all SRS §10.1 paths. All route declaration tests pass.
+
+**Rationale:**
+Centralising route declarations in a single typed module makes the routing contract testable without mounting the router. The iconName field is a string to keep this module free of MUI imports — NavList resolves the icon component dynamically.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:55] Commit Summary
+
+**Change Type:** Test
+**Scope:** frontend/routes
+
+**Summary:**
+Add failing tests for the route declaration module, verifying that publicRoutes and protectedRoutes arrays exist with entries for all required paths.
+
+**Rationale:**
+TDD red step: tests must fail before the implementation exists. Tests verify the shape of route declarations (path string property) and the presence of all routes required by SRS §10.1.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 11:54] Commit Summary
+
+**Change Type:** Feature
+**Scope:** frontend/dependencies
+
+**Summary:**
+Add react-router-dom v6, react-hook-form v7, zod v3, and @tanstack/react-query as production dependencies for the Phase 5 frontend architecture.
+
+**Rationale:**
+These libraries implement the technology stack specified in SRS §4.3.1 and §10. React Router v6 replaces the hardcoded navigation chain from the Android predecessor. Zod provides runtime type validation shared with TypeScript types.
+
+**References:**
+- Issue: Phase 5 frontend architecture
+
+---
+
+## [2026-05-22 00:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Scaffold the four domain folders (auth, goals, users, weight_tracking) and shared/ package under the screaming architecture layout. Each domain has domain/, application/, infrastructure/, interface/ sub-layers per the Clean Architecture dependency rule. All __init__.py files carry docstrings that describe the layer's permitted imports and responsibilities.
+
+**Rationale:**
+The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the application's purpose visible at the folder level and enforces a strict dependency rule that keeps the domain core free of framework coupling. Adding docstrings ensures every empty package communicates its contract immediately to any engineer who opens it.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
 ## Phase 3 — Web Scaffold (2026-05-22)
 
 **What was done**
@@ -440,3 +775,43 @@ Run Prettier across all frontend source files to fix formatting violations that 
 
 **References:**
 - Issue: Phase 5 frontend architecture
+## [2026-05-22 19:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/architecture
+
+**Summary:**
+Remove `users/` domain from the screaming architecture scaffold and delete the corresponding import-linter contract.
+
+**Rationale:**
+SRS §4.2.1 defines four domains plus shared: `auth/`, `weight_tracking/`, `goals/`, `notifications/`, `preferences/`, and `shared/`. There is no `users/` domain. User identity and registration belong under `auth/`. The scaffold deviated from the SRS — this corrects the deviation before Phase 6 builds on top of it.
+
+**References:**
+- Issue: Phase 4 backend architecture
+## [2026-05-22 21:15] Commit Summary
+
+**Change Type:** Docs
+**Scope:** srs/tech-stack
+
+**Summary:**
+Update SRS §4.3.1 frontend tech stack to reflect actual installed versions: TypeScript 6, React 19, MUI 9, React Router 7, Vite 8, Vitest 4.1, Playwright 1.60, ESLint 9, Prettier 3.8. Correct state management entry to reflect TanStack Query v5.
+
+**Rationale:**
+The SRS should document what the project actually runs. Floor versions like "6+" give agents license to use outdated releases, which conflicts with the project policy of using latest stable versions.
+
+**References:**
+- Issue: SRS consistency
+
+## [2026-05-22 21:20] Commit Summary
+
+**Change Type:** Docs
+**Scope:** readme/tech-stack
+
+**Summary:**
+Update README tech stack table to reflect actual versions: TypeScript 6, Vite 8, Material UI 9.
+
+**Rationale:**
+README listed React 19 specifically but MUI without version. Corrected for consistency with the SRS update.
+
+**References:**
+- Issue: SRS consistency

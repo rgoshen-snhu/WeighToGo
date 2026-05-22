@@ -12,6 +12,7 @@ dependencies = [
     "sqlalchemy>=2.0",
     "alembic>=1.13",
     "psycopg[binary]>=3.2",
+    "structlog>=24.0",
 ]
 
 [dependency-groups]
@@ -22,6 +23,9 @@ dev = [
     # Pinned to the ruff-pre-commit rev in .pre-commit-config.yaml; bump both together.
     "ruff==0.15.14",
     "mypy>=1.13",
+    "import-linter>=2.1",
+    "pytest-asyncio>=0.23",
+    "aiosqlite>=0.20",
 ]
 
 [build-system]
@@ -54,6 +58,91 @@ files = ["src", "tests"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=weighttogo --cov-report=term-missing"
+asyncio_mode = "auto"
 
 [tool.coverage.run]
 branch = true
+
+# ---------------------------------------------------------------------------
+# import-linter: Clean Architecture dependency contracts (SRS §4.2)
+#
+# Two contract types work together:
+#
+#   layers   – enforces inward-only dependencies within each bounded context
+#              (domain knows nothing above it; application knows nothing above
+#              it except domain; infrastructure may only import application +
+#              domain; interface is the outermost layer).
+#
+#   forbidden – supplements layers by explicitly blocking framework packages
+#               from the inner layers and preventing shared/ from importing
+#               any bounded context (it must stay cross-cutting only).
+#
+# Deferred bounded contexts (not yet scaffolded; add contracts when created):
+#   - weighttogo.notifications  (SRS §4.2 / FR-N-*)
+#   - weighttogo.preferences    (SRS §4.2 / FR-P-*)
+# ---------------------------------------------------------------------------
+
+[tool.importlinter]
+root_packages = ["weighttogo"]
+include_external_packages = true
+
+# ── Layer ordering contracts (inward-only dependency rule) ─────────────────
+
+[[tool.importlinter.contracts]]
+name = "auth: Clean Architecture layer ordering"
+type = "layers"
+containers = ["weighttogo.auth"]
+layers = ["interface", "infrastructure", "application", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "goals: Clean Architecture layer ordering"
+type = "layers"
+containers = ["weighttogo.goals"]
+layers = ["interface", "infrastructure", "application", "domain"]
+
+[[tool.importlinter.contracts]]
+name = "weight_tracking: Clean Architecture layer ordering"
+type = "layers"
+containers = ["weighttogo.weight_tracking"]
+layers = ["interface", "infrastructure", "application", "domain"]
+
+# ── Framework exclusion contracts (belt-and-suspenders for inner layers) ───
+
+[[tool.importlinter.contracts]]
+name = "auth: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.auth.domain",
+    "weighttogo.auth.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "goals: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.goals.domain",
+    "weighttogo.goals.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+[[tool.importlinter.contracts]]
+name = "weight_tracking: domain and application must not import frameworks"
+type = "forbidden"
+source_modules = [
+    "weighttogo.weight_tracking.domain",
+    "weighttogo.weight_tracking.application",
+]
+forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
+
+# ── Shared cross-cutting isolation ─────────────────────────────────────────
+
+[[tool.importlinter.contracts]]
+name = "shared: must not import bounded contexts"
+type = "forbidden"
+source_modules = ["weighttogo.shared"]
+forbidden_modules = [
+    "weighttogo.auth",
+    "weighttogo.goals",
+    "weighttogo.weight_tracking",
+]

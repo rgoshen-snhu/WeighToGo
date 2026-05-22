@@ -222,20 +222,20 @@ This blend is documented in `[ADR-0012]` (planned). The decision builds on the e
 
 | Concern | Technology | Version | Notes |
 | --- | --- | --- | --- |
-| Language | TypeScript | 5.4+ | Strict mode enabled |
-| UI Framework | React | 18+ | Functional components, hooks |
-| Component Library | Material UI (MUI) | 6+ | Accessibility-conformant components |
-| Routing | React Router | 6+ | Declarative routes, code splitting |
-| Forms | React Hook Form | 7+ | Performant, uncontrolled-by-default |
-| Form Validation | Zod | 3+ | Runtime type validation, shares schemas with TypeScript types |
+| Language | TypeScript | 6.0 | Strict mode enabled |
+| UI Framework | React | 19 | Functional components, hooks |
+| Component Library | Material UI (MUI) | 9 | Accessibility-conformant components |
+| Routing | React Router | 7 | Declarative routes, code splitting |
+| Forms | React Hook Form | 7.76 | Performant, uncontrolled-by-default |
+| Form Validation | Zod | 4.4 | Runtime type validation, shares schemas with TypeScript types |
 | HTTP Client | Fetch API + custom wrapper | Native | Wrapper enforces auth, error mapping, base URL |
-| State Management | React Context API + hooks | Native | No Redux unless complexity demands it |
-| Build Tool | Vite | 5+ | Fast dev server, optimized production bundle |
-| Unit Testing | Vitest | 1+ | Vite-native test runner |
-| Component Testing | React Testing Library | 14+ | Behavior-focused tests |
-| E2E Testing | Playwright | 1.40+ | Cross-browser end-to-end coverage |
-| Linting | ESLint | 8+ | TypeScript + React rules |
-| Formatting | Prettier | 3+ | Single source of truth for style |
+| State Management | TanStack Query + React Context | 5.100 | Server state via TanStack Query; no Redux |
+| Build Tool | Vite | 8 | Fast dev server, optimized production bundle |
+| Unit Testing | Vitest | 4.1 | Vite-native test runner |
+| Component Testing | React Testing Library | 16 | Behavior-focused tests |
+| E2E Testing | Playwright | 1.60 | Cross-browser end-to-end coverage |
+| Linting | ESLint | 9 | TypeScript + React rules |
+| Formatting | Prettier | 3.8 | Single source of truth for style |
 
 #### 4.3.2 Backend
 
@@ -411,7 +411,7 @@ The restructure is performed in a single feature branch and merged via pull requ
 
 | Step | Action | Verification |
 | --- | --- | --- |
-| 1 | Create branch `feature/repo-restructure-polyglot-monorepo` | `git branch` shows the new branch |
+| 1 | Create a feature branch from `main` | `git branch` shows the new branch |
 | 2 | Use `git mv` to move every Android file under `/android/` | `git log --follow android/app/...` shows full history |
 | 3 | Update the Android CI workflow to reference `/android/` as the working directory | Workflow runs successfully on the branch |
 | 4 | Create empty `/web/frontend/` and `/web/backend/` folders with `.gitkeep` | Folders exist in `git status` |
@@ -1563,14 +1563,14 @@ A new contributor should be able to clone, set up, and run the application in un
 
 | Command | Purpose |
 | --- | --- |
-| `uvicorn weighttogo.main:app --reload` | Development server with auto-reload |
-| `pytest` | Run all backend tests |
-| `pytest --cov=weighttogo --cov-report=html` | Run tests with coverage report |
-| `ruff check .` | Lint check |
-| `ruff format .` | Apply formatting |
-| `mypy src` | Type check |
-| `alembic upgrade head` | Apply all pending migrations |
-| `alembic revision --autogenerate -m "message"` | Generate a new migration |
+| `uv run uvicorn weighttogo.main:app --reload` | Development server with auto-reload |
+| `uv run pytest` | Run all backend tests |
+| `uv run pytest --cov=weighttogo --cov-report=html` | Run tests with coverage report |
+| `uv run ruff check .` | Lint check |
+| `uv run ruff format .` | Apply formatting |
+| `uv run mypy src` | Type check |
+| `uv run alembic upgrade head` | Apply all pending migrations |
+| `uv run alembic revision --autogenerate -m "message"` | Generate a new migration |
 
 #### 12.3.2 Frontend Commands
 
@@ -1651,11 +1651,7 @@ volumes:
 
 The repository uses Conventional Commits (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`, `perf:`, `ci:`). This convention is already established in the Android codebase and is carried forward.
 
-#### 12.7.2 Branch Names
-
-Feature branches follow the pattern `feature/<short-kebab-description>`. Fix branches use `fix/`. Documentation branches use `docs/`.
-
-#### 12.7.3 File Naming
+#### 12.7.2 File Naming
 
 | Stack | Convention | Example |
 | --- | --- | --- |
