@@ -15,9 +15,9 @@ issues were resolved.
   monorepo: the entire Android Gradle project moved from the repository root
   into `android/`, and `web/frontend/` and `web/backend/` were created as
   tracked placeholders for the web rebuild.
-- Marked the project's two eras with annotated tags: `v1.0.0-android` on the
-  final pre-restructure commit of `main`, and `v1.1.0-web` — applied after this
-  phase merges — on the restructured `main`.
+- Tagged `v1.0.0-android` on the final pre-restructure commit of `main`,
+  marking the end of the Android-only era. The restructure commit itself is not
+  separately tagged — it is a structural change, not a release.
 - Updated the Android CI workflow to build from `android/`, corrected its
   report and artifact paths, and path-filtered its triggers so it runs only for
   Android changes.
@@ -58,8 +58,10 @@ issues were resolved.
   predated this phase.
 - The SRS carried two ADR cross-references that pointed at the wrong ADR
   independently of the renumbering.
-- Several historical testing documents under `docs/testing/` contain stale
-  Gradle paths.
+- A thorough documentation sweep surfaced pre-existing documentation debt wider
+  than this phase's scope: corrupted command snippets in `docs/testing/`, live
+  AI-tool references and project-instruction-file citations in several committed
+  documents, and retired tracker references.
 - The review passes flagged three documentation and configuration gaps: the
   expanded `.gitignore` did not ignore `.env` files; the README
   repository-layout tree omitted several directories; and the SRS ADR-index
@@ -76,9 +78,9 @@ issues were resolved.
   module name and the new path layer together.
 - The two mis-targeted SRS references were corrected to their proper ADRs while
   the index was renumbered, leaving the SRS internally consistent.
-- The `docs/testing/` staleness predates this phase and is unrelated to the
-  restructure; it was left for a later consolidated documentation pass and
-  noted on the pull request rather than expanding this phase's scope.
+- That debt predates this phase. It is tracked as Phase 2 follow-on work in
+  issue #20 — a dedicated documentation-hygiene pass delivered as its own pull
+  request — rather than expanding the restructure PR.
 - The three review findings were resolved on the PR: an `.env` ignore rule was
   added (with `.env.example` kept tracked), the README layout tree was
   completed, and the SRS subsection heading was corrected. The security pass

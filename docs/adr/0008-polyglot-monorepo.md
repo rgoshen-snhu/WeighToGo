@@ -41,7 +41,7 @@ project is built under `web/`. Shared documentation stays at the root and under
   stays buildable and inspectable in the same repository, so the mobile-to-web
   evolution reads as one continuous history rather than a discontinuity.
 - **Single source of truth for project history.** One commit graph, one set of
-  release tags (`v1.0.0-android`, `v1.1.0-web`, and onward), and one issue
+  release tags (`v1.0.0-android` and onward), and one issue
   tracker and board span both eras of the project.
 - **Shared documentation and decision records.** ADRs, the SRS, and design
   records describe the project as a whole. In one repository they are written

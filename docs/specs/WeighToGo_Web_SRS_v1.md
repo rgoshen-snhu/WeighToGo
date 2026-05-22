@@ -441,12 +441,11 @@ All file moves use `git mv` (or equivalent index operations) so that `git log --
 
 ### 5.6 Branch and Tag Strategy
 
-The Android artifact's final commit before the restructure is tagged `v1.0.0-android` to mark the mobile-only era. The first commit after the restructure is tagged `v1.1.0-web`. Subsequent web milestones receive their own tags as they ship.
+The Android artifact's final commit before the restructure is tagged `v1.0.0-android` to mark the mobile-only era. The restructure itself is a structural change and is not separately tagged. Subsequent web milestones receive their own tags as they ship.
 
 | Tag | Meaning |
 | --- | --- |
 | `v1.0.0-android` | Final state of Android-only repository, before restructure |
-| `v1.1.0-web` | Repository restructured into monorepo, no web code yet |
 | `v2.0.0-m2` | Milestone 2 deliverable (auth + weight entry vertical slice) |
 | `v2.1.0-m3` | Milestone 3 deliverable (algorithms enhancement) |
 | `v2.2.0-m4` | Milestone 4 deliverable (database enhancement) |
