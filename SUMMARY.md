@@ -7,6 +7,101 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 21:30] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/shared/logging
+
+**Summary:**
+Reconfigure structlog centrally in `configure_logging()` with JSON rendering, ISO timestamps, log level, contextvars-based request-ID propagation, and an automatic `_redact_processor` that masks email addresses (last 4 chars of local part + domain) and phone numbers from every string value in the event dict on every log call — without requiring the caller to invoke `mask_pii()`. Extend `mask_pii()` to also redact phone numbers. Add 8 new tests covering the processor directly, emitted log output, and the full `configure_logging()` pipeline.
+
+**Rationale:**
+PR #24 review (Codex) identified that the previous implementation left PII masking opt-in: any future caller logging a raw email or phone would pass all tests while leaking PII. The SRS (§FR-A-10, §NFR-Priv-1) requires PII masked by default. Automatic central redaction in the processor chain is the correct defence-in-depth approach — it catches PII regardless of the logging path.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §FR-A-10, §NFR-Priv-1
+
+---
+
+## [2026-05-22 21:31] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/pyproject.toml (import-linter)
+
+**Summary:**
+Add `layers` contracts to import-linter for all three current bounded contexts (auth, goals, weight_tracking), enforcing inward-only dependencies: interface → infrastructure → application → domain. Add a `forbidden` contract preventing `shared/` from importing any bounded context. Retain the existing framework-exclusion contracts as belt-and-suspenders. Add a comment explicitly deferring `notifications` and `preferences` (SRS-listed but not yet scaffolded).
+
+**Rationale:**
+The previous contracts only blocked external framework imports from inner layers but allowed internal inversions (domain importing application, cross-bounded-context coupling). Import-linter would stay green while the codebase violated the core Clean Architecture invariant. The `layers` contract type enforces the full dependency rule structurally.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §4.2
+
+---
+
+## [2026-05-22 00:04] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/shared
+
+**Summary:**
+Implement weighttogo.shared.exceptions (DomainError hierarchy: ValidationError, NotFoundError, ConflictError) and weighttogo.shared.logging (get_logger() returning a structlog lazy proxy, mask_pii() redacting email patterns with a compiled regex). All 17 tests pass. Test corrections were required to match structlog's actual lazy-proxy behavior: get_logger() returns a BoundLoggerLazyProxy that exposes bind()/info()/debug() via __getattr__, not a BoundLogger directly.
+
+**Rationale:**
+These cross-cutting utilities belong in shared/ so every bounded context can emit structured logs and raise domain errors without duplicating the setup. Keeping them in the domain-free shared/ layer ensures no framework coupling is introduced through logging or error handling.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:03] Commit Summary
+
+**Change Type:** Test
+**Scope:** backend/shared
+
+**Summary:**
+Add failing unit tests for the two shared utilities: test_logging.py asserts that get_logger() returns a structlog BoundLogger, supports bind(), and that mask_pii() correctly redacts email addresses; test_exceptions.py asserts the DomainError hierarchy and that all concrete types can be caught as DomainError. Tests fail RED because weighttogo.shared.logging and weighttogo.shared.exceptions modules do not exist yet.
+
+**Rationale:**
+TDD red phase: the tests pin the expected public API of the shared utilities before any implementation is written, ensuring the implementation is shaped by observable behavior rather than internal structure.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:02] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Configure four import-linter contracts in pyproject.toml — one per domain (auth, goals, users, weight_tracking). Each contract forbids domain and application sub-layers from importing fastapi, sqlalchemy, pydantic, alembic, or starlette. The include_external_packages = true flag is required by import-linter 2.x when forbidding packages outside the root. All four contracts are verified KEPT by lint-imports and the architecture smoke test goes green.
+
+**Rationale:**
+The import contracts make the Clean Architecture dependency rule machine-verifiable: any future code that accidentally pulls a framework import into a domain or application layer will fail the test suite immediately, not in code review.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
+## [2026-05-22 00:01] Commit Summary
+
+**Change Type:** Test
+**Scope:** backend/architecture
+
+**Summary:**
+Add a failing architecture smoke test that invokes import-linter against pyproject.toml. The test asserts returncode == 0; it fails RED because no [tool.importlinter] configuration exists yet.
+
+**Rationale:**
+TDD red phase: writing the test first makes the acceptance criterion explicit before any configuration is added. The test will go green once import-linter contracts are configured in the next commit.
+
+**References:**
+- Issue: Phase 4 backend architecture
 ## [2026-05-22 12:10] Commit Summary
 
 **Change Type:** Fix
@@ -625,6 +720,19 @@ The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the
 - Broader `docs/` indexing was captured as a separate tracked issue (#17) under
   the M2 epic rather than expanding Phase 0 further.
 
+## [2026-05-22 19:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/architecture
+
+**Summary:**
+Remove `users/` domain from the screaming architecture scaffold and delete the corresponding import-linter contract.
+
+**Rationale:**
+SRS §4.2.1 defines four domains plus shared: `auth/`, `weight_tracking/`, `goals/`, `notifications/`, `preferences/`, and `shared/`. There is no `users/` domain. User identity and registration belong under `auth/`. The scaffold deviated from the SRS — this corrects the deviation before Phase 6 builds on top of it.
+
+**References:**
+- Issue: Phase 4 backend architecture
 ## [2026-05-22 21:15] Commit Summary
 
 **Change Type:** Docs
