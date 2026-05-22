@@ -22,6 +22,11 @@ assignees: ''
 ## Proposed Approach
 <!-- Optional: outline of how this could be implemented -->
 
+## Tasks
+<!-- Break the work into discrete, checkable steps -->
+- [ ]
+- [ ]
+
 ## Acceptance Criteria
 <!-- Define "done" with testable, specific outcomes -->
 - [ ]

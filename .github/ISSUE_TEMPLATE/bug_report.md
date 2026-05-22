@@ -42,3 +42,8 @@ assignees: ''
 
 ## Possible Cause / Additional Context
 <!-- Optional: suspected root cause, related issues, or other notes -->
+
+## Tasks
+<!-- Break the fix into discrete, checkable steps -->
+- [ ]
+- [ ]
