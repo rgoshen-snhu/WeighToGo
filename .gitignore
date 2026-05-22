@@ -263,6 +263,9 @@ test-results/
 # Local environment overrides
 *.local
 
+### Git worktrees (isolated development workspaces — never commit these)
+.worktrees/
+
 ### Environment files
 # Never commit real environment files; keep the example templates tracked
 .env
