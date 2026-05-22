@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     environment: Literal["development", "test", "production"] = "development"
-    database_url: str = "postgresql+psycopg://weighttogo:weighttogo@localhost:5432/weighttogo_dev"
+    database_url: str  # required — no default; raises ValidationError if DATABASE_URL is unset
 
 
 @lru_cache
@@ -27,4 +27,4 @@ def get_settings() -> Settings:
     misconfigured environment surfaces where settings are first used,
     instead of crashing every module that imports this one.
     """
-    return Settings()
+    return Settings()  # type: ignore[call-arg]  # pydantic-settings injects fields from env
