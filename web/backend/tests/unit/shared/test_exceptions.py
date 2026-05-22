@@ -1,6 +1,7 @@
 """Unit tests for the shared base domain exceptions module."""
 
 import pytest
+
 from weighttogo.shared.exceptions import (
     ConflictError,
     DomainError,
