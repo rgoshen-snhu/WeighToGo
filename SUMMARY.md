@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 00:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** backend/architecture
+
+**Summary:**
+Scaffold the four domain folders (auth, goals, users, weight_tracking) and shared/ package under the screaming architecture layout. Each domain has domain/, application/, infrastructure/, interface/ sub-layers per the Clean Architecture dependency rule. All __init__.py files carry docstrings that describe the layer's permitted imports and responsibilities.
+
+**Rationale:**
+The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the application's purpose visible at the folder level and enforces a strict dependency rule that keeps the domain core free of framework coupling. Adding docstrings ensures every empty package communicates its contract immediately to any engineer who opens it.
+
+**References:**
+- Issue: Phase 4 backend architecture
+
+---
+
 ## Phase 3 — Web Scaffold (2026-05-22)
 
 **What was done**
