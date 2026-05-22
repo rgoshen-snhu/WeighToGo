@@ -183,7 +183,7 @@ These manual tests **complement** (not replace) automated tests:
 
 ## Related Documentation
 
-- **Project Summary**: `../../project_summary.md` - Document testing findings here
+- **Android Development Journal**: `../history/android_summary.md`
 - **TODO**: `../../TODO.md` - Phase 9.6 completion tracking
 - **Database Architecture**: `../architecture/WeighToGo_Database_Architecture.md`
 - **Design Specifications**: `../design/Weight_Tracker_Figma_Design_Specifications.md`
