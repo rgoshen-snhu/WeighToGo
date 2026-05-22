@@ -2,12 +2,12 @@ name: E2E
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'web/frontend/**'
       - '.github/workflows/e2e.yml'
   pull_request:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'web/frontend/**'
       - '.github/workflows/e2e.yml'
