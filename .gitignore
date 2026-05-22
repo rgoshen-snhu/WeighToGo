@@ -235,3 +235,29 @@ google-services.json
 *.hprof
 
 *.bak
+
+### Python template
+# Byte-compiled / cache
+__pycache__/
+*.pyc
+# Virtual environment
+.venv/
+# Test / type-check / lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+# Coverage reports
+.coverage
+htmlcov/
+
+### Node template
+# Dependencies
+node_modules/
+# Build output
+dist/
+.vite/
+# Coverage and test reports
+coverage/
+playwright-report/
+# Local environment overrides
+*.local
