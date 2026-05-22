@@ -615,7 +615,7 @@ adb logcat | grep -E "AndroidRuntime|FATAL"
 **Solution**:
 ```bash
 # Check manifest for permission declaration
-grep -r "SEND_SMS" app/src/main/AndroidManifest.xml
+grep -r "SEND_SMS" android/weightogo/src/main/AndroidManifest.xml
 
 # For API 23+, permissions must be requested at runtime
 # Use UI to grant permissions instead of ADB
