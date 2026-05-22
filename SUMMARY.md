@@ -464,3 +464,17 @@ The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the
 - A README was added for `docs/history/`, resolving N1.
 - Broader `docs/` indexing was captured as a separate tracked issue (#17) under
   the M2 epic rather than expanding Phase 0 further.
+
+## [2026-05-22 19:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/architecture
+
+**Summary:**
+Remove `users/` domain from the screaming architecture scaffold and delete the corresponding import-linter contract.
+
+**Rationale:**
+SRS §4.2.1 defines four domains plus shared: `auth/`, `weight_tracking/`, `goals/`, `notifications/`, `preferences/`, and `shared/`. There is no `users/` domain. User identity and registration belong under `auth/`. The scaffold deviated from the SRS — this corrects the deviation before Phase 6 builds on top of it.
+
+**References:**
+- Issue: Phase 4 backend architecture

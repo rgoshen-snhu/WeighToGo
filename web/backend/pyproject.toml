@@ -93,15 +93,6 @@ source_modules = [
 forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
 
 [[tool.importlinter.contracts]]
-name = "users: domain and application must not import frameworks"
-type = "forbidden"
-source_modules = [
-    "weighttogo.users.domain",
-    "weighttogo.users.application",
-]
-forbidden_modules = ["fastapi", "sqlalchemy", "pydantic", "alembic", "starlette"]
-
-[[tool.importlinter.contracts]]
 name = "weight_tracking: domain and application must not import frameworks"
 type = "forbidden"
 source_modules = [
