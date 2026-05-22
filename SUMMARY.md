@@ -7,6 +7,96 @@ issues were resolved.
 
 ---
 
+## Phase 2 Follow-up — Documentation Hygiene (2026-05-22)
+
+**What was done**
+
+- Cleared repository-wide documentation debt that the Phase 2
+  documentation sweep surfaced and that was deliberately scoped out of
+  the restructure pull request (#19) to keep that change focused.
+  Tracked as issue #20; with this work merged, Phase 2 is complete.
+- Removed every live AI-tool reference from committed documentation: a
+  tooling-attribution line in the Android code quality audit, two
+  references in the Milestone Two brief, an attribution and a local
+  tool-config path in the Phase 7 SMS testing guide, a local
+  tool-config path in the Phase 8 manual test scenarios, and an aside
+  in the SRS introduction.
+- Removed every citation of the root project instruction file from
+  other documentation: three reference-table rows and a constraints
+  paragraph in the Milestone Two brief, roughly two dozen citations in
+  the Android code quality fix plan (violation labels, workflow
+  references, and example-commit-message footers), and one in the
+  manual testing checklist.
+- Repaired corrupted shell commands across three testing documents
+  (two manual-testing command guides and the testing-directory
+  README). A botched find/replace had merged the Android application
+  package token into adjacent words, dropped a path separator, and —
+  in one guide — left a misspelled package name and a wrong database
+  filename. Restructure-induced build, source, and data paths were
+  corrected, and a post-restructure path note was added to each
+  repaired guide.
+- Corrected retired-tracker references (`TODO.md`,
+  `project_summary.md`) in the actively-maintained testing-directory
+  README, while leaving such references intact in frozen historical
+  material where they accurately record the project's state at the
+  time of writing.
+- Replaced a `v2.x` milestone-release version scheme with honest
+  `0.x` development versioning across the SRS and the Milestone Two
+  brief, since the web application is in initial, pre-1.0 development.
+- Delivered as PR #21, branch `docs/m2-phase-2-doc-hygiene`.
+
+**How it was done**
+
+- Branched `docs/m2-phase-2-doc-hygiene` from the latest `main` after
+  the Phase 2 restructure pull request merged.
+- A read-and-verify documentation sweep opened every in-scope document
+  in full; repository-wide searches then confirmed that issue #20's
+  diagnosis of AI-tool and instruction-file references was complete.
+- The repository owner chose, per file, to repair the corrupted
+  command guides in place rather than archive or delete them. Ground
+  truth for the repair — application package, Gradle module name,
+  launcher activity, and database filename — was read directly from
+  the Android sources.
+- The corrupted commands were repaired with a scripted, systematic
+  pass and then verified line by line.
+- The retired-tracker policy was applied by classification: frozen
+  historical documents keep their references as accurate history;
+  actively-maintained documents have them corrected.
+- Work was committed as a sequence of small, atomic commits, one per
+  debt category.
+- Three review passes — code, adversarial, and security — were run on
+  the branch; their findings are recorded below.
+
+**Issues encountered**
+
+- The read-and-verify sweep found one AI-tooling reference in the SRS
+  introduction that issue #20's original diagnosis had not listed.
+- The corruption in the testing commands was more systematic than
+  stale paths: a find/replace had merged shell tokens, dropped a path
+  separator, misspelled the package name, and used the wrong database
+  filename.
+- The adversarial review found a third corrupted snippet — in the
+  testing-directory README — and one restructure-stale path that the
+  first repair pass had missed.
+- The adversarial review also flagged the same wrong package and
+  database names in a test-helper script outside this issue's
+  documentation scope.
+
+**How issues were resolved**
+
+- The additional SRS reference was surfaced to the repository owner,
+  who chose to remove it; it was removed alongside the other AI-tool
+  references.
+- The corrupted commands were repaired against ground truth from the
+  Android sources and verified to contain no residual corruption.
+- The third corrupted snippet and the stale path from the adversarial
+  review were repaired the same way in follow-up commits and
+  re-verified.
+- The out-of-scope script defect was surfaced to the repository owner
+  as a separate decision rather than folded into this issue.
+
+---
+
 ## Phase 2 — Repository Restructure (2026-05-21)
 
 **What was done**
