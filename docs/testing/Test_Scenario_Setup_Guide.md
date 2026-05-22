@@ -18,6 +18,8 @@
 
 ## Device Setup & Management
 
+> **Post-restructure paths:** The Android project lives in the `android/` directory. Run `./gradlew` commands from there (`cd android` first). `adb` commands run from any directory. Debug APK artifacts build to `android/weightogo/build/outputs/apk/debug/weightogo-debug.apk`.
+
 ### Install & Launch App
 
 ```bash
@@ -25,10 +27,10 @@
 ./gradlew clean assembleDebug installDebug
 
 # Launch app
-adb shell am start -n weightogo.activities.LoginActivity
+adb shell am start -n com.example.weightogo/.activities.LoginActivity
 
 # Install on specific device (if multiple connected)
-adb -s <device-id> install app/build/outputs/apk/debug/app-debug.apk
+adb -s <device-id> install android/weightogo/build/outputs/apk/debug/weightogo-debug.apk
 ```
 
 ### Device Management
@@ -57,11 +59,12 @@ adb shell cmd connectivity airplane-mode enable
 adb shell cmd connectivity airplane-mode disable
 
 # Kill app process (simulate process death)
-adb shell am kill weightogo
+adb shell am kill com.example.weightogo
 # Force stop app
-adb shell am force-stop weightogo
+adb shell am force-stop com.example.weightogo
 # Clear app data (reset to fresh install state)
-adb shell pm clear weightogo```
+adb shell pm clear com.example.weightogo
+```
 
 ### Emulator Management
 
@@ -91,9 +94,9 @@ adb exec-out screencap -p > screenshot.png
 
 ```bash
 # Connect to app database
-adb shell run-as weightogo
+adb shell run-as com.example.weightogo
 # Open SQLite database
-sqlite3 /data/data/weightogodatabases/WeighToGo.db
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db
 
 # Create test user manually (note: password hashing must be done in-app)
 # Instead, use registration feature in app for test users:
@@ -169,7 +172,8 @@ python3 scripts/generate_test_weight_entries.py > test_weight_entries.sql
 
 # Apply to database
 adb push test_weight_entries.sql /sdcard/
-adb shell run-as weightogosqlite3 /data/data/weightogodatabases/WeighToGo.db
+adb shell run-as com.example.weightogo
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db
 .read /sdcard/test_weight_entries.sql
 .exit
 exit
@@ -201,12 +205,14 @@ For faster testing without scripts:
 
 ```bash
 # Method 1: Via run-as (rooted device or emulator)
-adb shell run-as weightogocd /data/data/weightogodatabases
-sqlite3 WeighToGo.db
+adb shell run-as com.example.weightogo
+cd /data/data/com.example.weightogo/databases
+sqlite3 weigh_to_go.db
 
 # Method 2: Pull database to local machine
-adb shell run-as weightogocat /data/data/weightogodatabases/WeighToGo.db > WeighToGo.db
-sqlite3 WeighToGo.db
+adb shell run-as com.example.weightogo
+cat /data/data/com.example.weightogo/databases/weigh_to_go.db > weigh_to_go.db
+sqlite3 weigh_to_go.db
 ```
 
 ### Useful SQL Queries
@@ -273,14 +279,16 @@ GROUP BY weight_unit;
 
 ```bash
 # Export database to file
-adb shell run-as weightogocat /data/data/weightogodatabases/WeighToGo.db > backup_$(date +%Y%m%d).db
+adb shell run-as com.example.weightogo
+cat /data/data/com.example.weightogo/databases/weigh_to_go.db > backup_$(date +%Y%m%d).db
 
 # Import database from backup
-adb shell run-as weightogocat /sdcard/backup.db > /data/data/weightogodatabases/WeighToGo.db
+adb shell run-as com.example.weightogo
+cat /sdcard/backup.db > /data/data/com.example.weightogo/databases/weigh_to_go.db
 exit
 
 # Dump database to SQL (for version control)
-sqlite3 WeighToGo.db .dump > database_dump.sql
+sqlite3 weigh_to_go.db .dump > database_dump.sql
 ```
 
 ---
@@ -291,14 +299,16 @@ sqlite3 WeighToGo.db .dump > database_dump.sql
 
 ```bash
 # Method 1: Clear app data (fastest)
-adb shell pm clear weightogo
+adb shell pm clear com.example.weightogo
 # Method 2: Uninstall and reinstall
-adb uninstall weightogo./gradlew installDebug
+adb uninstall com.example.weightogo
+./gradlew installDebug
 
 # Method 3: Delete database only (keep app installed)
-adb shell run-as weightogorm /data/data/weightogodatabases/WeighToGo.db
-rm /data/data/weightogodatabases/WeighToGo.db-shm
-rm /data/data/weightogodatabases/WeighToGo.db-wal
+adb shell run-as com.example.weightogo
+rm /data/data/com.example.weightogo/databases/weigh_to_go.db
+rm /data/data/com.example.weightogo/databases/weigh_to_go.db-shm
+rm /data/data/com.example.weightogo/databases/weigh_to_go.db-wal
 exit
 ```
 
@@ -306,37 +316,41 @@ exit
 
 ```bash
 # Check SharedPreferences (session data)
-adb shell run-as weightogocat /data/data/weightogoshared_prefs/SessionPrefs.xml
+adb shell run-as com.example.weightogo
+cat /data/data/com.example.weightogo/shared_prefs/SessionPrefs.xml
 exit
 
 # Clear session (force logout)
-adb shell run-as weightogorm /data/data/weightogoshared_prefs/SessionPrefs.xml
+adb shell run-as com.example.weightogo
+rm /data/data/com.example.weightogo/shared_prefs/SessionPrefs.xml
 exit
 
 # Restart app
-adb shell am force-stop weightogoadb shell am start -n weightogo.activities.LoginActivity
+adb shell am force-stop com.example.weightogo
+adb shell am start -n com.example.weightogo/.activities.LoginActivity
 ```
 
 ### Permissions Management
 
 ```bash
 # Check granted permissions
-adb shell dumpsys package weightogo| grep permission
+adb shell dumpsys package com.example.weightogo | grep permission
 
 # Grant SMS permission (for testing)
-adb shell pm grant weightogoandroid.permission.SEND_SMS
+adb shell pm grant com.example.weightogo android.permission.SEND_SMS
 
 # Revoke SMS permission
-adb shell pm revoke weightogoandroid.permission.SEND_SMS
+adb shell pm revoke com.example.weightogo android.permission.SEND_SMS
 
 # Grant notification permission (API 33+)
-adb shell pm grant weightogoandroid.permission.POST_NOTIFICATIONS
+adb shell pm grant com.example.weightogo android.permission.POST_NOTIFICATIONS
 
 # Revoke notification permission
-adb shell pm revoke weightogoandroid.permission.POST_NOTIFICATIONS
+adb shell pm revoke com.example.weightogo android.permission.POST_NOTIFICATIONS
 
 # Reset all permissions to default
-adb shell pm reset-permissions weightogo```
+adb shell pm reset-permissions com.example.weightogo
+```
 
 ---
 
@@ -346,9 +360,9 @@ adb shell pm reset-permissions weightogo```
 
 ```bash
 # 1. Reset app
-adb shell pm clear weightogo
+adb shell pm clear com.example.weightogo
 # 2. Launch app
-adb shell am start -n weightogo.activities.LoginActivity
+adb shell am start -n com.example.weightogo/.activities.LoginActivity
 
 # 3. Register user via UI:
 #    - Switch to "Create Account" tab
@@ -356,14 +370,15 @@ adb shell am start -n weightogo.activities.LoginActivity
 #    - Password: TestPass123!
 
 # 4. Verify session persistence
-adb shell am force-stop weightogoadb shell am start -n weightogo.activities.LoginActivity
+adb shell am force-stop com.example.weightogo
+adb shell am start -n com.example.weightogo/.activities.LoginActivity
 # Expected: Auto-navigate to MainActivity
 
 # 5. Test logout
 # (Tap logout in SettingsActivity via UI)
 
 # 6. Verify session cleared
-adb shell am start -n weightogo.activities.LoginActivity
+adb shell am start -n com.example.weightogo/.activities.LoginActivity
 # Expected: LoginActivity displays (not auto-navigate)
 ```
 
@@ -390,14 +405,16 @@ adb shell am start -n weightogo.activities.LoginActivity
 #    99 kg → 218 lbs
 
 # 6. Check database
-adb shell run-as weightogosqlite3 /data/data/weightogodatabases/WeighToGo.db "SELECT weight_date, weight_value, weight_unit FROM daily_weights WHERE user_id = 1 ORDER BY weight_date DESC;"
+adb shell run-as com.example.weightogo
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db "SELECT weight_date, weight_value, weight_unit FROM daily_weights WHERE user_id = 1 ORDER BY weight_date DESC;"
 ```
 
 ### Scenario 3: Test SMS Permissions
 
 ```bash
 # 1. Fresh install
-adb shell pm clear weightogo./gradlew installDebug
+adb shell pm clear com.example.weightogo
+./gradlew installDebug
 
 # 2. Login as testuser1
 
@@ -414,7 +431,7 @@ adb shell pm clear weightogo./gradlew installDebug
 # 8. Tap toggle again → Verify settings prompt
 
 # 9. Manually grant permission:
-adb shell pm grant weightogoandroid.permission.SEND_SMS
+adb shell pm grant com.example.weightogo android.permission.SEND_SMS
 
 # 10. Reopen SettingsActivity → Verify toggle enabled
 ```
@@ -426,13 +443,15 @@ adb shell pm grant weightogoandroid.permission.SEND_SMS
 
 # 2. Import to database
 adb push test_weight_entries.sql /sdcard/
-adb shell run-as weightogosqlite3 /data/data/weightogodatabases/WeighToGo.db
+adb shell run-as com.example.weightogo
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db
 .read /sdcard/test_weight_entries.sql
 .exit
 exit
 
 # 3. Launch app
-adb shell am force-stop weightogoadb shell am start -n weightogo.activities.MainActivity
+adb shell am force-stop com.example.weightogo
+adb shell am start -n com.example.weightogo/.activities.MainActivity
 
 # 4. Test scrolling performance:
 #    - Open MainActivity
@@ -473,15 +492,15 @@ adb logcat | grep -E "WeighToGo|MainActivity|LoginActivity|SessionManager"
 
 ```bash
 # Monitor app memory usage
-adb shell dumpsys meminfo weightogo
+adb shell dumpsys meminfo com.example.weightogo
 # Monitor CPU usage
-adb shell top | grep weightogo
+adb shell top | grep com.example.weightogo
 
 # Check app is running
-adb shell ps | grep weightogo
+adb shell ps | grep com.example.weightogo
 
 # Monitor frame rendering
-adb shell dumpsys gfxinfo weightogo
+adb shell dumpsys gfxinfo com.example.weightogo
 # Enable GPU rendering profile
 adb shell setprop debug.hwui.profile true
 
@@ -502,7 +521,8 @@ adb shell cmd connectivity airplane-mode disable
 adb shell ping -c 3 8.8.8.8
 
 # Monitor network traffic
-adb shell dumpsys netstats | grep weightogo```
+adb shell dumpsys netstats | grep com.example.weightogo
+```
 
 ### UI Hierarchy Inspection
 
@@ -519,7 +539,7 @@ adb pull /sdcard/window_dump.xml
 
 ```bash
 # Show current activity stack
-adb shell dumpsys activity activities | grep -E "Running|weightogo"
+adb shell dumpsys activity activities | grep -E "Running|com.example.weightogo"
 
 # Show current focused activity
 adb shell dumpsys activity activities | grep mResumedActivity
@@ -554,7 +574,7 @@ Before starting manual testing, verify:
 **Solution**:
 ```bash
 # Verify app is debuggable
-adb shell dumpsys package weightogo| grep "android:debuggable"
+adb shell dumpsys package com.example.weightogo | grep "android:debuggable"
 # Should show: android:debuggable=true
 
 # If false, rebuild with debug variant
@@ -580,7 +600,9 @@ adb devices
 **Solution**:
 ```bash
 # Clear app data and reinstall
-adb shell pm clear weightogoadb uninstall weightogo./gradlew installDebug
+adb shell pm clear com.example.weightogo
+adb uninstall com.example.weightogo
+./gradlew installDebug
 
 # Check logcat for crash details
 adb logcat | grep -E "AndroidRuntime|FATAL"
@@ -607,11 +629,11 @@ grep -r "SEND_SMS" app/src/main/AndroidManifest.xml
 # Essential Test Cycle Commands
 ./gradlew clean build                              # Build app
 ./gradlew installDebug                             # Install debug APK
-adb shell pm clear weightogo         # Reset app data
-adb shell am start -n weightogo.activities.LoginActivity  # Launch app
+adb shell pm clear com.example.weightogo         # Reset app data
+adb shell am start -n com.example.weightogo/.activities.LoginActivity  # Launch app
 adb logcat -s WeighToGo:*                          # Monitor app logs
-adb shell run-as weightogo           # Access app data
-sqlite3 /data/data/weightogodatabases/WeighToGo.db  # Open database
+adb shell run-as com.example.weightogo           # Access app data
+sqlite3 /data/data/com.example.weightogo/databases/weigh_to_go.db  # Open database
 
 # Common Test Data Setup
 # 1. Create testuser1 via UI (username: testuser1, password: TestPass123!)

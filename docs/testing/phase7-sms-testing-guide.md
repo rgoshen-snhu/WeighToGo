@@ -78,12 +78,14 @@ This section covers complete end-to-end SMS testing on a real device.
 
 ### Step 1: Install App on Device
 
+> **Post-restructure paths:** The Android project lives in the `android/` directory. Run `./gradlew` commands from there (`cd android` first). `adb` commands run from any directory. Debug APK artifacts build to `android/weightogo/build/outputs/apk/debug/weightogo-debug.apk`.
+
 ```bash
 # Build debug APK
 ./gradlew assembleDebug
 
 # Install on connected device
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r android/weightogo/build/outputs/apk/debug/weightogo-debug.apk
 
 # Or build and install in one step
 ./gradlew installDebug
@@ -429,7 +431,7 @@ adb logcat -s SMSNotificationManager DailyReminderWorker
 **Step 5: Verify Database**
 ```bash
 # Pull database from emulator
-adb pull /data/data/weightogodatabases/weigh_to_go.db
+adb pull /data/data/com.example.weightogo/databases/weigh_to_go.db
 
 # Open with SQLite browser to verify:
 # - Phone number stored in E.164 format
@@ -549,7 +551,7 @@ adb logcat -s DailyReminderWorker
 adb logcat -s SettingsActivity
 
 # All WeightToGo logs
-adb logcat | grep "weightogo"
+adb logcat | grep "com.example.weightogo"
 ```
 
 ### Common Issues
@@ -567,10 +569,10 @@ adb logcat | grep "weightogo"
 **Debug Steps:**
 ```bash
 # Check phone number in database
-adb shell "run-as weightogo cat databases/weigh_to_go.db" | strings | grep "+1"
+adb shell "run-as com.example.weightogo cat databases/weigh_to_go.db" | strings | grep "+1"
 
 # Verify SMS permission
-adb shell dumpsys package weightogo| grep SEND_SMS
+adb shell dumpsys package com.example.weightogo | grep SEND_SMS
 
 # Check SmsManager logs
 adb logcat -s SmsManager
@@ -588,13 +590,14 @@ adb logcat -s SmsManager
 
 2. Verify permission in system:
    ```bash
-   adb shell dumpsys package weightogo| grep "android.permission.SEND_SMS"
+   adb shell dumpsys package com.example.weightogo | grep "android.permission.SEND_SMS"
    # Should show: granted=true
    ```
 
 3. Clear app data and retry:
    ```bash
-   adb shell pm clear weightogo   ```
+   adb shell pm clear com.example.weightogo
+   ```
 
 #### Issue: Daily Reminder Not Firing
 
@@ -603,12 +606,12 @@ adb logcat -s SmsManager
 **Debug Steps:**
 1. Check WorkManager status:
    ```bash
-   adb shell dumpsys jobscheduler | grep "weightogo"
+   adb shell dumpsys jobscheduler | grep "com.example.weightogo"
    ```
 
 2. Verify reminder preference:
    ```bash
-   adb shell "run-as weightogo cat databases/weigh_to_go.db" | strings | grep "sms_reminder_enabled"
+   adb shell "run-as com.example.weightogo cat databases/weigh_to_go.db" | strings | grep "sms_reminder_enabled"
    # Should show: sms_reminder_enabled|true
    ```
 
@@ -637,7 +640,7 @@ adb logcat -s SmsManager
 
 2. Check database writes:
    ```bash
-   adb shell "run-as weightogo cat databases/weigh_to_go.db" | strings | grep "sms_"
+   adb shell "run-as com.example.weightogo cat databases/weigh_to_go.db" | strings | grep "sms_"
    ```
 
 3. Verify SessionManager has valid userId:
@@ -665,7 +668,7 @@ adb logcat -s SmsManager
 
 3. Verify preference toggles:
    ```bash
-   adb shell "run-as weightogo cat databases/weigh_to_go.db" | strings | grep "sms_goal_alerts"
+   adb shell "run-as com.example.weightogo cat databases/weigh_to_go.db" | strings | grep "sms_goal_alerts"
    # Should show: sms_goal_alerts|true
    ```
 
@@ -689,7 +692,7 @@ Pull and inspect database for debugging:
 
 ```bash
 # Pull database
-adb pull /data/data/weightogodatabases/weigh_to_go.db
+adb pull /data/data/com.example.weightogo/databases/weigh_to_go.db
 
 # Open with sqlite3
 sqlite3 weigh_to_go.db
@@ -798,12 +801,10 @@ Status: [Fixed | Known Issue | Wont Fix]
 
 ## Additional Resources
 
-- **Phase 7 Plan:** `~/.claude/plans/giggly-watching-flame.md`
 - **Architecture Doc:** `docs/architecture/WeighToGo_Database_Architecture.md`
-- **TODO.md:** Phase 7 section for implementation details
-- **SMSNotificationManager:** `app/src/main/java/com/example/weighttogo/utils/SMSNotificationManager.java`
-- **DailyReminderWorker:** `app/src/main/java/com/example/weighttogo/workers/DailyReminderWorker.java`
-- **SettingsActivity:** `app/src/main/java/com/example/weighttogo/activities/SettingsActivity.java`
+- **SMSNotificationManager:** `android/weightogo/src/main/java/com/example/weightogo/utils/SMSNotificationManager.java`
+- **DailyReminderWorker:** `android/weightogo/src/main/java/com/example/weightogo/workers/DailyReminderWorker.java`
+- **SettingsActivity:** `android/weightogo/src/main/java/com/example/weightogo/activities/SettingsActivity.java`
 
 ---
 
@@ -819,5 +820,4 @@ For issues or questions during testing:
 ---
 
 **Last Updated:** 2025-12-12
-**Prepared by:** Claude Code
 **Testing Status:** Ready for manual validation
