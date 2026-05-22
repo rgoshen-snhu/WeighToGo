@@ -259,6 +259,7 @@ dist/
 # Coverage and test reports
 coverage/
 playwright-report/
+test-results/
 # Local environment overrides
 *.local
 

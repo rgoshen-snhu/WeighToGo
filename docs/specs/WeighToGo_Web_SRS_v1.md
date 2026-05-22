@@ -1095,7 +1095,7 @@ Errors follow RFC 7807 Problem Details:
 
 ```json
 {
-  "type": "https://api.weightogo.example/errors/validation-error",
+  "type": "https://api.weighttogo.example/errors/validation-error",
   "title": "Validation failed",
   "status": 422,
   "detail": "The submitted data did not pass validation.",
@@ -1608,7 +1608,7 @@ Secrets are managed via environment variables loaded from `.env` files in develo
 
 | Variable | Purpose | Example |
 | --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql+psycopg://user:pass@localhost:5432/weightogo_dev?sslmode=require` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql+psycopg://user:pass@localhost:5432/weighttogo_dev?sslmode=require` |
 | `JWT_SECRET_KEY` | JWT signing key (256-bit minimum) | Generated via `openssl rand -base64 32` |
 | `JWT_ACCESS_TOKEN_TTL_SECONDS` | Access token lifetime | `900` (15 minutes) |
 | `JWT_REFRESH_TOKEN_TTL_DAYS` | Refresh token lifetime | `7` |
@@ -1634,9 +1634,9 @@ services:
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: weightogo
+      POSTGRES_USER: weighttogo
       POSTGRES_PASSWORD: <from .env>
-      POSTGRES_DB: weightogo_dev
+      POSTGRES_DB: weighttogo_dev
     ports:
       - "5432:5432"
     volumes:

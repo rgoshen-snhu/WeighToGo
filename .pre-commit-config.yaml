@@ -1,0 +1,36 @@
+# Pre-commit hooks for the Weigh to Go! polyglot monorepo.
+#
+# A single hook manager coordinates both stacks: Git exposes one pre-commit
+# slot, so the Python pre-commit framework runs the backend (ruff) and the
+# frontend (eslint, prettier) checks rather than competing with a second
+# manager. Activate locally once with: pre-commit install
+#
+# The frontend hooks shell out to the project's own npm scripts and so
+# require `npm install` to have been run in web/frontend.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 0c7b6c989466a93942def1f84baf36ddfcd60c83 # v0.15.14
+    hooks:
+      - id: ruff
+        name: ruff (backend lint)
+        args: [--fix]
+        files: ^web/backend/.*\.py$
+      - id: ruff-format
+        name: ruff (backend format)
+        files: ^web/backend/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: frontend-lint
+        name: eslint (frontend lint)
+        entry: "bash -c 'cd web/frontend && if [ ! -d node_modules ]; then echo frontend dependencies missing, run npm --prefix web/frontend install; exit 1; fi; npm run lint'"
+        language: system
+        files: ^web/frontend/.*\.(ts|tsx)$
+        pass_filenames: false
+      - id: frontend-format
+        name: prettier (frontend format check)
+        entry: "bash -c 'cd web/frontend && if [ ! -d node_modules ]; then echo frontend dependencies missing, run npm --prefix web/frontend install; exit 1; fi; npm run format:check'"
+        language: system
+        files: ^web/frontend/.*\.(ts|tsx|js|jsx|json|css|html|md|ya?ml)$
+        pass_filenames: false

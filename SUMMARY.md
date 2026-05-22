@@ -7,6 +7,113 @@ issues were resolved.
 
 ---
 
+## Phase 3 — Web Scaffold (2026-05-22)
+
+**What was done**
+
+- Stood up runnable but otherwise empty frontend and backend skeletons
+  for the web rebuild, so that later feature phases inherit a complete
+  toolchain. Tracked as issue #9, the third phase of Milestone Two.
+- Scaffolded the backend under `web/backend/`: a uv-managed FastAPI
+  project using a `src/weighttogo/` package layout, with ruff, mypy in
+  strict mode, and pytest configured. Added an environment-driven
+  settings module, a `GET /health` endpoint reporting service status
+  and the active environment, an Alembic migration harness (no
+  migrations authored yet), and a Docker Compose definition for a local
+  PostgreSQL 16 database.
+- Scaffolded the frontend under `web/frontend/`: a Vite project using
+  React 19 and TypeScript in strict mode, with ESLint and Prettier,
+  Vitest and React Testing Library, and Playwright for end-to-end
+  tests. Added the Material UI theme carrying the design-system teal
+  palette and a root application component mounted through the theme
+  provider.
+- Added a single pre-commit hook manager covering both stacks, and four
+  path-filtered GitHub Actions workflows: backend CI, frontend CI,
+  end-to-end tests, and a daily dependency security audit.
+- Updated the repository README with an accurate web-application status
+  and quickstart instructions for both stacks.
+
+**How it was done**
+
+- Branched `feature/m2-phase-3-web-scaffold` from `main` and worked in
+  sixteen small, atomic commits, one per subtask.
+- The three units with genuine behavior — the backend settings module,
+  the `/health` endpoint, and the frontend theme and application
+  component — were developed test-first on a red-green cycle.
+  Configuration, which has no behavior to assert, was verified by
+  running its tools: ruff, mypy, tsc, eslint, prettier, the two dev
+  servers, the database container, and the Alembic harness.
+- Two decisions shaped the scaffold: the `/health` endpoint was kept
+  minimal (status and environment only), with the fuller health check
+  deferred until the database session layer exists; and a single
+  pre-commit framework runs both stacks' linters, because Git exposes
+  only one pre-commit slot and two hook managers would conflict.
+- Both stacks were verified end to end: the backend dev server serves
+  `/health`, the PostgreSQL container reports healthy, and Alembic
+  applies cleanly against it; the frontend builds, unit tests pass, and
+  a Playwright run drives the application in a real browser.
+
+**Issues encountered**
+
+- The Playwright end-to-end test surfaced a runtime failure that the
+  unit tests had not: the Material UI theme provider received a second
+  React instance because the development bundler split React across
+  separate pre-bundles. It was resolved by pre-bundling React, the
+  styling library, and Material UI together and deduplicating React in
+  the bundler configuration.
+- The frontend linting, test, and UI-library dependencies were briefly
+  installed into a stray package manifest at the repository root rather
+  than under `web/frontend/`, leaving them undeclared in the frontend
+  manifest. The error was caught before the work shipped; the stray
+  root files were removed and every dependency consolidated into
+  `web/frontend/`, verified with a clean install from the lockfile.
+
+**Documentation**
+
+- The README web-application section was rewritten from a placeholder
+  note into an accurate status with backend and frontend quickstarts.
+- `CONTRIBUTING.md` was reviewed and remains accurate for the Android
+  workflow; it does not yet cover web-stack development or the
+  pre-commit hooks, which are recommended for a later documentation
+  pass.
+
+**Reviews**
+
+- Three review passes — code, adversarial, and security — were run on
+  the branch before the merge gate.
+- The code and adversarial reviews both flagged that the backend pinned
+  Python 3.13 while the project targets 3.12; the pin was corrected to
+  3.12 so the declared minimum is the version actually run. The
+  adversarial review confirmed the scaffold is architecture-neutral —
+  it introduces no organize-by-technical-layer folders and does not
+  pre-empt the later domain-architecture phase. A clarifying comment
+  was added to the Vite config explaining why React, the styling
+  library, and Material UI are pre-bundled together.
+- The security review found no committed secrets, no workflow
+  script-injection, and least-privilege workflow permissions. Its
+  recommendation to pin third-party CI actions to commit SHAs was
+  applied repository-wide: every action across all five workflows and
+  the ruff pre-commit hook is now pinned to a commit SHA with a version
+  comment.
+- A naming inconsistency the reviews raised — the database identifier
+  `weightogo` versus the Python package `weighttogo` — was resolved by
+  standardizing the web project on `weighttogo`. The database
+  identifiers, the `.env.example`, the Docker Compose definition, and
+  the SRS examples were all updated to match. The preserved Android
+  artifact keeps its own `weightogo` package and is unaffected.
+- A subsequent maximum-effort review pass — five finder angles plus a
+  gap sweep — surfaced thirteen further findings, all addressed before
+  merge. The substantive fixes: application settings are now built
+  lazily, so a misconfigured environment no longer crashes every
+  importer; the Alembic environment passes the database URL straight to
+  the engine, immune to ConfigParser interpolation of characters such
+  as a percent sign; end-to-end specs are type-checked; ESLint enforces
+  React JSX rules through eslint-plugin-react, which moved ESLint to the
+  current stable 9 line; and the pre-commit, Playwright, Docker Compose,
+  and CI configurations were each hardened.
+
+---
+
 ## Phase 2 Follow-up — Documentation Hygiene (2026-05-22)
 
 **What was done**

@@ -63,8 +63,8 @@ WeighToGo/
 │   ├── build.gradle
 │   └── settings.gradle
 ├── web/                  # Rebuilt full-stack web application
-│   ├── frontend/         #   React + TypeScript   (scaffolded in a later step)
-│   └── backend/          #   FastAPI + Python     (scaffolded in a later step)
+│   ├── frontend/         #   React + TypeScript (Vite)
+│   └── backend/          #   FastAPI + Python (PostgreSQL)
 ├── docs/                 # Shared documentation
 │   ├── adr/              #   Architecture Decision Records
 │   ├── ddr/              #   Design Decision Records
@@ -90,7 +90,7 @@ WeighToGo/
 | Path | Contents |
 |------|----------|
 | `android/` | The original Android application — preserved, still buildable, full test suite passing. Maintenance-only: no new features. |
-| `web/` | The web rebuild. The `frontend/` and `backend/` skeletons are scaffolded in a subsequent step. |
+| `web/` | The web rebuild. Runnable `frontend/` and `backend/` skeletons; feature development follows in subsequent steps. |
 | `docs/` | Documentation shared across both stacks: ADRs, DDRs, the SRS, design specs, and architecture notes. |
 
 ---
@@ -205,14 +205,52 @@ gates.
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 18, TypeScript, Vite, Material UI |
+| Frontend | React 19, TypeScript, Vite, Material UI |
 | Backend | FastAPI, Python, Pydantic, SQLAlchemy |
 | Database | PostgreSQL |
 
-At this stage `web/frontend/` and `web/backend/` are tracked placeholders. The
-runnable frontend and backend skeletons, the local database, and the web CI
-pipelines are added in the next step. Quickstart instructions for the web stack
-will be documented in this section as it lands.
+The `web/frontend/` and `web/backend/` skeletons are scaffolded and runnable,
+with a local PostgreSQL database and CI pipelines in place. Feature development —
+authentication, weight tracking, and the rest of the rebuild — follows in
+subsequent steps.
+
+### Running the Backend
+
+Prerequisites: [Python 3.12+](https://www.python.org/),
+[uv](https://docs.astral.sh/uv/), and [Docker](https://www.docker.com/).
+
+```bash
+cd web/backend
+cp .env.example .env             # adjust values as needed
+docker compose up -d             # start local PostgreSQL
+uv sync                          # install dependencies
+uv run alembic upgrade head      # apply database migrations
+uv run uvicorn weighttogo.main:app --reload
+```
+
+The API is served at `http://localhost:8000`; `GET /health` reports service status.
+
+### Running the Frontend
+
+Prerequisites: [Node.js 20.19+ or 22+](https://nodejs.org/).
+
+```bash
+cd web/frontend
+cp .env.example .env             # adjust values as needed
+npm install
+npm run dev
+```
+
+The application is served at `http://localhost:5173`.
+
+### Git Hooks
+
+The repository uses [pre-commit](https://pre-commit.com/) to run linting and
+formatting before each commit. Activate the hooks once after cloning:
+
+```bash
+pre-commit install
+```
 
 ---
 
