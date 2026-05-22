@@ -15,11 +15,10 @@ Usage::
     logger.info("user action", user_id="u-123")  # raw PII is masked automatically
 """
 
-import io
 import logging
 import re
 import sys
-from typing import Any
+from typing import Any, TextIO
 
 import structlog
 
@@ -84,7 +83,7 @@ def configure_logging(
     *,
     json_logs: bool = True,
     level: int = logging.INFO,
-    _output: io.TextIOWrapper | None = None,
+    _output: TextIO | None = None,
 ) -> None:
     """Configure structlog for the application.
 

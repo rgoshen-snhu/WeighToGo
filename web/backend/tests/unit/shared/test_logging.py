@@ -2,6 +2,8 @@
 
 import io
 import json
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 import structlog
@@ -56,21 +58,21 @@ def test_mask_pii_email_shows_stars_prefix() -> None:
 
 def test_redact_processor_masks_email_in_event_message() -> None:
     """PII in the event message field must be redacted automatically."""
-    event_dict: dict = {"event": "raw@example.com attempted login", "level": "info"}
+    event_dict: dict[str, Any] = {"event": "raw@example.com attempted login", "level": "info"}
     out = _redact_processor(None, "info", event_dict)
     assert "raw@example.com" not in out["event"]
 
 
 def test_redact_processor_masks_email_in_structured_field() -> None:
     """PII in arbitrary structured fields must be redacted without caller help."""
-    event_dict: dict = {"event": "login", "email": "victim@example.com"}
+    event_dict: dict[str, Any] = {"event": "login", "email": "victim@example.com"}
     out = _redact_processor(None, "info", event_dict)
     assert "victim@example.com" not in out["email"]
 
 
 def test_redact_processor_masks_phone_in_structured_field() -> None:
     """Phone numbers in structured fields must be replaced with [phone]."""
-    event_dict: dict = {"event": "sms sent", "phone": "555-867-5309"}
+    event_dict: dict[str, Any] = {"event": "sms sent", "phone": "555-867-5309"}
     out = _redact_processor(None, "info", event_dict)
     assert "555-867-5309" not in out["phone"]
     assert "[phone]" in out["phone"]
@@ -78,7 +80,7 @@ def test_redact_processor_masks_phone_in_structured_field() -> None:
 
 def test_redact_processor_does_not_require_caller_masking() -> None:
     """Raw PII passed to a log call must be masked without any caller action."""
-    event_dict: dict = {
+    event_dict: dict[str, Any] = {
         "event": "authenticated",
         "email": "victim@example.com",
         "phone": "555-123-4567",
@@ -93,20 +95,20 @@ def test_redact_processor_does_not_require_caller_masking() -> None:
 
 
 @pytest.fixture()
-def _reset_structlog():
+def _reset_structlog() -> Generator[None, None, None]:
     """Restore structlog defaults after each test that reconfigures it."""
     yield
     structlog.reset_defaults()
 
 
-def test_configure_logging_emits_json_with_pii_masked(_reset_structlog) -> None:
+def test_configure_logging_emits_json_with_pii_masked(_reset_structlog: None) -> None:
     """Emitted JSON log lines must not contain raw PII even without caller masking."""
     output = io.StringIO()
     structlog.configure(
         processors=[
             structlog.stdlib.add_log_level,
             structlog.processors.TimeStamper(fmt="iso"),
-            _redact_processor,
+            _redact_processor,  # type: ignore[list-item]
             structlog.processors.JSONRenderer(),
         ],
         logger_factory=structlog.PrintLoggerFactory(output),
@@ -124,7 +126,7 @@ def test_configure_logging_emits_json_with_pii_masked(_reset_structlog) -> None:
 
 
 def test_configure_logging_emitted_json_includes_timestamp_and_level(
-    _reset_structlog,
+    _reset_structlog: None,
 ) -> None:
     """Every emitted JSON log entry must include a timestamp and log level."""
     output = io.StringIO()
