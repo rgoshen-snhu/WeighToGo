@@ -624,3 +624,31 @@ The Screaming + Clean + Hexagonal architecture combination (SRS §4.2) makes the
 - A README was added for `docs/history/`, resolving N1.
 - Broader `docs/` indexing was captured as a separate tracked issue (#17) under
   the M2 epic rather than expanding Phase 0 further.
+
+## [2026-05-22 21:15] Commit Summary
+
+**Change Type:** Docs
+**Scope:** srs/tech-stack
+
+**Summary:**
+Update SRS §4.3.1 frontend tech stack to reflect actual installed versions: TypeScript 6, React 19, MUI 9, React Router 7, Vite 8, Vitest 4.1, Playwright 1.60, ESLint 9, Prettier 3.8. Correct state management entry to reflect TanStack Query v5.
+
+**Rationale:**
+The SRS should document what the project actually runs. Floor versions like "6+" give agents license to use outdated releases, which conflicts with the project policy of using latest stable versions.
+
+**References:**
+- Issue: SRS consistency
+
+## [2026-05-22 21:20] Commit Summary
+
+**Change Type:** Docs
+**Scope:** readme/tech-stack
+
+**Summary:**
+Update README tech stack table to reflect actual versions: TypeScript 6, Vite 8, Material UI 9.
+
+**Rationale:**
+README listed React 19 specifically but MUI without version. Corrected for consistency with the SRS update.
+
+**References:**
+- Issue: SRS consistency

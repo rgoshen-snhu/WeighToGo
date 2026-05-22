@@ -205,7 +205,7 @@ gates.
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 19, TypeScript, Vite, Material UI |
+| Frontend | React 19, TypeScript 6, Vite 8, Material UI 9 |
 | Backend | FastAPI, Python, Pydantic, SQLAlchemy |
 | Database | PostgreSQL |
 

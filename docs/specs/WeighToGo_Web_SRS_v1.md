@@ -222,20 +222,20 @@ This blend is documented in `[ADR-0012]` (planned). The decision builds on the e
 
 | Concern | Technology | Version | Notes |
 | --- | --- | --- | --- |
-| Language | TypeScript | 5.4+ | Strict mode enabled |
-| UI Framework | React | 18+ | Functional components, hooks |
-| Component Library | Material UI (MUI) | 6+ | Accessibility-conformant components |
-| Routing | React Router | 6+ | Declarative routes, code splitting |
-| Forms | React Hook Form | 7+ | Performant, uncontrolled-by-default |
-| Form Validation | Zod | 3+ | Runtime type validation, shares schemas with TypeScript types |
+| Language | TypeScript | 6.0 | Strict mode enabled |
+| UI Framework | React | 19 | Functional components, hooks |
+| Component Library | Material UI (MUI) | 9 | Accessibility-conformant components |
+| Routing | React Router | 7 | Declarative routes, code splitting |
+| Forms | React Hook Form | 7.76 | Performant, uncontrolled-by-default |
+| Form Validation | Zod | 4.4 | Runtime type validation, shares schemas with TypeScript types |
 | HTTP Client | Fetch API + custom wrapper | Native | Wrapper enforces auth, error mapping, base URL |
-| State Management | React Context API + hooks | Native | No Redux unless complexity demands it |
-| Build Tool | Vite | 5+ | Fast dev server, optimized production bundle |
-| Unit Testing | Vitest | 1+ | Vite-native test runner |
-| Component Testing | React Testing Library | 14+ | Behavior-focused tests |
-| E2E Testing | Playwright | 1.40+ | Cross-browser end-to-end coverage |
-| Linting | ESLint | 8+ | TypeScript + React rules |
-| Formatting | Prettier | 3+ | Single source of truth for style |
+| State Management | TanStack Query + React Context | 5.100 | Server state via TanStack Query; no Redux |
+| Build Tool | Vite | 8 | Fast dev server, optimized production bundle |
+| Unit Testing | Vitest | 4.1 | Vite-native test runner |
+| Component Testing | React Testing Library | 16 | Behavior-focused tests |
+| E2E Testing | Playwright | 1.60 | Cross-browser end-to-end coverage |
+| Linting | ESLint | 9 | TypeScript + React rules |
+| Formatting | Prettier | 3.8 | Single source of truth for style |
 
 #### 4.3.2 Backend
 
