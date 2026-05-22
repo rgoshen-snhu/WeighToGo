@@ -638,3 +638,17 @@ The SRS should document what the project actually runs. Floor versions like "6+"
 
 **References:**
 - Issue: SRS consistency
+
+## [2026-05-22 21:20] Commit Summary
+
+**Change Type:** Docs
+**Scope:** readme/tech-stack
+
+**Summary:**
+Update README tech stack table to reflect actual versions: TypeScript 6, Vite 8, Material UI 9.
+
+**Rationale:**
+README listed React 19 specifically but MUI without version. Corrected for consistency with the SRS update.
+
+**References:**
+- Issue: SRS consistency
