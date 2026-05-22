@@ -13,6 +13,10 @@ dependencies = [
     "alembic>=1.13",
     "psycopg[binary]>=3.2",
     "structlog>=24.0",
+    "passlib[bcrypt]>=1.7",
+    "python-jose[cryptography]>=3.3",
+    "slowapi>=0.1.9",
+    "bcrypt>=4.0",
 ]
 
 [dependency-groups]
@@ -26,6 +30,8 @@ dev = [
     "import-linter>=2.1",
     "pytest-asyncio>=0.23",
     "aiosqlite>=0.20",
+    "types-passlib>=1.7",
+    "types-python-jose>=3.3",
 ]
 
 [build-system]

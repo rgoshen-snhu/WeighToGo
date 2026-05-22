@@ -7,6 +7,34 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 22:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** auth/domain, auth/application, auth/infrastructure (password + JWT), config
+
+**Summary:**
+Phase 6 auth backend — domain and application layers plus infrastructure adapters.
+Implements User and RefreshToken entities, domain exceptions, repository ports,
+RegisterUser / AuthenticateUser / IssueTokens / RefreshSession / RevokeSession use
+cases, BcryptPasswordAdapter (bcrypt cost 12), JwtAdapter (HS256), and Settings
+additions for auth configuration.  All unit tests (78 total) pass; mypy strict
+mode and ruff pass clean.
+
+**Rationale:**
+TDD Red-Green-Refactor with one failing test per subtask.  Domain and application
+layers are framework-free (enforced by import-linter contracts in pyproject.toml).
+bcrypt library used directly instead of passlib because passlib 1.7 has a
+compatibility bug with bcrypt >= 4 that raises ValueError on hash attempts.
+StrEnum used for TokenType per ruff UP042 guidance.
+
+**References:**
+- SRS §6.1 (FR-A-1 to FR-A-5, FR-A-9, FR-A-10)
+- SRS §7.1 (NFR-S-2, NFR-S-3, NFR-S-6, NFR-S-7)
+- SRS §12.5.1 (env var names for auth config)
+- ADR-0009 (email as identifier), ADR-0010 (generic errors), ADR-0013 (refresh rotation)
+
+---
+
 ## [2026-05-22 21:30] Commit Summary
 
 **Change Type:** Fix
