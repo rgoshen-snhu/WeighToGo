@@ -7,6 +7,40 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 21:30] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/shared/logging
+
+**Summary:**
+Reconfigure structlog centrally in `configure_logging()` with JSON rendering, ISO timestamps, log level, contextvars-based request-ID propagation, and an automatic `_redact_processor` that masks email addresses (last 4 chars of local part + domain) and phone numbers from every string value in the event dict on every log call — without requiring the caller to invoke `mask_pii()`. Extend `mask_pii()` to also redact phone numbers. Add 8 new tests covering the processor directly, emitted log output, and the full `configure_logging()` pipeline.
+
+**Rationale:**
+PR #24 review (Codex) identified that the previous implementation left PII masking opt-in: any future caller logging a raw email or phone would pass all tests while leaking PII. The SRS (§FR-A-10, §NFR-Priv-1) requires PII masked by default. Automatic central redaction in the processor chain is the correct defence-in-depth approach — it catches PII regardless of the logging path.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §FR-A-10, §NFR-Priv-1
+
+---
+
+## [2026-05-22 21:31] Commit Summary
+
+**Change Type:** Fix
+**Scope:** backend/pyproject.toml (import-linter)
+
+**Summary:**
+Add `layers` contracts to import-linter for all three current bounded contexts (auth, goals, weight_tracking), enforcing inward-only dependencies: interface → infrastructure → application → domain. Add a `forbidden` contract preventing `shared/` from importing any bounded context. Retain the existing framework-exclusion contracts as belt-and-suspenders. Add a comment explicitly deferring `notifications` and `preferences` (SRS-listed but not yet scaffolded).
+
+**Rationale:**
+The previous contracts only blocked external framework imports from inner layers but allowed internal inversions (domain importing application, cross-bounded-context coupling). Import-linter would stay green while the codebase violated the core Clean Architecture invariant. The `layers` contract type enforces the full dependency rule structurally.
+
+**References:**
+- PR: #24 (Phase 4 backend architecture)
+- SRS: §4.2
+
+---
+
 ## [2026-05-22 00:04] Commit Summary
 
 **Change Type:** Feature
