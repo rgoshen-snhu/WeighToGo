@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:01] Commit Summary
+
+**Change Type:** Fix
+**Scope:** auth/interface/router
+
+**Summary:**
+In the `/refresh` endpoint, when `user_repo.get_by_id()` returns `None` after token rotation, the handler now calls `token_repo.revoke_family(old_token.family_id)` — identical to the inactive-user branch — before returning 401. This prevents a newly-rotated refresh token from remaining live in the DB with no valid owner.
+
+**Rationale:**
+The original code had `if user is None: pass`, leaving the post-rotation token unrevoked (orphaned). PR #27 code review finding C2.
+
+**References:**
+- PR: #27 (C2)
+
+---
+
 ## [2026-05-22 10:00] Commit Summary
 
 **Change Type:** Fix

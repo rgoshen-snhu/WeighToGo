@@ -381,13 +381,11 @@ def refresh(
     new_user_id = jwt_adapter.verify_access_token(tokens.access_token)
     user = user_repo.get_by_id(new_user_id)
     if user is None or not user.is_active:
-        # Deactivated account — revoke the whole token family and deny access
-        if user is None:
-            pass
-        else:
-            token_repo.revoke_family(
-                token_repo.get_by_hash(jwt_adapter.hash_token(refresh_token)).family_id  # type: ignore[union-attr]
-            )
+        # Deleted or deactivated account — revoke the whole token family and deny access.
+        # The old token is already revoked; look it up by hash to get family_id.
+        old_token = token_repo.get_by_hash(jwt_adapter.hash_token(refresh_token))
+        if old_token is not None:
+            token_repo.revoke_family(old_token.family_id)
         _clear_auth_cookies(response)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated.")
 
