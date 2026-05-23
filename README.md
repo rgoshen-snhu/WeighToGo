@@ -1,6 +1,6 @@
 # 🎉 Weigh to Go!
 
-> Daily weight tracking — from mobile to web.
+> **"You've got this—pound for pound."**
 
 A weight-tracking application — first built as a native Android app, now being
 rebuilt as a full-stack web application. This repository is a **polyglot
@@ -417,5 +417,5 @@ information for any bug report or question.
 ---
 
 <p align="center">
-  <strong>Weigh to Go!</strong> — Daily weight tracking, from mobile to web. 🎉
+  <strong>Weigh to Go!</strong> — You've got this, pound for pound. 🎉
 </p>
