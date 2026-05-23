@@ -19,6 +19,7 @@ from weighttogo.auth.interface.router import router as auth_router
 from weighttogo.config import get_settings
 from weighttogo.shared.error_handlers import validation_exception_handler
 from weighttogo.shared.logging import configure_logging
+from weighttogo.weight_tracking.interface.router import router as weight_router
 
 configure_logging()
 
@@ -78,6 +79,7 @@ async def add_security_headers(request: Request, call_next: object) -> object:
 # ── Routers ───────────────────────────────────────────────────────────────────
 
 app.include_router(auth_router, prefix="/api/v1")
+app.include_router(weight_router, prefix="/api/v1")
 
 
 # ── Health check (SRS §NFR-O-3) ───────────────────────────────────────────────

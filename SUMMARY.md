@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 16–19] feat(interface): add weight-entries router and Pydantic schemas
+
+**Change Type:** Feature
+**Scope:** weight_tracking interface layer
+
+**Summary:**
+Created `WeightEntryRequest` (Decimal validation, unit enum, future-date rejection, notes max 500), `WeightEntryResponse` (float for numeric JSON literals per SRS §3.2), and `WeightEntryListResponse`. Implemented the 5-endpoint router with `get_current_user_id` auth guard, rate limiting (30/min) on write endpoints, RFC 7807 error shape via the shared handler, and structlog events on state-changing paths. Mounted the router in `main.py`. 89 weight tests passing.
+
+**Rationale:**
+`WeightEntryResponse.weight_value` uses `float` (not `Decimal`) because Pydantic v2 serializes `Decimal` as a JSON string by default; the SRS requires numeric literals in the response JSON.
+
+**References:**
+- SRS §9.4, §NFR-S-3, §NFR-S-5, §NFR-S-7
+- Phase 8 Implementation Plan subtasks 16–19
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 13–15] feat(infra): add WeightEntryModel ORM and SqlAlchemy repository
 
 **Change Type:** Feature
