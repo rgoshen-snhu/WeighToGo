@@ -7,6 +7,32 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(narrative): add Milestone Two narrative
+
+**Change Type:** Docs
+**Scope:** New `docs/narratives/milestone-two-narrative.md` + `.gitignore` for `.docx` sidecar
+
+**Summary:**
+Created the Milestone Two narrative addressing the four CS 499 rubric prompts:
+
+1. **Artifact description** — what Weigh to Go! is, when it was created (CS 360, Android), and what M2 rebuilds.
+2. **Justification for ePortfolio inclusion** — the Android code review findings that motivated the rebuild, the specific M2 components (three-pattern architecture, security baseline, TDD, RFC 7807, cursor pagination, ADR/SUMMARY discipline) that showcase software-engineering skills, and how the artifact was improved.
+3. **Course-outcome coverage check vs. Module One plan** — Outcomes 2, 4, and 5 are Met; Outcomes 1 and 3 are Partial with the Partial work deliberately deferred to M3 per the milestone schedule. No revisions to the Module One coverage plan.
+4. **Reflection on the enhancement process** — sections 1–3 are fully drafted from verifiable facts; section 4 (personal reflection on lessons learned and challenges faced) is scaffolded with `[PLACEHOLDER]` markers and concrete prompts so the user fills it in from personal experience before submitting, rather than the doc making up reflection on their behalf.
+
+The markdown is the single source of truth. The `.docx` is rendered via `pandoc milestone-two-narrative.md -o milestone-two-narrative.docx` and is git-ignored under a new `### Narrative submission artifacts` block at the top of `.gitignore` — only narrative `.docx` files in `docs/narratives/` are excluded, not all `.docx` files repo-wide.
+
+**Rationale:**
+The factual portion of the narrative (prompts 1–3) is straight reporting from the SUMMARY.md log, ADRs, and SRS — there is no reason to leave that for the user to redo. Prompt 4 is genuinely personal reflection; scaffolding it with placeholders and a list of candidate experiences (drawn from real SUMMARY.md events: cursor pagination bug, soft-delete filter bug, auth-race E2E flake, schema drift) lets the user write the personal answer without staring at a blank page, while not putting words in their mouth.
+
+The `.docx` is intentionally a sidecar rather than a committed artifact so the markdown source remains the authoritative version and the rendered file can be regenerated on demand for submission without polluting the repository history with binary churn.
+
+**References:**
+- Rubric prompts: `docs/plans/CS 499 Milestone Two Guidelines and Rubric.md` (local-only)
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(review): record CS 499 checklist self-review findings
 
 **Change Type:** Docs
