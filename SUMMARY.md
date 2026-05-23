@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 10 — useLogin, useRegister, useLogout mutations
+
+**Change Type:** Feature
+**Scope:** src/features/auth/hooks/
+
+**Summary:**
+Added three TanStack Query useMutation hooks: useLogin (401→formError, 422→setError, 423→lockout, 429→rate-limit), useRegister (same shape, 409→conflict), useLogout (clears cache via onSettled so logout always completes even on network error).
+
+**Rationale:**
+Centralizing error mapping in the hooks keeps the form components pure (they only render state). The onSettled pattern for logout ensures the user is always redirected and cache always cleared regardless of server response.
+
+**References:**
+- Issue: #13
+
+---
+
 ## [2026-05-22] Task 9 — RegisterForm component
 
 **Change Type:** Feature
