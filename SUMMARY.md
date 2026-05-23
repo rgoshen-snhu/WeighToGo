@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-22] Task 9 — RegisterForm component
+
+**Change Type:** Feature
+**Scope:** web/frontend/src/features/auth/components/RegisterForm.tsx, RegisterForm.test.tsx
+
+**Summary:**
+Implemented the RegisterForm React component backed by React Hook Form + Zod (registerSchema). The form captures display name, email, password, and confirm password; enforces client-side complexity rules (≥12 chars, uppercase, lowercase, digit, special character) and a passwords-match refinement; and exposes an onSubmit callback and status/formError props for server-error surface. Added @testing-library/user-event to devDependencies (was missing). Seven Vitest tests cover: field rendering, email validation, password length error, passwords-must-match error, valid submit callback invocation, form-level alert rendering, and submit-button disabled state during submission.
+
+**Rationale:**
+Isolating the form as a pure presentational component (no direct API calls) keeps it unit-testable without network stubs and allows the parent page to own the mutation lifecycle. Used zodResolver to share the same schema already validated on the backend, avoiding duplication.
+
+**References:**
+- SRS §3.1 FR-03
+- Issue: Phase 7 auth vertical slice
+
+---
+
 ## [2026-05-23] Task 7 — AuthContext on React Query, LoadingSplash, ProtectedRoute hydration
 
 **Change Type:** Feature
