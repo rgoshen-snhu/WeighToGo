@@ -1,15 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Button, Stack, TextField } from '@mui/material';
-import { useForm, type UseFormSetError } from 'react-hook-form';
+import { useForm, type UseFormResetField, type UseFormSetError } from 'react-hook-form';
 import { loginSchema, type LoginFormValues } from '../schemas/auth-schemas';
 
 export type LoginFormStatus = 'idle' | 'submitting';
 
+/** Helpers from react-hook-form forwarded to the onSubmit callback. */
+export interface LoginFormHelpers {
+  setError: UseFormSetError<LoginFormValues>;
+  resetField: UseFormResetField<LoginFormValues>;
+}
+
 export interface LoginFormProps {
-  onSubmit: (
-    values: LoginFormValues,
-    setError: UseFormSetError<LoginFormValues>,
-  ) => void | Promise<void>;
+  onSubmit: (values: LoginFormValues, helpers: LoginFormHelpers) => void | Promise<void>;
   status: LoginFormStatus;
   formError?: string | null;
 }
@@ -29,6 +32,7 @@ export function LoginForm({ onSubmit, status, formError }: LoginFormProps) {
     handleSubmit,
     formState: { errors },
     setError,
+    resetField,
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onSubmit',
@@ -36,7 +40,11 @@ export function LoginForm({ onSubmit, status, formError }: LoginFormProps) {
   });
 
   return (
-    <Box component="form" noValidate onSubmit={handleSubmit((v) => onSubmit(v, setError))}>
+    <Box
+      component="form"
+      noValidate
+      onSubmit={handleSubmit((v) => onSubmit(v, { setError, resetField }))}
+    >
       <Box aria-live="polite" sx={{ mb: formError ? 2 : 0 }}>
         {formError && (
           <Alert severity="error" role="alert">

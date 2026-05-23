@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { UseFormSetError } from 'react-hook-form';
 import { useAuth } from '../../../contexts/AuthContext';
 import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
+import type { LoginFormHelpers } from '../components/LoginForm';
 import type { LoginFormValues } from '../schemas/auth-schemas';
 
 export function useLogin() {
@@ -16,7 +16,7 @@ export function useLogin() {
   const mutation = useMutation<
     AuthUser,
     Error,
-    { values: LoginFormValues; setError: UseFormSetError<LoginFormValues> }
+    { values: LoginFormValues; helpers: LoginFormHelpers }
   >({
     mutationFn: ({ values }) => authClient.login(values),
     onSuccess: (user) => {
@@ -27,17 +27,24 @@ export function useLogin() {
     onError: (error, vars) => {
       if (error instanceof ValidationError) {
         for (const [field, message] of Object.entries(error.fieldErrors)) {
-          vars.setError(field as keyof LoginFormValues, { type: 'server', message });
+          vars.helpers.setError(field as keyof LoginFormValues, { type: 'server', message });
         }
         return;
       }
       if (error instanceof ApiError) {
-        if (error.status === 401) setFormError('Invalid credentials.');
-        else if (error.status === 423)
+        if (error.status === 401) {
+          setFormError('Invalid credentials.');
+          // Clear the password field after a failed attempt so the browser
+          // does not auto-fill the wrong credential on the next try.
+          vars.helpers.resetField('password');
+        } else if (error.status === 423) {
           setFormError('Account is temporarily locked. Please try again later.');
-        else if (error.status === 429)
+          vars.helpers.resetField('password');
+        } else if (error.status === 429) {
           setFormError('Too many attempts. Please wait a moment and try again.');
-        else setFormError('Something went wrong. Please try again.');
+        } else {
+          setFormError('Something went wrong. Please try again.');
+        }
       } else {
         setFormError('Something went wrong. Please try again.');
       }
@@ -45,9 +52,9 @@ export function useLogin() {
   });
 
   return {
-    submit: (values: LoginFormValues, setError: UseFormSetError<LoginFormValues>) => {
+    submit: (values: LoginFormValues, helpers: LoginFormHelpers) => {
       setFormError(null);
-      mutation.mutate({ values, setError });
+      mutation.mutate({ values, helpers });
     },
     status: mutation.isPending ? ('submitting' as const) : ('idle' as const),
     formError,

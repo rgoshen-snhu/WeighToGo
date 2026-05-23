@@ -268,7 +268,7 @@ def register(
     response_model=UserResponse,
     summary="Authenticate and receive session cookies (FR-A-2)",
 )
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 def login(
     request: Request,
     payload: LoginRequest,

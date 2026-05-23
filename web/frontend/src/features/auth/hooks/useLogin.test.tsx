@@ -33,11 +33,12 @@ describe('useLogin', () => {
     vi.restoreAllMocks();
   });
 
+  const makeHelpers = () => ({ setError: vi.fn(), resetField: vi.fn() });
+
   it('calls authClient.login and sets user on success', async () => {
     vi.spyOn(authClient, 'login').mockResolvedValueOnce(user);
     const { result } = renderHook(() => useLogin(), { wrapper });
-    const setError = vi.fn();
-    result.current.submit({ email: 'a@b.co', password: 'pass' }, setError);
+    result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
     await waitFor(() => expect(result.current.status).toBe('idle'));
     expect(authClient.login).toHaveBeenCalledWith({ email: 'a@b.co', password: 'pass' });
   });
@@ -45,21 +46,21 @@ describe('useLogin', () => {
   it('sets formError to "Invalid credentials." on 401', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(401, 'Unauthorized'));
     const { result } = renderHook(() => useLogin(), { wrapper });
-    result.current.submit({ email: 'a@b.co', password: 'wrong' }, vi.fn());
+    result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
     await waitFor(() => expect(result.current.formError).toBe('Invalid credentials.'));
   });
 
   it('sets formError on 423 account lockout', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(423, 'Locked'));
     const { result } = renderHook(() => useLogin(), { wrapper });
-    result.current.submit({ email: 'a@b.co', password: 'wrong' }, vi.fn());
+    result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
     await waitFor(() => expect(result.current.formError).toMatch(/locked/i));
   });
 
   it('sets formError on 429 rate limit', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(429, 'Too many'));
     const { result } = renderHook(() => useLogin(), { wrapper });
-    result.current.submit({ email: 'a@b.co', password: 'wrong' }, vi.fn());
+    result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
     await waitFor(() => expect(result.current.formError).toMatch(/too many/i));
   });
 
@@ -68,10 +69,13 @@ describe('useLogin', () => {
       new ValidationError({ email: 'bad email' }, 'Validation failed'),
     );
     const { result } = renderHook(() => useLogin(), { wrapper });
-    const setError = vi.fn();
-    result.current.submit({ email: 'bad', password: 'pass' }, setError);
+    const helpers = makeHelpers();
+    result.current.submit({ email: 'bad', password: 'pass' }, helpers);
     await waitFor(() =>
-      expect(setError).toHaveBeenCalledWith('email', { type: 'server', message: 'bad email' }),
+      expect(helpers.setError).toHaveBeenCalledWith('email', {
+        type: 'server',
+        message: 'bad email',
+      }),
     );
   });
 
@@ -83,7 +87,7 @@ describe('useLogin', () => {
       }),
     );
     const { result } = renderHook(() => useLogin(), { wrapper });
-    result.current.submit({ email: 'a@b.co', password: 'pass' }, vi.fn());
+    result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
     await waitFor(() => expect(result.current.status).toBe('submitting'));
     resolve(user);
   });

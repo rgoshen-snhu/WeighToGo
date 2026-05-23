@@ -54,7 +54,10 @@ describe('LoginForm', () => {
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith(
         { email: 'jane@example.com', password: 'Aa1!aaaaaaaa' },
-        expect.any(Function),
+        expect.objectContaining({
+          setError: expect.any(Function),
+          resetField: expect.any(Function),
+        }),
       ),
     );
   });
