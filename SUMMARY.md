@@ -7,6 +7,19 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 34–38] test(e2e): add weight and dashboard Playwright specs
+
+**Change Type:** Test
+**Scope:** E2E — weight and dashboard flows
+
+**Summary:**
+Added 5 Playwright spec files: weight-create, weight-edit, weight-delete, dashboard, weight-a11y. Uses `test.describe.serial` for ordered state setup and `@axe-core/playwright` for accessibility scanning. Scans cover /weight, /weight/new, and / for critical WCAG 2.1 AA violations.
+
+**References:**
+- SRS §11, Phase 8 Implementation Plan subtasks 34–38
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 31–33] feat(frontend): replace stub pages with real weight and dashboard pages
 
 **Change Type:** Feature
