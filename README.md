@@ -8,6 +8,10 @@ monorepo**: it preserves the original Android codebase under `android/` and host
 the new web codebase under `web/`.
 
 ![Android CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/android-ci.yml/badge.svg)
+![Backend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/backend-ci.yml/badge.svg)
+![Frontend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/frontend-ci.yml/badge.svg)
+![E2E](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/e2e.yml/badge.svg)
+![Security Audit](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/security-audit.yml/badge.svg)
 ![Android](https://img.shields.io/badge/Android-14+-3DDC84?style=flat&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -196,12 +200,14 @@ disabled.
 
 ---
 
-## 🌐 Web Application (in progress)
+## 🌐 Web Application
 
 The web rebuild is specified by the
 [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md), which
 is the authoritative source for its architecture, requirements, API, and quality
-gates.
+gates. Milestone 2 (auth + weight-entry vertical slice + dashboard) is complete
+and tagged `v0.1.0`; Milestones 3 and 4 add algorithms/data-structures and
+database enhancements respectively.
 
 | Layer | Technology |
 |-------|------------|
@@ -285,11 +291,13 @@ and the complete set of functional and non-functional requirements.
 
 | Document | Description |
 |----------|-------------|
+| [Documentation index](docs/README.md) | Top-level map of the `docs/` tree |
 | [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
-| [Architecture Decision Records](docs/adr/) | Numbered engineering decisions, Android-era and web-rebuild |
-| [Design Decision Records](docs/ddr/) | Numbered design and UI decisions |
+| [Architecture Decision Records](docs/adr/README.md) | Numbered engineering decisions, Android-era and web-rebuild |
+| [Design Decision Records](docs/ddr/README.md) | Numbered design and UI decisions |
 | [Android Database Architecture](docs/architecture/WeighToGo_Database_Architecture.md) | SQLite schema, ER diagrams, SQL scripts, and DAO patterns |
 | [UI/UX Design Specifications](docs/design/) | Figma design specifications and quick-start guide |
+| [OpenAPI Snapshot](docs/api/openapi.json) | Generated REST API contract for the web backend |
 | [`SUMMARY.md`](SUMMARY.md) | Reverse-chronological narrative log of what changed and why |
 
 ---

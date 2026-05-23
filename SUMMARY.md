@@ -7,6 +7,26 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(readme): final pass — web CI badges, M2 status, docs index link
+
+**Change Type:** Docs
+**Scope:** `README.md`
+
+**Summary:**
+Final README polish before Milestone 2 closeout:
+
+- Added CI badges for `backend-ci`, `frontend-ci`, `e2e`, and `security-audit` workflows — only the Android badge was rendering, despite four web-stack workflows running on every PR.
+- Replaced the "Web Application (in progress)" heading with the unqualified "Web Application" and added a one-sentence M2/M3/M4 status note pointing at the `v0.1.0` tag.
+- Added the new top-level `docs/README.md` index, the ADR/DDR README indexes (introduced by PR #31), and the OpenAPI snapshot to the Documentation table; updated the ADR/DDR rows to link the index READMEs rather than the bare directories.
+
+**Rationale:**
+The badges were silently misleading the reader about CI scope — five workflows run, four were invisible. Wording about "in progress" undersells what M2 actually shipped now that the vertical slice is complete. The documentation table referenced the ADR/DDR directories before they had index READMEs; now that they do (PR #31), the table should point at the indexes for a better entry point.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(srs): reconcile Appendix A ADR index with on-disk ADRs
 
 **Change Type:** Docs
