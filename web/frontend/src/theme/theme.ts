@@ -10,7 +10,11 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#00897B',
+      // #00796B is teal-700 from Material Design.  It provides a 4.77:1
+      // contrast ratio against white (#ffffff), meeting WCAG 2 AA (4.5:1).
+      // The original #00897B (teal-600) only reached 4.31:1 and failed the
+      // WCAG AA colour-contrast check.
+      main: '#00796B',
       dark: '#00695C',
       light: '#4DB6AC',
     },

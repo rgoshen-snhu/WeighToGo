@@ -7,6 +7,31 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Tasks 15–19 — E2E specs (register, login, errors, logout, a11y)
+
+**Change Type:** Test
+**Scope:** web/frontend/e2e/
+
+**Summary:**
+Added 5 Playwright E2E specs covering the full auth vertical slice: registration → dashboard, login with ?from= redirect preservation, invalid credentials (401) and account lockout (423/NFR-S-6), logout cookie clearing, and axe-core WCAG 2.1 AA assertions on /login and /register.
+
+**Rationale:**
+E2E tests are the only layer that verifies the frontend-backend contract end-to-end. Unit tests mock the API; these tests prove the real integration works including cookie handling, redirect chaining, and browser accessibility.
+
+Implementation fixes discovered during E2E runs:
+- Added Vite /api proxy (port configurable via VITE_API_PORT) — no proxy existed, all API calls returned 404.
+- Fixed auth interceptor onLogout: the /me probe on page load fired window.location.assign('/login') unconditionally, overriding React Router's own ?from= redirect on ProtectedRoute.
+- Fixed LoginPage isAuthenticated guard: the guard navigated to '/' instead of the ?from= destination, racing against useLogin's navigate() call and overriding it.
+- Extended LoginForm onSubmit callback to pass both setError and resetField (LoginFormHelpers), allowing useLogin to clear the password field on 401/423 errors.
+- Raised login endpoint rate limit from 5/minute to 10/minute: with max_login_attempts=5, the 6th request (which should return 423 account-locked) was blocked by the rate limiter (429) instead.
+- Fixed theme primary color from #00897B (4.31:1 contrast) to #00796B (4.77:1 contrast) to pass WCAG 2.1 AA.
+
+**References:**
+- Issue: #13
+- FR-A-1..5, NFR-A-1..6, NFR-S-6
+
+---
+
 ## [2026-05-23] Task 14 — Playwright webServer config
 
 **Change Type:** Chore

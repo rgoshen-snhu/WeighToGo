@@ -4,7 +4,8 @@ import { theme } from './theme';
 
 describe('theme', () => {
   it('applies the Weigh to Go! design-system color palette', () => {
-    expect(theme.palette.primary.main).toBe('#00897B');
+    // #00796B (teal-700) provides 4.77:1 contrast vs white, meeting WCAG AA.
+    expect(theme.palette.primary.main).toBe('#00796B');
     expect(theme.palette.primary.dark).toBe('#00695C');
     expect(theme.palette.primary.light).toBe('#4DB6AC');
     expect(theme.palette.success.main).toBe('#4CAF50');
