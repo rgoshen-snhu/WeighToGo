@@ -7,6 +7,54 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Issue #17] docs: add DDR decision-log index
+
+**Change Type:** Docs
+**Scope:** `/docs/ddr/` — new `README.md`
+
+**Summary:**
+Adds `docs/ddr/README.md` — a decision-log index listing the three Design Decision Records (DDR-0001 through DDR-0003) with title, status, date, and stack scope. Notes the boundary between DDRs (UI/UX design trade-offs) and ADRs (architectural and implementation trade-offs) so future contributors choose the right log.
+
+**Rationale:**
+The DDR folder is small today but will grow as the web rebuild adds UI surfaces. Adding the index now — at the same time as the ADR index — establishes the pattern before scale makes retrofitting painful. The DDR/ADR scope distinction is recorded inline so it does not have to be re-derived.
+
+**References:**
+- Issue: GH-17
+
+---
+
+## [2026-05-23 Issue #17] docs: add ADR decision-log index
+
+**Change Type:** Docs
+**Scope:** `/docs/adr/` — new `README.md`
+
+**Summary:**
+Adds `docs/adr/README.md` — a decision-log index listing all fifteen Architecture Decision Records (ADR-0001 through ADR-0015) with title, status, date, and stack scope (Android, Cross-stack, or Web). Each row links to the full record. Documents the supersession convention (old entries stay in the log, marked) and points to the existing records as the pattern for new ones.
+
+**Rationale:**
+With fifteen ADRs spanning two stacks and two distinct authoring eras, the folder had become hard to scan. A table with status and scope columns lets a reader filter the relevant subset (web-only, currently-accepted) at a glance. Dates were extracted directly from each record; six older Android ADRs that omitted a date field show "—" rather than fabricated values.
+
+**References:**
+- Issue: GH-17
+
+---
+
+## [2026-05-23 Issue #17] docs: add top-level docs/README index
+
+**Change Type:** Docs
+**Scope:** `/docs/` — new `README.md`
+
+**Summary:**
+Adds a top-level `docs/README.md` that lists the 13 subdirectories of the documentation tree with their purpose, plus a quick-links section for the most-referenced documents (SRS, M2 plan, code review checklist, ADR index, DDR index). Includes an explicit authority order so a new contributor knows which document wins when two disagree.
+
+**Rationale:**
+Before this change the `docs/` tree had thirteen subdirectories and no map. A contributor opening `docs/` had to guess what lived where. Documenting purpose in one index file — rather than scattering it across each subdirectory — keeps the scope narrow and matches the boundary set in issue #17 (this PR adds new index READMEs only; content fixes to existing docs are owned by #20).
+
+**References:**
+- Issue: GH-17
+
+---
+
 ## [2026-05-23 PR #30 Review] fix(weight): render not-found state when edit-form fetch fails
 
 **Change Type:** Fix
