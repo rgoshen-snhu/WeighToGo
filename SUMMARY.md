@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 2–5] feat(domain): add WeightEntry entity, port, and exceptions
+
+**Change Type:** Feature
+**Scope:** weight_tracking domain layer
+
+**Summary:**
+Created `WeightEntry` dataclass (with `soft_delete()` idempotent method), `IWeightEntryRepository` `@runtime_checkable` Protocol port with 6 methods, and 3 domain exceptions (`WeightEntryNotFoundError`, `DuplicateObservationDateError`, `ObservationDateInFutureError`). Written TDD: 17 failing tests → implementation → 17 green.
+
+**Rationale:**
+Domain entities and ports are framework-free per ADR-0012. `soft_delete()` is idempotent so re-deleting via the use case never clobbers the original `deleted_at` timestamp.
+
+**References:**
+- SRS §6.2, §8.2.3
+- Phase 8 Implementation Plan subtasks 2–5
+
+---
+
 ## [2026-05-23 Phase 8 Subtask 1] feat(db): add weight_entries migration (FR-W-1..5)
 
 **Change Type:** Feature
