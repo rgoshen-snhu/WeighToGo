@@ -250,7 +250,7 @@
           "weight"
         ],
         "summary": "List weight entries (FR-W-2)",
-        "description": "Return a paginated list of weight entries for the authenticated user.\n\nArgs:\n    request: The incoming HTTP request.\n    limit: Maximum number of entries per page (default 20, max 100).\n    cursor: Pagination cursor (entry_id of the last item on the previous page).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A paginated envelope with ``items`` and ``next_cursor``.",
+        "description": "Return a paginated list of weight entries for the authenticated user.\n\nArgs:\n    request: The incoming HTTP request.\n    limit: Maximum number of entries per page (1..100, default 20).\n        Out-of-range values return 422 rather than being silently clamped,\n        so clients learn they exceeded the contract.\n    cursor: Opaque base64 pagination token previously returned as\n        ``next_cursor`` (ADR-0015). Clients round-trip the value\n        unchanged; the router decodes the compound ``(observation_date,\n        entry_id)`` sort key here.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A paginated envelope with ``items`` and ``next_cursor``.\n\nRaises:\n    HTTPException: 422 when ``cursor`` is malformed.",
         "operationId": "list_weight_entries_api_v1_weight_entries_get",
         "parameters": [
           {
@@ -259,6 +259,8 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
               "default": 20,
               "title": "Limit"
             }
@@ -270,7 +272,7 @@
             "schema": {
               "anyOf": [
                 {
-                  "type": "integer"
+                  "type": "string"
                 },
                 {
                   "type": "null"
@@ -655,7 +657,7 @@
           "next_cursor": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
@@ -670,7 +672,7 @@
           "next_cursor"
         ],
         "title": "WeightEntryListResponse",
-        "description": "Paginated list response envelope for weight entries (SRS \u00a79.4).\n\nAttributes:\n    items: The weight entries in the current page.\n    next_cursor: Opaque pagination token, or ``None`` when no further pages exist."
+        "description": "Paginated list response envelope for weight entries (SRS \u00a79.4).\n\nAttributes:\n    items: The weight entries in the current page.\n    next_cursor: Opaque base64 pagination token (ADR-0015), or ``None``\n        when no further pages exist. Clients should treat this value as\n        opaque and round-trip it unchanged to the next request."
       },
       "WeightEntryRequest": {
         "properties": {
