@@ -103,7 +103,7 @@ The Milestone Two work showcases the following:
   and the corrected design in one place.
 
 - **Documentation discipline.** A versioned Software Requirements
-  Specification ([`/docs/specs/WeighToGo_Web_SRS_v1.md`](../specs/WeighToGo_Web_SRS_v1.md))
+  Specification ([`/docs/specs/WeighToGo_Web_SRS_v2.md`](../specs/WeighToGo_Web_SRS_v2.md))
   is the authoritative source for architecture, requirements, API, and
   quality gates. Nine new Architecture Decision Records (ADR-0007 through
   ADR-0015) capture every M2 decision with alternatives considered. A
@@ -271,7 +271,7 @@ of shipping a milestone is now reviewing one PR.
 - Repository: <https://github.com/rgoshen-snhu/WeighToGo>
 - Milestone Two tag: `v0.1.0`
 - Prior baseline tag: `v1.0.0-android`
-- Software Requirements Specification: [`/docs/specs/WeighToGo_Web_SRS_v1.md`](../specs/WeighToGo_Web_SRS_v1.md)
+- Software Requirements Specification: [`/docs/specs/WeighToGo_Web_SRS_v2.md`](../specs/WeighToGo_Web_SRS_v2.md)
 - Architecture summary: [`/ARCHITECTURE.md`](../../ARCHITECTURE.md)
 - ADR index: [`/docs/adr/README.md`](../adr/README.md)
 - DDR index: [`/docs/ddr/README.md`](../ddr/README.md)

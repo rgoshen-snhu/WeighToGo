@@ -1,7 +1,7 @@
 # Architecture
 
 This file is a 30-second orientation. The **authoritative architecture
-specification** for the web rebuild is [SRS §4 — Architecture](docs/specs/WeighToGo_Web_SRS_v1.md#4-architecture).
+specification** for the web rebuild is [SRS §4 — Architecture](docs/specs/WeighToGo_Web_SRS_v2.md#4-architecture).
 When this file and the SRS disagree, the SRS wins.
 
 ## Two stacks, one repository
@@ -55,6 +55,6 @@ Decision context: [ADR-0014 — TanStack Query for Server State](docs/adr/0014-t
 
 ## Where to read next
 
-- **Full architecture spec:** [SRS §4](docs/specs/WeighToGo_Web_SRS_v1.md#4-architecture) — high-level diagram, component diagrams, technology stack, pattern definitions
+- **Full architecture spec:** [SRS §4](docs/specs/WeighToGo_Web_SRS_v2.md#4-architecture) — high-level diagram, component diagrams, technology stack, pattern definitions
 - **All architecture decisions:** [`docs/adr/README.md`](docs/adr/README.md)
 - **Android-era architecture (historical):** [`docs/architecture/WeighToGo_Database_Architecture.md`](docs/architecture/WeighToGo_Database_Architecture.md)

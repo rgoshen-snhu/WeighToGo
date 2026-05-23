@@ -8,7 +8,7 @@ entry point for anything under `docs/`.
 
 When two documents disagree, use this order of precedence:
 
-1. **`specs/WeighToGo_Web_SRS_v1.md`** — authoritative system spec for the web
+1. **`specs/WeighToGo_Web_SRS_v2.md`** — authoritative system spec for the web
    rebuild. Wins over every other web-related doc.
 2. **`plans/milestone-two-plan.md`** — the active CS 499 Milestone Two
    implementation brief. References sections of the SRS that are in scope for
@@ -20,7 +20,7 @@ When two documents disagree, use this order of precedence:
 
 ## Quick links
 
-- **System spec (web):** [`specs/WeighToGo_Web_SRS_v1.md`](specs/WeighToGo_Web_SRS_v1.md)
+- **System spec (web):** [`specs/WeighToGo_Web_SRS_v2.md`](specs/WeighToGo_Web_SRS_v2.md)
 - **Active milestone plan:** [`plans/milestone-two-plan.md`](plans/milestone-two-plan.md)
 - **Code review checklist:** [`standards/cs499_code_review_checklist.md`](standards/cs499_code_review_checklist.md)
 - **ADR index:** [`adr/README.md`](adr/README.md)

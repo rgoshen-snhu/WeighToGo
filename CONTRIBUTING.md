@@ -727,7 +727,7 @@ We use the [All Contributors](https://allcontributors.org/) specification. Contr
 
 **Project-specific**
 
-- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) — authoritative for the web rebuild
+- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md) — authoritative for the web rebuild
 - [Architecture Decision Records](docs/adr/README.md) — numbered engineering decisions
 - [Design Decision Records](docs/ddr/README.md) — numbered design decisions
 

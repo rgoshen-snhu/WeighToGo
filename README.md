@@ -53,7 +53,7 @@ The decisions behind this approach are recorded in:
 
 - [ADR-0007 — Rebuild as a Full-Stack Web Application](docs/adr/0007-rebuild-as-full-stack-web-application.md)
 - [ADR-0008 — Polyglot Monorepo](docs/adr/0008-polyglot-monorepo.md)
-- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) — the
+- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md) — the
   authoritative specification for the web rebuild
 
 ---
@@ -205,7 +205,7 @@ disabled.
 ## 🌐 Web Application (in progress)
 
 The web rebuild is specified by the
-[Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md), which
+[Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md), which
 is the authoritative source for its architecture, requirements, API, and quality
 gates. Milestone 2 (auth + weight-entry vertical slice + dashboard) is complete
 and tagged `v0.1.0`; Milestones 3 and 4 add algorithms/data-structures and
@@ -227,7 +227,7 @@ at final capstone submission.
 - Cookie-based session auth, rate limiting, RFC 7807 error responses, WCAG 2.1 AA
 - 277 backend tests (pytest) · 241 frontend test cases (Vitest) · 5 E2E specs (Playwright)
 
-See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md)
+See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md)
 for the full milestone roadmap.
 
 ### Running the Backend
@@ -285,7 +285,7 @@ is now preserved in maintenance-only status.
   trend analytics and time-series pagination.
 - **Milestone 4** — database enhancements.
 
-See the [SRS](docs/specs/WeighToGo_Web_SRS_v1.md) for the full milestone roadmap
+See the [SRS](docs/specs/WeighToGo_Web_SRS_v2.md) for the full milestone roadmap
 and the complete set of functional and non-functional requirements.
 
 ---
@@ -296,7 +296,7 @@ and the complete set of functional and non-functional requirements.
 |----------|-------------|
 | [Documentation index](docs/README.md) | Top-level map of the `docs/` tree |
 | [Architecture](ARCHITECTURE.md) | 30-second orientation; delegates to SRS §4 for the full spec |
-| [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
+| [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
 | [Architecture Decision Records](docs/adr/README.md) | Numbered engineering decisions, Android-era and web-rebuild |
 | [Design Decision Records](docs/ddr/README.md) | Numbered design and UI decisions |
 | [Android Database Architecture](docs/architecture/WeighToGo_Database_Architecture.md) | SQLite schema, ER diagrams, SQL scripts, and DAO patterns |
