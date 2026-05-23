@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Issue #17] docs: add DDR decision-log index
+
+**Change Type:** Docs
+**Scope:** `/docs/ddr/` — new `README.md`
+
+**Summary:**
+Adds `docs/ddr/README.md` — a decision-log index listing the three Design Decision Records (DDR-0001 through DDR-0003) with title, status, date, and stack scope. Notes the boundary between DDRs (UI/UX design trade-offs) and ADRs (architectural and implementation trade-offs) so future contributors choose the right log.
+
+**Rationale:**
+The DDR folder is small today but will grow as the web rebuild adds UI surfaces. Adding the index now — at the same time as the ADR index — establishes the pattern before scale makes retrofitting painful. The DDR/ADR scope distinction is recorded inline so it does not have to be re-derived.
+
+**References:**
+- Issue: GH-17
+
+---
+
 ## [2026-05-23 Issue #17] docs: add ADR decision-log index
 
 **Change Type:** Docs
