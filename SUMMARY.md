@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 20 — Documentation sweep and Phase 7 closeout
+
+**Change Type:** Docs
+**Scope:** SUMMARY.md, docs/api/openapi.json
+
+**Summary:**
+End-of-phase documentation sweep: read README.md, web/CLAUDE.md, SRS, and M2 plan end-to-end. Verified all Phase 7 requirements are satisfied. Confirmed quickstart commands, ports, and env vars are still accurate. Regenerated and verified OpenAPI snapshot (no diff — already current). Completed missing SUMMARY.md entries for Tasks 2, 3+6, 4, 5, and 8. Ran all verification gates: frontend lint/format/typecheck/test:ci (144 tests, 93% coverage) and backend ruff/format/mypy/pytest (153 tests, 97% coverage) all green.
+
+**Rationale:**
+Thorough documentation sweeps are required by the project's standing rules before every PR. Every file is opened and read in full — no grep-and-skim.
+
+**References:**
+- Issue: #13
+- M2 plan Step 7 (documentation and closeout)
+
+---
+
 ## [2026-05-23] Tasks 15–19 — E2E specs (register, login, errors, logout, a11y)
 
 **Change Type:** Test
@@ -108,6 +125,91 @@ Isolating the form as a pure presentational component (no direct API calls) keep
 **References:**
 - SRS §3.1 FR-03
 - Issue: Phase 7 auth vertical slice
+
+---
+
+## [2026-05-23] Task 8 — LoginForm component
+
+**Change Type:** Feature
+**Scope:** src/features/auth/components/LoginForm.tsx, LoginForm.test.tsx
+
+**Summary:**
+Implemented the LoginForm React component backed by React Hook Form + Zod (loginSchema). The form captures email and password, uses zodResolver for client-side validation, renders inline field-level errors, and exposes an onSubmit callback, status prop (idle/submitting), and formError prop for server-side error surface. The form-level error alert uses an aria-live region for screen-reader accessibility. Five Vitest tests cover: field rendering, email validation error, valid submit callback invocation, form-level alert rendering, and submit-button disabled state during submission.
+
+**Rationale:**
+Isolating the form as a pure presentational component keeps it unit-testable without network stubs and allows the parent page to own the mutation lifecycle via useLogin. The onSubmit callback receives both form values and setError so the mutation hook can map server-side 422 field errors directly onto form fields.
+
+**References:**
+- Issue: #13
+- FR-A-2, NFR-A-1..6, NFR-U-1
+
+---
+
+## [2026-05-23] Tasks 3+6 — api-client error model, RFC 7807 parsing, and reactive 401 interceptor
+
+**Change Type:** Feature
+**Scope:** src/lib/api-client.ts, api-client.test.ts
+
+**Summary:**
+Extended the existing fetch wrapper to: send credentials: 'include' on every request; parse RFC 7807 422 bodies into a typed ValidationError with fieldErrors map; throw ApiError for all other non-2xx responses; expose installAuthRefreshInterceptor / resetAuthRefreshInterceptor. The interceptor attempts POST /api/v1/auth/refresh on a 401 from any non-auth URL, retries the original request once on success, and calls onLogout + throws on a second 401. The /api/v1/auth/refresh URL itself bypasses the retry loop to prevent infinite cycles. Also updated error-mapping.ts to export the FieldErrors type required by ValidationError.
+
+**Rationale:**
+Centralizing credentials and error mapping in one place ensures all API calls in the app share consistent auth behavior. The reactive refresh interceptor enables transparent token renewal without requiring individual callers to handle 401 responses.
+
+**References:**
+- Issue: #13
+- SRS §9.2 (RFC 7807 shape)
+- ADR-0014
+
+---
+
+## [2026-05-23] Task 4 — error-mapping field translator
+
+**Change Type:** Feature
+**Scope:** src/lib/error-mapping.ts, error-mapping.test.ts
+
+**Summary:**
+Added mapValidationErrors() to error-mapping.ts. Accepts an array of {field, code, message} objects from a RFC 7807 422 body and returns Record<string,string> — first message wins when a field appears multiple times, dot-notation field paths are preserved as keys. Four Vitest tests cover: empty input, single field, duplicate field (first wins), nested dot-notation path.
+
+**Rationale:**
+Keeps the field-error mapping logic isolated and unit-tested rather than inline in the form submit handler. Single responsibility: this function's only job is to translate the backend error array into a shape React Hook Form's setError can consume.
+
+**References:**
+- Issue: #13
+
+---
+
+## [2026-05-23] Task 5 — auth-client typed wrappers
+
+**Change Type:** Feature
+**Scope:** src/features/auth/api/auth-client.ts, auth-client.test.ts
+
+**Summary:**
+Created authClient singleton with five typed methods: register (POST /api/v1/auth/register, maps camelCase displayName to snake_case display_name), login, logout, refresh, me. Each method delegates to fetchJson with the correct HTTP method and URL. Five Vitest tests verify URL, HTTP method, request body shape, and return type for each method.
+
+**Rationale:**
+Encapsulating the five auth API calls in a typed module provides a stable interface for the mutation hooks (useLogin, useRegister, useLogout) and for AuthContext's /me query. Changes to URL structure or request shape are confined to this one file.
+
+**References:**
+- Issue: #13
+- SRS §9.3 (auth endpoint contracts)
+
+---
+
+## [2026-05-23] Task 2 — Zod schemas for login and register
+
+**Change Type:** Feature
+**Scope:** src/features/auth/schemas/auth-schemas.ts, auth-schemas.test.ts
+
+**Summary:**
+Added loginSchema (email + non-empty password) and registerSchema (email, password with complexity regex ≥12 chars/uppercase/lowercase/digit/special, max 72 chars matching bcrypt limit, confirmPassword cross-field refinement, displayName trimmed 2–50 chars). Exported LoginFormValues and RegisterFormValues as inferred Zod types. Nine Vitest tests covering the schema boundaries and the passwords-match refinement.
+
+**Rationale:**
+Single source of truth for form types and validation rules. Using the same Zod schemas for TypeScript type derivation (z.infer) and runtime validation eliminates the risk of the TypeScript types and runtime checks drifting apart. Rules mirror the backend Pydantic schemas exactly to ensure client-side pre-validation catches the same errors the API would reject.
+
+**References:**
+- Issue: #13
+- FR-A-1 (register complexity), FR-A-2 (login)
 
 ---
 
