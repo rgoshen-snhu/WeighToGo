@@ -226,12 +226,12 @@ contract. The lesson — pagination contracts are public API surface and
 need an ADR up front, not after a code review catches them — is one I
 now apply by default to anything client-facing.
 
-A second category of challenge was the multi-agent code review on PR #30
-that caught a soft-delete filter bug in `get_by_id`: the method was
-returning soft-deleted entries, which meant a `DELETE` followed by a
-`PUT` would silently resurrect a deleted row. Fixed in `ec22cf2` with
-regression tests for `GET` / `PUT` / `DELETE` on soft-deleted entries,
-plus a separate `get_by_id_including_deleted` helper for the genuinely
+A second category of challenge was the PR #30 code review that caught a
+soft-delete filter bug in `get_by_id`: the method was returning
+soft-deleted entries, which meant a `DELETE` followed by a `PUT` would
+silently resurrect a deleted row. Fixed in `ec22cf2` with regression
+tests for `GET` / `PUT` / `DELETE` on soft-deleted entries, plus a
+separate `get_by_id_including_deleted` helper for the genuinely
 idempotent `DELETE` path. The class of bug — "soft delete is a domain
 invariant, not a query filter" — is now an explicit thing I check for
 whenever I see `is_deleted` in a model.

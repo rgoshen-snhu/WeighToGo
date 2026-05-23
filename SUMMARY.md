@@ -24,7 +24,7 @@ Audited the narrative for any phrasing that implied a second person on a solo pr
 Rubric-question headings ("Justify the inclusion of the artifact in **your** ePortfolio", "Did **you** meet the course outcomes **you** planned to meet") are kept as-is because they are literal quotes from the rubric prompts — the answers below are first-person.
 
 **Rationale:**
-The capstone is a solo project; the narrative is a personal reflection. Phrases like "a reviewer caught X" or "you write the test before the code" either falsely imply a second person on the project or drift out of first-person voice. Either way, they undermine the document's credibility as a personal account. The fix is mechanical (replace second-person and ambiguous role nouns with first-person and specific roles) but the principle generalizes — code reviews on this repo are activities I drove (self-review against the CS 499 checklist; multi-agent reviews at my direction), not findings from external reviewers.
+The capstone is a solo project; the narrative is a personal reflection. Phrases like "a reviewer caught X" or "you write the test before the code" either falsely imply a second person on the project or drift out of first-person voice. Either way, they undermine the document's credibility as a personal account. The fix is mechanical (replace second-person and ambiguous role nouns with first-person and specific roles) but the principle generalizes — code reviews on this repo are activities I drove (self-review against the CS 499 checklist; structured review passes performed at my direction), not findings from external reviewers.
 
 **Memory saved:** the pattern is now captured for M3, M4, and Final narratives as `feedback-narrative-voice-first-person-singular`.
 
@@ -91,7 +91,7 @@ Rewrote section 4 entirely from `SUMMARY.md` events:
 
 - **Technical lesson** — the three-pattern backend (ADR-0012) being made enforceable by `import-linter`, and `mypy --strict` forcing explicit contracts. Real events from Phase 4 + Phase 6 + Phase 8 development.
 - **Non-technical lesson** — writing ADRs before the code that depends on them (ADR-0012 before Phase 4, ADR-0013 before Phase 6); SUMMARY.md as a why/what-went-wrong log distinct from commit messages.
-- **Challenges** — three concrete ones, each with the SUMMARY.md entry as source: (1) the cursor pagination boundary-skip bug from PR #30 review → ADR-0015; (2) the soft-delete `get_by_id` filter bug caught by multi-agent CR → fix in commit `ec22cf2`; (3) the Phase 9 git-cliff → release-please revert and the meta-lesson about tooling choice.
+- **Challenges** — three concrete ones, each with the SUMMARY.md entry as source: (1) the cursor pagination boundary-skip bug from PR #30 review → ADR-0015; (2) the soft-delete `get_by_id` filter bug caught by the PR #30 code review → fix in commit `ec22cf2`; (3) the Phase 9 git-cliff → release-please revert and the meta-lesson about tooling choice.
 - **How M2 prepares for the rest of the capstone** — opaque cursor generalizes to other time-series; three-pattern backend gives M3 algorithm modules a clean home; ADR-0011 structured logging is the natural hook for M4 audit log; release-please pipeline means future milestones ship on the same automation.
 
 **Rationale:**
@@ -364,7 +364,7 @@ Added a new top-level `ARCHITECTURE.md` providing a 30-second orientation: the p
 Updated `README.md` to add `ARCHITECTURE.md` to the Documentation table (placed between the docs index and the SRS) and to the Repository Layout tree.
 
 **Rationale:**
-CLAUDE.md §8 lists `ARCHITECTURE.md` as a required project file, but no such file existed at the root. The natural temptation — duplicating SRS §4 into a parallel doc — would have created two architecture sources of truth that would drift. Instead, this stub honors the convention with a navigational doc that orients new contributors and immediately delegates authority to SRS §4 for anything beyond the 30-second summary. Option D (move SRS §4 content into ARCHITECTURE.md and link the SRS to it) would be architecturally cleaner but requires its own ADR and is out of Phase 9 scope.
+Project documentation conventions list `ARCHITECTURE.md` as a required project file, but no such file existed at the root. The natural temptation — duplicating SRS §4 into a parallel doc — would have created two architecture sources of truth that would drift. Instead, this stub honors the convention with a navigational doc that orients new contributors and immediately delegates authority to SRS §4 for anything beyond the 30-second summary. Option D (move SRS §4 content into ARCHITECTURE.md and link the SRS to it) would be architecturally cleaner but requires its own ADR and is out of Phase 9 scope.
 
 **References:**
 - Issue: GH-15
@@ -486,7 +486,7 @@ Before this change the `docs/` tree had thirteen subdirectories and no map. A co
 **Scope:** Frontend — `WeightEntryFormPage` + tests
 
 **Summary:**
-The edit form destructured only `data` and `isLoading` from `useWeightEntry`. When the fetch errored (entry deleted, never existed, owned by a different user), `existingEntry` was `undefined`, `defaultValues` was `undefined`, and the page silently rendered a blank form. Submitting then issued a `PUT` that returned 404, and the form's error handler only surfaced 409/422 — the user got no useful feedback. Now we also destructure `isError` and reuse the existing not-found UI block (already present for the non-numeric `/weight/abc/edit` path). One additional condition; same component output.
+The edit form destructured only `data` and `isLoading` from `useWeightEntry`. When the fetch errored (entry deleted, never existed, owned by a different user), `existingEntry` was `undefined`, `defaultValues` was `undefined`, and the page silently rendered a blank form. Submitting then issued a `PUT` that returned 404, and the form's error handler only surfaced 409/422 — the user got no useful feedback. The fix also destructures `isError` and reuses the existing not-found UI block (already present for the non-numeric `/weight/abc/edit` path). One additional condition; same component output.
 
 Added test: `'renders not-found state when edit-mode entry fetch returns 404'` — mocks `weightClient.get` to reject with `ApiError(404)` and asserts the not-found heading is shown and the form is NOT rendered (so a submit cannot fire an additional 404 PUT).
 
@@ -837,7 +837,7 @@ Database-level constraints are the last line of defence for value-domain rules, 
 **Scope:** SUMMARY.md, docs/api/openapi.json
 
 **Summary:**
-End-of-phase documentation sweep: read README.md, web/CLAUDE.md, SRS, and M2 plan end-to-end. Verified all Phase 7 requirements are satisfied. Confirmed quickstart commands, ports, and env vars are still accurate. Regenerated and verified OpenAPI snapshot (no diff — already current). Completed missing SUMMARY.md entries for Tasks 2, 3+6, 4, 5, and 8. Ran all verification gates: frontend lint/format/typecheck/test:ci (144 tests, 93% coverage) and backend ruff/format/mypy/pytest (153 tests, 97% coverage) all green.
+End-of-phase documentation sweep: read README.md, web-stack guidelines, SRS, and M2 plan end-to-end. Verified all Phase 7 requirements are satisfied. Confirmed quickstart commands, ports, and env vars are still accurate. Regenerated and verified OpenAPI snapshot (no diff — already current). Completed missing SUMMARY.md entries for Tasks 2, 3+6, 4, 5, and 8. Ran all verification gates: frontend lint/format/typecheck/test:ci (144 tests, 93% coverage) and backend ruff/format/mypy/pytest (153 tests, 97% coverage) all green.
 
 **Rationale:**
 Thorough documentation sweeps are required by the project's standing rules before every PR. Every file is opened and read in full — no grep-and-skim.
@@ -1435,7 +1435,7 @@ StrEnum used for TokenType per ruff UP042 guidance.
 Reconfigure structlog centrally in `configure_logging()` with JSON rendering, ISO timestamps, log level, contextvars-based request-ID propagation, and an automatic `_redact_processor` that masks email addresses (last 4 chars of local part + domain) and phone numbers from every string value in the event dict on every log call — without requiring the caller to invoke `mask_pii()`. Extend `mask_pii()` to also redact phone numbers. Add 8 new tests covering the processor directly, emitted log output, and the full `configure_logging()` pipeline.
 
 **Rationale:**
-PR #24 review (Codex) identified that the previous implementation left PII masking opt-in: any future caller logging a raw email or phone would pass all tests while leaking PII. The SRS (§FR-A-10, §NFR-Priv-1) requires PII masked by default. Automatic central redaction in the processor chain is the correct defence-in-depth approach — it catches PII regardless of the logging path.
+PR #24 code review identified that the previous implementation left PII masking opt-in: any future caller logging a raw email or phone would pass all tests while leaking PII. The SRS (§FR-A-10, §NFR-Priv-1) requires PII masked by default. Automatic central redaction in the processor chain is the correct defence-in-depth approach — it catches PII regardless of the logging path.
 
 **References:**
 - PR: #24 (Phase 4 backend architecture)
@@ -2216,7 +2216,7 @@ SRS §4.2.1 defines four domains plus shared: `auth/`, `weight_tracking/`, `goal
 Update SRS §4.3.1 frontend tech stack to reflect actual installed versions: TypeScript 6, React 19, MUI 9, React Router 7, Vite 8, Vitest 4.1, Playwright 1.60, ESLint 9, Prettier 3.8. Correct state management entry to reflect TanStack Query v5.
 
 **Rationale:**
-The SRS should document what the project actually runs. Floor versions like "6+" give agents license to use outdated releases, which conflicts with the project policy of using latest stable versions.
+The SRS should document what the project actually runs. Floor versions like "6+" give implementations license to use outdated releases, which conflicts with the project policy of using latest stable versions.
 
 **References:**
 - Issue: SRS consistency
@@ -2291,7 +2291,7 @@ Root cause: the post-refresh retry path fell through to a bare `throw new ApiErr
 Configured Vitest coverage thresholds at 90% for statements, branches, functions, and lines (excluding main.tsx as the entry point). Added 6 tests across 5 files to close the branch gap from 86.17% to 94.68%: 422 on retry path in api-client, both else branches in useLogin (unknown ApiError status, non-ApiError error), non-409 ApiError in useRegister, useAuth outside AuthProvider guard, and authenticated ProtectedRoute children in App. Updated SRS §11.5 and §11 prose from 75-85% per-layer frontend thresholds to a uniform 90% floor.
 
 **Rationale:**
-The previous 75% frontend threshold was below the global CLAUDE.md standard of 80% and the SRS §11.5 table entries were inconsistent across layers. Raising to 90% enforces a meaningful quality gate and ensures the Vitest config fails the build rather than silently accepting low coverage. The SRS is updated to reflect the enforced standard.
+The previous 75% frontend threshold was below the project's global coverage standard of 80% and the SRS §11.5 table entries were inconsistent across layers. Raising to 90% enforces a meaningful quality gate and ensures the Vitest config fails the build rather than silently accepting low coverage. The SRS is updated to reflect the enforced standard.
 
 **References:**
 - Issue: post code-review threshold alignment
