@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@mui/material';
 import { theme } from '../theme/theme';
 import { AuthProvider } from '../contexts/AuthContext';
-import { authClient } from '../features/auth/api/auth-client';
+import { authClient, type AuthUser } from '../features/auth/api/auth-client';
 import { AppLayout } from './AppLayout';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
@@ -55,5 +55,25 @@ describe('AppLayout', () => {
       </Wrapper>,
     );
     expect(screen.getByRole('navigation')).toBeInTheDocument();
+  });
+
+  it('renders UserMenu avatar when user is authenticated', async () => {
+    const authenticatedUser: AuthUser = {
+      user_id: 1,
+      email: 'user@example.com',
+      display_name: 'Test User',
+      created_at: '2026-05-23T00:00:00Z',
+    };
+    vi.spyOn(authClient, 'me').mockResolvedValue(authenticatedUser);
+    render(
+      <Wrapper>
+        <AppLayout />
+      </Wrapper>,
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /account menu for test user/i }),
+      ).toBeInTheDocument(),
+    );
   });
 });

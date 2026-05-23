@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23] Task 12 — UserMenu in AppBar
+
+**Change Type:** Feature
+**Scope:** src/components/UserMenu.tsx, src/components/AppLayout.tsx
+
+**Summary:**
+Added UserMenu component (MUI Avatar + IconButton + Menu) to the AppBar right side. Shows display name, email, and Log out action. Keyboard accessible (Escape closes, Enter/Space opens via MUI defaults).
+
+**Rationale:**
+Per DDR-0003: industry convention puts session controls in a top-right avatar menu, keeping navigation routes separate from session actions.
+
+**References:**
+- Issue: #13
+- DDR-0003
+
+---
+
 ## [2026-05-23] Task 11 — Wire LoginPage and RegisterPage
 
 **Change Type:** Feature

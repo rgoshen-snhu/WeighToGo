@@ -36,6 +36,7 @@ import { Outlet } from 'react-router-dom';
 
 import { protectedRoutes } from '../routes';
 import { NavList } from './NavList';
+import { UserMenu } from './UserMenu';
 
 const DRAWER_WIDTH = 240;
 
@@ -78,6 +79,8 @@ export function AppLayout() {
           <Typography variant="h6" noWrap component="div">
             Weigh to Go!
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <UserMenu />
         </Toolbar>
       </AppBar>
 
