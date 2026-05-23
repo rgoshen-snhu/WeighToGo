@@ -7,6 +7,26 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 E2E Fix] test(e2e): wait for post-login redirect and disambiguate delete locator
+
+**Change Type:** Fix
+**Scope:** E2E — weight and dashboard specs
+
+**Summary:**
+Fixed four failing Playwright tests on PR #30 (`dashboard.spec.ts`, `weight-create.spec.ts`, `weight-delete.spec.ts`, `weight-edit.spec.ts`). Added `await expect(page).toHaveURL('/', { timeout: 10_000 })` after every login button click that is followed by an immediate `goto` to a protected route, eliminating a race between the async login mutation and the next navigation. Replaced `getByRole('button', { name: /delete/i })` in the delete spec with `/^delete entry from/i` so the locator targets the row delete button instead of the user-menu avatar (whose aria-label is "Account menu for Delete Tester" and matched the broader pattern). Replaced ambiguous `getByText('1')` on the dashboard with `getByRole('heading', { level: 5, name: '1', exact: true })` to pin the assertion to the TotalEntriesCard. Removed an unnecessary `await` on a synchronous `page.url()` expression in the edit spec.
+
+**Rationale:**
+The race against the login mutation passed locally on fast machines but failed in CI where the redirect to `/` lagged the subsequent `page.goto()`, so `ProtectedRoute` bounced the page back to `/login` before the form rendered. The delete-spec locator picked up the user-menu avatar because the seed user's display name was "Delete Tester", whose accessible name contains "delete". Both bugs are timing- and naming-coincidence issues that surfaced only under CI conditions.
+
+**Bug Fix Context:**
+Locally, all 22 Playwright specs now pass deterministically with `CI=1` and 4 workers.
+
+**References:**
+- PR #30 CI run 26338798443
+- Phase 8 Implementation Plan subtasks 34–38 (original spec authoring)
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 39–44] docs(api): refresh OpenAPI snapshot and update project docs
 
 **Change Type:** Docs

@@ -34,11 +34,14 @@ test.describe.serial('weight entry delete flow', () => {
     await page.getByLabel(/email/i).fill(email);
     await page.getByLabel(/password/i).fill(password);
     await page.getByRole('button', { name: /log in/i }).click();
+    await expect(page).toHaveURL('/', { timeout: 10_000 });
     await page.goto('/weight');
 
-    // Click the first delete button (most recent entry)
-    const deleteButtons = page.getByRole('button', { name: /delete/i });
-    await deleteButtons.first().click();
+    // Click the first row's delete button (most recent entry). The aria-label
+    // pattern excludes the user-menu avatar (whose name may contain "delete"
+    // when the test user's display name does, e.g. "Delete Tester").
+    const rowDeleteButtons = page.getByRole('button', { name: /^delete entry from/i });
+    await rowDeleteButtons.first().click();
 
     // Confirm in the dialog
     await page.getByRole('button', { name: /^delete$/i }).click();
