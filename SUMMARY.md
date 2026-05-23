@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:10] Commit Summary
+
+**Change Type:** Fix
+**Scope:** auth/interface/router
+
+**Summary:**
+`_clear_auth_cookies` now passes `path="/"`, `httponly=True`, `samesite="strict"`, and `secure=s.cookie_secure` to both `delete_cookie` calls — matching the attributes used when the cookies were set. Without these, browsers may ignore the deletion directive for cookies set with `Secure + SameSite=Strict`.
+
+**Rationale:**
+The previous bare `delete_cookie(key=...)` omitted all attributes, so browsers silently ignored the deletion. PR #27 code review finding C11.
+
+**References:**
+- PR: #27 (C11)
+
+---
+
 ## [2026-05-22 10:09] Commit Summary
 
 **Change Type:** Fix

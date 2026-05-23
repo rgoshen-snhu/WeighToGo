@@ -166,9 +166,20 @@ def _set_auth_cookies(
 
 
 def _clear_auth_cookies(response: Response) -> None:
-    """Delete access and refresh token cookies from the client."""
-    response.delete_cookie(key=_ACCESS_COOKIE)
-    response.delete_cookie(key=_REFRESH_COOKIE)
+    """Delete access and refresh token cookies from the client.
+
+    Attributes must match what ``_set_auth_cookies`` used; browsers only
+    delete a cookie when the deletion Set-Cookie header carries the same
+    ``Path``, ``Secure``, ``SameSite``, and ``HttpOnly`` attributes.
+    """
+    s = get_settings()
+    delete_kwargs = {
+        "httponly": True,
+        "samesite": "strict",
+        "secure": s.cookie_secure,
+    }
+    response.delete_cookie(key=_ACCESS_COOKIE, path="/", **delete_kwargs)  # type: ignore[arg-type]
+    response.delete_cookie(key=_REFRESH_COOKIE, path="/", **delete_kwargs)  # type: ignore[arg-type]
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
