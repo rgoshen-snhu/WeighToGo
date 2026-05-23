@@ -7,6 +7,41 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 PR #30 Review] feat(weight): paginate weight history with Load more
+
+**Change Type:** Feature
+**Scope:** Frontend — `useWeightEntries` hook, `WeightHistoryPage`, page + hook tests
+
+**Summary:**
+The weight history page rendered only the first response from `useQuery(weightClient.list)` and ignored `next_cursor`. With the backend default of 20 entries per page, any user with more than 20 entries could not reach the older ones. Converted the hook to TanStack Query's `useInfiniteQuery` and added a "Load more" button on the page that fetches and appends the next page using the opaque cursor returned by the previous page (ADR-0015).
+
+Implementation notes:
+- `useWeightEntries` now returns the standard `useInfiniteQuery` shape (`data.pages`, `hasNextPage`, `fetchNextPage`, `isFetchingNextPage`). `initialPageParam: undefined` for the first request; `getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined` to stop when the backend signals no more pages.
+- `WeightHistoryPage` flattens `data.pages.flatMap((p) => p.items)` and renders the load-more button only when `hasNextPage` is true. The button shows "Loading…" and disables itself while a fetch is in flight.
+- Chose an explicit user-triggered button over scroll-triggered infinite scroll: more accessible (NFR-A-1 / WCAG 2.1 AA — keyboard reachable, focus visible, no surprise content shifts), simpler to test, and lower risk of double-fetches on unstable scroll containers.
+
+Added page tests:
+- `'shows a Load more button when more pages are available'`
+- `'hides the Load more button when no further pages exist'`
+- `'fetches and appends the next page when Load more is clicked'` — also asserts that the second `weightClient.list` call carries the previous page's `next_cursor` opaque token.
+
+Added hook test:
+- `'exposes hasNextPage=false when next_cursor is null'` — keyset stop condition.
+
+Updated `useWeightEntries.test.tsx` existing assertion from `data.items` to `data.pages[0].items` to match the new infinite-query shape.
+
+**Rationale:**
+`useInfiniteQuery` is the idiomatic TanStack Query primitive for cursor pagination and already cooperates with the rest of the app's query cache (no separate mental model). The alternative — `useQuery` plus manual cursor state — would have required custom merging, manual loading state, and ad-hoc cache keys; useInfiniteQuery delivers all of that for free.
+
+**Bug Fix Context:**
+Root cause: `WeightHistoryPage` consumed only the first `useQuery` page and never read `next_cursor`. The fix changes the data primitive so subsequent pages are reachable from the UI.
+
+**References:**
+- PR #30 reviewer comment on `WeightHistoryPage.tsx:63`
+- ADR-0014 (TanStack Query for server state), ADR-0015 (compound cursor)
+
+---
+
 ## [2026-05-23 PR #30 Review] docs(api): refresh OpenAPI snapshot for cursor and limit changes
 
 **Change Type:** Docs

@@ -1,13 +1,14 @@
 /**
  * Weight history page (FR-W-2, FR-W-4).
  *
- * Displays the user's full weight log with delete functionality.
- * Uses TanStack Query for server state, ConfirmDeleteDialog for
- * safe deletes, and WeightEntryTable for the data display.
+ * Displays the user's full weight log with delete functionality and
+ * load-more pagination (ADR-0015). Uses TanStack Query's useInfiniteQuery
+ * for server state, ConfirmDeleteDialog for safe deletes, and
+ * WeightEntryTable for the data display.
  */
 
 import { Button, Box, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { EmptyState } from '../../../components/EmptyState';
 import { LoadingSpinner } from '../../../components/LoadingSpinner';
@@ -20,9 +21,11 @@ import { useWeightEntries } from '../hooks/useWeightEntries';
  * Weight log history page rendered at /weight.
  */
 export function WeightHistoryPage() {
-  const { data, isLoading } = useWeightEntries();
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useWeightEntries();
   const deleteMutation = useDeleteWeightEntry();
   const [deleteId, setDeleteId] = useState<number | null>(null);
+
+  const entries = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
 
   const handleDeleteRequest = (entryId: number) => setDeleteId(entryId);
   const handleDeleteConfirm = () => {
@@ -35,8 +38,6 @@ export function WeightHistoryPage() {
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
-  const entries = data?.items ?? [];
 
   return (
     <Box component="main">
@@ -60,7 +61,20 @@ export function WeightHistoryPage() {
           }
         />
       ) : (
-        <WeightEntryTable entries={entries} onDelete={handleDeleteRequest} />
+        <>
+          <WeightEntryTable entries={entries} onDelete={handleDeleteRequest} />
+          {hasNextPage && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Button
+                variant="outlined"
+                onClick={() => void fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+              </Button>
+            </Box>
+          )}
+        </>
       )}
 
       <ConfirmDeleteDialog

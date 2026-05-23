@@ -36,11 +36,17 @@ describe('useWeightEntries', () => {
   it('returns items on success', async () => {
     const { result } = renderHook(() => useWeightEntries(), { wrapper });
     await waitFor(() => expect(result.current.data).toBeDefined());
-    expect(result.current.data?.items).toHaveLength(1);
+    expect(result.current.data?.pages[0]?.items).toHaveLength(1);
   });
 
   it('sets isLoading=true while fetching', () => {
     const { result } = renderHook(() => useWeightEntries(), { wrapper });
     expect(result.current.isLoading).toBe(true);
+  });
+
+  it('exposes hasNextPage=false when next_cursor is null', async () => {
+    const { result } = renderHook(() => useWeightEntries(), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeDefined());
+    expect(result.current.hasNextPage).toBe(false);
   });
 });
