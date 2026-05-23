@@ -1486,3 +1486,18 @@ NFR-S-5 explicitly mandates "3 requests per hour for registration." The login an
 **References:**
 - SRS: NFR-S-5
 - Security review finding (non-vulnerability, spec gap)
+
+## [2026-05-23 12:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Backend config / E2E test harness
+
+**Summary:**
+Add `RATE_LIMIT_ENABLED` env-var bypass so E2E Playwright runs do not hit the 3/hour `/register` quota. Added `rate_limit_enabled: bool = True` to `Settings`, wired it to the `Limiter` constructor (`enabled=` param), and set `RATE_LIMIT_ENABLED=false` in the Playwright webServer env.
+
+**Rationale:**
+The E2E suite makes 6+ POST /register requests from the same CI host IP; the 3/hour limit blocked requests 4+ with 429, causing URL and menu assertions to fail in all specs after the third account creation. Rate-limit enforcement by IP is meaningless in a test context where all traffic originates from a single process. The 429 behavior is already verified by the integration test `test_c13_register_rate_limit.py` which manually enables the limiter. Two new unit tests (`test_settings_rate_limit_enabled_*`) provide TDD coverage for the new setting.
+
+**References:**
+- SRS: NFR-S-5
+- PR #29 review finding: P1 blocking issue

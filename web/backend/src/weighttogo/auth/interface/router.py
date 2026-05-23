@@ -82,8 +82,11 @@ def _make_rate_limit_key(settings: object) -> Callable[[Request], str]:
     return key_func
 
 
-# Rate limiter instance — shared via the app.state.limiter pattern
-limiter = Limiter(key_func=_make_rate_limit_key(get_settings()))
+# Rate limiter instance — shared via the app.state.limiter pattern.
+# Disabled when RATE_LIMIT_ENABLED=false (e.g. E2E test runs) so that
+# per-IP buckets do not block a test suite where all traffic shares one host.
+_settings = get_settings()
+limiter = Limiter(key_func=_make_rate_limit_key(_settings), enabled=_settings.rate_limit_enabled)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

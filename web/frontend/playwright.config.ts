@@ -16,6 +16,7 @@ export default defineConfig({
       url: `http://localhost:${API_PORT}/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
+      env: { RATE_LIMIT_ENABLED: 'false' },
     },
     {
       command: `VITE_API_PORT=${API_PORT} npm run dev`,

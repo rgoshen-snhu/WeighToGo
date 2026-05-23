@@ -66,6 +66,10 @@ class Settings(BaseSettings):
     # instead of REMOTE_ADDR. Only enable when a trusted reverse proxy is in
     # front of the API; never enable if clients can set this header directly.
     trusted_proxies: bool = False
+    # Set RATE_LIMIT_ENABLED=false in E2E / dev environments to prevent the
+    # per-IP bucket from blocking test traffic originating from a single host.
+    # Must always be True in production.
+    rate_limit_enabled: bool = True
 
     # ── Observability ─────────────────────────────────────────────────────────
 

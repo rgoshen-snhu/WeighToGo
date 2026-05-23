@@ -161,3 +161,33 @@ def test_settings_cookie_secure_is_true_in_production(
     settings = Settings()  # type: ignore[call-arg]
 
     assert settings.cookie_secure is True
+
+
+def test_settings_rate_limit_enabled_defaults_to_true(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """rate_limit_enabled must default to True so production is always protected."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://test:test@localhost:5432/test")
+    monkeypatch.setenv("SECRET_KEY", "a" * 32)
+    monkeypatch.delenv("RATE_LIMIT_ENABLED", raising=False)
+    monkeypatch.chdir(tmp_path)
+
+    settings = Settings()  # type: ignore[call-arg]
+
+    assert settings.rate_limit_enabled is True
+
+
+def test_settings_rate_limit_enabled_false_when_env_var_set(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """RATE_LIMIT_ENABLED=false must propagate to rate_limit_enabled=False."""
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://test:test@localhost:5432/test")
+    monkeypatch.setenv("SECRET_KEY", "a" * 32)
+    monkeypatch.setenv("RATE_LIMIT_ENABLED", "false")
+    monkeypatch.chdir(tmp_path)
+
+    settings = Settings()  # type: ignore[call-arg]
+
+    assert settings.rate_limit_enabled is False
