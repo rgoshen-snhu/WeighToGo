@@ -7,6 +7,23 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 6–12] feat(application): add five weight use cases
+
+**Change Type:** Feature
+**Scope:** weight_tracking application layer
+
+**Summary:**
+Implemented `CreateWeightEntry`, `ListWeightEntries`, `GetWeightEntry`, `UpdateWeightEntry`, and `DeleteWeightEntry` use cases. Each receives the port via constructor injection and returns domain entities. DeleteWeightEntry is idempotent for already-deleted entries. ListWeightEntries uses limit+1 to compute next_cursor without a second query. Written TDD: 22 failing tests → 5 use cases → 39 green.
+
+**Rationale:**
+One file per use case keeps the application layer legible as a directory listing of business capabilities. Constructor injection makes unit testing with mocks trivial.
+
+**References:**
+- SRS §6.2 (FR-W-1 through FR-W-5)
+- Phase 8 Implementation Plan subtasks 6–12
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 2–5] feat(domain): add WeightEntry entity, port, and exceptions
 
 **Change Type:** Feature
