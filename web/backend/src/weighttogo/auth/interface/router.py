@@ -18,6 +18,7 @@ Cookie names:
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Callable
 
 import structlog
 from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, Response, status
@@ -51,8 +52,38 @@ from weighttogo.shared.db import get_db_session
 
 logger = structlog.stdlib.get_logger(__name__)
 
+
+def _make_rate_limit_key(settings: object) -> Callable[[Request], str]:
+    """Return a slowapi key_func that respects the ``trusted_proxies`` setting.
+
+    When ``trusted_proxies`` is *True* the key is the rightmost IP in
+    ``X-Forwarded-For`` (the last untrusted hop before the proxy).  When
+    *False* (the safe default) ``REMOTE_ADDR`` is used so a spoofed XFF
+    header cannot let an attacker reset their own rate-limit bucket.
+
+    Args:
+        settings: The application ``Settings`` instance.
+
+    Returns:
+        A callable ``(request) -> str`` suitable as a slowapi ``key_func``.
+    """
+    from weighttogo.config import Settings
+
+    s = settings if isinstance(settings, Settings) else get_settings()
+
+    def key_func(request: Request) -> str:
+        if s.trusted_proxies:
+            xff = request.headers.get("x-forwarded-for", "")
+            if xff:
+                # The rightmost address is the last proxy-added hop — use it.
+                return xff.split(",")[-1].strip()
+        return get_remote_address(request)
+
+    return key_func
+
+
 # Rate limiter instance — shared via the app.state.limiter pattern
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=_make_rate_limit_key(get_settings()))
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:09] Commit Summary
+
+**Change Type:** Fix
+**Scope:** config, auth/interface/router
+
+**Summary:**
+Added `trusted_proxies: bool = False` to `Settings`. Replaced the fixed `get_remote_address` key_func with `_make_rate_limit_key()` which, when `trusted_proxies=True`, uses the rightmost `X-Forwarded-For` IP for per-client rate-limit buckets. Documented the knob in `.env.example`.
+
+**Rationale:**
+Behind a reverse proxy, `REMOTE_ADDR` is always the proxy IP — all users share one rate-limit bucket. The `trusted_proxies` knob defaults to `False` (safe) to avoid letting attackers spoof XFF headers. PR #27 code review finding C10.
+
+**References:**
+- PR: #27 (C10)
+
+---
+
 ## [2026-05-22 10:08] Commit Summary
 
 **Change Type:** Fix
