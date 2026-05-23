@@ -7,6 +7,24 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(architecture): add ARCHITECTURE.md stub deferring to SRS §4
+
+**Change Type:** Docs
+**Scope:** New `ARCHITECTURE.md` at repo root + `README.md` cross-links
+
+**Summary:**
+Added a new top-level `ARCHITECTURE.md` providing a 30-second orientation: the polyglot monorepo split (android/ vs web/), the three-pattern backend architecture (Screaming + Clean + Hexagonal) summarized in a table, the frontend's TanStack Query / MUI / React Router stack, and pointers to the authoritative spec (SRS §4), the ADR index, and the Android-era architecture doc. Includes an ASCII diagram of the monorepo split. Explicitly states "when this file and the SRS disagree, the SRS wins."
+
+Updated `README.md` to add `ARCHITECTURE.md` to the Documentation table (placed between the docs index and the SRS) and to the Repository Layout tree.
+
+**Rationale:**
+CLAUDE.md §8 lists `ARCHITECTURE.md` as a required project file, but no such file existed at the root. The natural temptation — duplicating SRS §4 into a parallel doc — would have created two architecture sources of truth that would drift. Instead, this stub honors the convention with a navigational doc that orients new contributors and immediately delegates authority to SRS §4 for anything beyond the 30-second summary. Option D (move SRS §4 content into ARCHITECTURE.md and link the SRS to it) would be architecturally cleaner but requires its own ADR and is out of Phase 9 scope.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(contributing): add web stack contribution guidelines
 
 **Change Type:** Docs

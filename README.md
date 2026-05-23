@@ -86,6 +86,7 @@ WeighToGo/
 ├── scripts/              # Developer utility scripts
 ├── .github/              # CI workflows, issue and pull-request templates
 ├── README.md
+├── ARCHITECTURE.md       # 30-second orientation; SRS §4 is authoritative
 ├── CONTRIBUTING.md
 ├── SUMMARY.md            # Narrative log of what changed and why
 └── LICENSE.md
@@ -292,6 +293,7 @@ and the complete set of functional and non-functional requirements.
 | Document | Description |
 |----------|-------------|
 | [Documentation index](docs/README.md) | Top-level map of the `docs/` tree |
+| [Architecture](ARCHITECTURE.md) | 30-second orientation; delegates to SRS §4 for the full spec |
 | [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
 | [Architecture Decision Records](docs/adr/README.md) | Numbered engineering decisions, Android-era and web-rebuild |
 | [Design Decision Records](docs/ddr/README.md) | Numbered design and UI decisions |
