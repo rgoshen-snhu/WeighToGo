@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-22 10:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** shared/db
+
+**Summary:**
+Restructured `get_db_session` so each branch (success, HTTPException, unexpected) owns its commit or rollback explicitly, and `finally` only closes the session. Eliminated the double-commit race where a failed second commit in `finally` could replace the original HTTPException with a 500. Applied the same correction to the integration test override. Added three unit tests covering all three lifecycle paths.
+
+**Rationale:**
+The old pattern called `session.commit()` in `except HTTPException` and again in `finally` (since `_should_rollback` remained False). If the second commit fails, the original application error is swallowed. PR #27 code review finding C1.
+
+**References:**
+- PR: #27 (C1)
+
+---
+
 ## [2026-05-23 01:00] Commit Summary
 
 **Change Type:** Fix

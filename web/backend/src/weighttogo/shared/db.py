@@ -58,22 +58,15 @@ def get_db_session() -> Generator[Session, None, None]:
     _get_engine()
     assert _SessionLocal is not None
     session = _SessionLocal()
-    _should_rollback = False
     try:
         yield session
+        session.commit()
     except HTTPException:
-        # Expected application-level error — commit valid domain changes.
+        # Expected application-level error — commit valid domain changes then re-raise.
         session.commit()
         raise
     except Exception:
-        _should_rollback = True
         session.rollback()
         raise
     finally:
-        if not _should_rollback:
-            try:
-                session.commit()
-            except Exception:
-                session.rollback()
-                raise
         session.close()

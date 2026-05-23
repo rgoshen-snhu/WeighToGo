@@ -65,33 +65,22 @@ def client(db_session: Session) -> Iterator[TestClient]:
     """
 
     def _override_db() -> Generator[Session, None, None]:
-        # FastAPI throws the route's exception into the generator dependency
-        # when an exception (including HTTPException) propagates.
+        # Mirrors the commit/rollback policy of shared/db.get_db_session.
         # HTTPException is an expected application-level event (e.g. 401, 409)
         # and should NOT trigger a rollback — the domain may have made valid
         # DB changes (e.g. incrementing the failed login counter) that we
         # want to keep.
-        # Only roll back on unexpected exceptions (not HTTPException).
         from fastapi import HTTPException
 
-        _should_rollback = False
         try:
             yield db_session
+            db_session.commit()
         except HTTPException:
-            # Expected application error — commit any domain changes then re-raise
             db_session.commit()
             raise
         except Exception:
-            _should_rollback = True
             db_session.rollback()
             raise
-        finally:
-            if not _should_rollback:
-                try:
-                    db_session.commit()
-                except Exception:
-                    db_session.rollback()
-                    raise
 
     app.dependency_overrides[get_db_session] = _override_db
     limiter.enabled = False
