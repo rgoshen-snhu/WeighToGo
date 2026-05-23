@@ -122,5 +122,5 @@ fail CI rather than quietly violating the architecture.
 ---
 
 **Last Updated**: 2026-05-22
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead

@@ -125,5 +125,5 @@ milestones. This is a deliberate, scoped deferral rather than unmanaged debt.
 ---
 
 **Last Updated**: 2026-05-21
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead

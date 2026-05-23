@@ -90,5 +90,5 @@ field in the web rebuild.
 ---
 
 **Last Updated**: 2026-05-22
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead

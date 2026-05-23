@@ -6,7 +6,7 @@
 | Milestone | Two |
 | Enhancement Category | One: Software Design and Engineering |
 | Status | Active |
-| Authoritative Spec | `/docs/specs/WeighToGo_Web_SRS_v1.md` |
+| Authoritative Spec | `/docs/specs/WeighToGo_Web_SRS_v2.md` |
 | Last Updated | 2026-05-22 |
 
 ---
@@ -30,7 +30,7 @@ Read these before generating the detailed plan. The SRS is the source of truth w
 
 | Document | Location | Key Sections for M2 |
 | --- | --- | --- |
-| **Software Requirements Specification** | `/docs/specs/WeighToGo_Web_SRS_v1.md` | §4 Architecture, §5 Restructure Plan, §6 Functional Requirements (M2-tagged), §7 Non-Functional Requirements, §10 Frontend Specification, §11 Quality Engineering, §14 Acceptance Criteria, Appendix A (ADR Index) |
+| **Software Requirements Specification** | `/docs/specs/WeighToGo_Web_SRS_v2.md` | §4 Architecture, §5 Restructure Plan, §6 Functional Requirements (M2-tagged), §7 Non-Functional Requirements, §10 Frontend Specification, §11 Quality Engineering, §14 Acceptance Criteria, Appendix A (ADR Index) |
 | **CS 499 Code Review Checklist** | `/docs/standards/cs499_code_review_checklist.md` | Program-standard review framework. Applied as self-review gate during Step 7 before tagging `v0.1.0`. |
 | **Existing ADRs** | `/docs/adr/0001-*.md` through `/docs/adr/0006-*.md` | Context on Android-era decisions. New ADRs build on or supersede these where the rebuild changes the answer. |
 | **Android Database Architecture** | `/docs/architecture/WeighToGo_Database_Architecture.md` | Original schema. Informs the web rebuild's data model. Superseded by SRS §8 for the web side. |

@@ -119,5 +119,5 @@ value is delivered to the client once and never stored server-side.
 ---
 
 **Last Updated**: 2026-05-22
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead

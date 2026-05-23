@@ -1,8 +1,11 @@
-> **Document Status:** Frozen pre-Milestone 2 baseline.
-> Current spec: [WeighToGo_Web_SRS_v2.md](WeighToGo_Web_SRS_v2.md), which
-> reconciles Appendix A with the on-disk ADRs and corrects the FR-W-2
-> cross-reference. This document is retained for historical reference —
-> use v2 for the current spec.
+> **Document Version:** v2 — post-Milestone 2 baseline.
+> Supersedes [WeighToGo_Web_SRS_v1.md](WeighToGo_Web_SRS_v1.md) (the pre-M2 spec).
+>
+> **Changes from v1:**
+> - **Appendix A §17.2** reflects actual on-disk ADRs (ADR-0014 *TanStack Query for Server State* and ADR-0015 *Opaque Compound Cursor for Weight-Entry Pagination* are recognized as M2 work); planned M3/M4 ADRs renumbered to ADR-0016 through ADR-0020.
+> - **FR-W-2 §6.2** cross-reference points at the actual cursor ADR (ADR-0015) instead of the prior "planned ADR-0014 (finalized in M3)" text.
+>
+> The document body is otherwise identical to v1.
 
 # Weigh to Go! Web Application
 
@@ -582,7 +585,7 @@ The system shall return a paginated list of the authenticated user's weight entr
 - Soft-deleted entries are excluded
 - Response includes `next_cursor` when more results exist
 
-The cursor-based approach is documented in `[ADR-0014]` (planned, finalized in Milestone 3).
+The cursor-based approach is documented in [ADR-0015 — Opaque Compound Cursor for Weight-Entry Pagination](../adr/0015-opaque-compound-cursor-pagination.md), authored during Milestone 2 PR #30 review.
 
 #### FR-W-3: Update Weight Entry `[MUST]` `[M2]`
 
@@ -1863,12 +1866,13 @@ The following ADRs are written as their decisions are made. They build on the ex
 | ADR-0011 | PII Masking Strategy in Logs | M2 |
 | ADR-0012 | Three-Pattern Backend Architecture (Screaming + Clean + Hexagonal) | M2 |
 | ADR-0013 | Refresh Token Rotation with Family-Based Revocation | M2 |
-| ADR-0014 | Cursor-Based Pagination for Time-Series Data | M3 |
-| ADR-0015 | TTL-Based Server-Side Caching Strategy | M3 |
-| ADR-0016 | Milestone Detection Algorithm | M3 |
-| ADR-0017 | Composite Index Strategy for Trend Queries | M3 |
-| ADR-0018 | Audit Log Schema and Write Strategy | M4 |
-| ADR-0019 | CHECK Constraint Inventory and Database-Level Validation Policy | M4 |
+| ADR-0014 | TanStack Query for Server State | M2 |
+| ADR-0015 | Opaque Compound Cursor for Weight-Entry Pagination | M2 |
+| ADR-0016 | TTL-Based Server-Side Caching Strategy | M3 (planned) |
+| ADR-0017 | Milestone Detection Algorithm | M3 (planned) |
+| ADR-0018 | Composite Index Strategy for Trend Queries | M3 (planned) |
+| ADR-0019 | Audit Log Schema and Write Strategy | M4 (planned) |
+| ADR-0020 | CHECK Constraint Inventory and Database-Level Validation Policy | M4 (planned) |
 
 ---
 

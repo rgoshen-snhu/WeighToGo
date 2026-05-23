@@ -97,5 +97,5 @@ This policy applies to:
 ---
 
 **Last Updated**: 2026-05-22
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead

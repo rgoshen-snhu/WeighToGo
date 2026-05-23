@@ -1,3 +1,7 @@
+> **Document Status:** Preserved Android-era development journal. Frozen as
+> historical reference at the time of the polyglot-monorepo restructure.
+> The active engineering log for the web rebuild is [`/SUMMARY.md`](../../SUMMARY.md).
+
 # Project Summary - Weigh to Go!
 
 ## [2025-12-14] Espresso Tests: Fixed Database Isolation with Test Database
@@ -1085,7 +1089,7 @@ values.put("updated_at", now);
 ### Planning Phase: Exploration and Architecture Design
 
 **Exploration Approach:**
-Launched 3 parallel explore agents to understand:
+Three exploration passes investigated:
 1. Current unit selection implementation in WeightEntryActivity
 2. Existing user preferences system (table schema, models)
 3. Settings screen architecture (activity_sms_settings.xml layout exists)

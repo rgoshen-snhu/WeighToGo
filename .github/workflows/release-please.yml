@@ -1,0 +1,41 @@
+name: Release Please
+
+# Manages the entire release pipeline:
+#
+#   1. On every push to `main`, release-please scans Conventional Commits
+#      since the last released tag (or the configured bootstrap-sha for the
+#      very first release) and either opens or updates a "Release PR" that
+#      proposes the next version and the rendered CHANGELOG diff.
+#
+#   2. When that Release PR is merged, this same workflow creates the
+#      annotated git tag, publishes the GitHub Release with the CHANGELOG
+#      section as the release notes, and updates `.release-please-manifest.json`
+#      so the next cycle starts counting from the new release.
+#
+# The version number is decided by release-please from commit types and the
+# `release-as` directive in `release-please-config.json` — never typed by a
+# human. The human gate is reviewing and merging the Release PR.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write          # create tag and GitHub Release
+  pull-requests: write     # open and update the Release PR
+
+concurrency:
+  group: release-please
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    name: Manage Release PR and publish releases
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run release-please
+        uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

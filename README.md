@@ -8,6 +8,11 @@ monorepo**: it preserves the original Android codebase under `android/` and host
 the new web codebase under `web/`.
 
 ![Android CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/android-ci.yml/badge.svg)
+![Backend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/backend-ci.yml/badge.svg)
+![Frontend CI](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/frontend-ci.yml/badge.svg)
+![E2E](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/e2e.yml/badge.svg)
+![Security Audit](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/security-audit.yml/badge.svg)
+![Release Please](https://github.com/rgoshen-snhu/WeighToGo/actions/workflows/release-please.yml/badge.svg)
 ![Android](https://img.shields.io/badge/Android-14+-3DDC84?style=flat&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
@@ -48,7 +53,7 @@ The decisions behind this approach are recorded in:
 
 - [ADR-0007 — Rebuild as a Full-Stack Web Application](docs/adr/0007-rebuild-as-full-stack-web-application.md)
 - [ADR-0008 — Polyglot Monorepo](docs/adr/0008-polyglot-monorepo.md)
-- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) — the
+- [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md) — the
   authoritative specification for the web rebuild
 
 ---
@@ -82,6 +87,7 @@ WeighToGo/
 ├── scripts/              # Developer utility scripts
 ├── .github/              # CI workflows, issue and pull-request templates
 ├── README.md
+├── ARCHITECTURE.md       # 30-second orientation; SRS §4 is authoritative
 ├── CONTRIBUTING.md
 ├── SUMMARY.md            # Narrative log of what changed and why
 └── LICENSE.md
@@ -149,7 +155,7 @@ Open the **`android/`** directory — not the repository root — in Android Stu
 since the Gradle project root moved there during the monorepo restructure.
 Android Studio generates `android/local.properties` (the SDK location)
 automatically; for command-line builds, set the `ANDROID_HOME` environment
-variable or create that file yourself. The debug APK is written to
+variable or create the file manually. The debug APK is written to
 `android/weightogo/build/outputs/apk/debug/weightogo-debug.apk`.
 
 To run on an emulator, create a device (API 34) in **Tools → Device Manager**
@@ -199,15 +205,27 @@ disabled.
 ## 🌐 Web Application (in progress)
 
 The web rebuild is specified by the
-[Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md), which
+[Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md), which
 is the authoritative source for its architecture, requirements, API, and quality
-gates.
+gates. Milestone 2 (auth + weight-entry vertical slice + dashboard) is complete
+and tagged `v0.1.0`; Milestones 3 and 4 add algorithms/data-structures and
+database enhancements respectively, with the full web rebuild reaching `v1.0.0`
+at final capstone submission.
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 19, TypeScript 6, Vite 8, Material UI 9 |
-| Backend | FastAPI, Python, Pydantic, SQLAlchemy |
-| Database | PostgreSQL |
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Frontend framework | React | 19 |
+| Frontend language | TypeScript | 5+ (strict mode) |
+| Frontend build tool | Vite | 8 |
+| Frontend UI | Material UI | 9 |
+| Frontend server state | TanStack Query | 5 |
+| Frontend E2E | Playwright | latest |
+| Backend framework | FastAPI | latest |
+| Backend language | Python | 3.12+ |
+| Backend validation | Pydantic | 2 |
+| Backend ORM | SQLAlchemy | 2.0 |
+| Backend migrations | Alembic | latest |
+| Database | PostgreSQL | 16 (via Docker) |
 
 **What's working (Milestone 2):**
 
@@ -216,15 +234,16 @@ gates.
 - Dashboard summary: latest entry, total entry count
 - Frontend: weight history page, weight entry form (create/edit), dashboard cards
 - Cookie-based session auth, rate limiting, RFC 7807 error responses, WCAG 2.1 AA
-- 255 backend tests (pytest) · 213 frontend tests (Vitest) · 5 E2E specs (Playwright)
+- 277 backend tests (pytest) · 241 frontend test cases (Vitest) · 5 E2E specs (Playwright)
 
-See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md)
+See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md)
 for the full milestone roadmap.
 
 ### Running the Backend
 
 Prerequisites: [Python 3.12+](https://www.python.org/),
 [uv](https://docs.astral.sh/uv/), and [Docker](https://www.docker.com/).
+PostgreSQL must be running before applying migrations.
 
 ```bash
 cd web/backend
@@ -237,9 +256,20 @@ uv run uvicorn weighttogo.main:app --reload
 
 The API is served at `http://localhost:8000`; `GET /health` reports service status.
 
+**Quality gates** (also run by pre-commit and CI):
+
+```bash
+uv run ruff check .              # lint
+uv run ruff format .             # format
+uv run mypy                      # type-check
+uv run pytest                    # tests (coverage thresholds enforced)
+uv run pytest --cov              # explicit coverage report
+```
+
 ### Running the Frontend
 
-Prerequisites: [Node.js 20.19+ or 22+](https://nodejs.org/).
+Prerequisites: [Node.js 20.19+ or 22+](https://nodejs.org/). The backend must
+be running for the frontend to function end-to-end.
 
 ```bash
 cd web/frontend
@@ -248,7 +278,39 @@ npm install
 npm run dev
 ```
 
-The application is served at `http://localhost:5173`.
+The application is served at `http://localhost:5173` and proxies API calls to
+the backend dev server.
+
+**Quality gates** (also run by pre-commit and CI):
+
+```bash
+npm run lint                     # eslint
+npm run format:check             # prettier (write with `npm run format`)
+npm run typecheck                # tsc
+npm test                         # vitest (coverage thresholds enforced)
+npm run test:e2e                 # playwright (requires backend running)
+```
+
+### Running the full web app
+
+The web rebuild requires both servers running. Open two terminals:
+
+```bash
+# Terminal 1 — backend
+cd web/backend && uv run uvicorn weighttogo.main:app --reload
+
+# Terminal 2 — frontend
+cd web/frontend && npm run dev
+```
+
+Then open <http://localhost:5173>.
+
+### Web Database Schema
+
+The web rebuild uses PostgreSQL. The authoritative schema documentation is the
+SRS §8 — see [`docs/specs/WeighToGo_Web_SRS_v2.md`](docs/specs/WeighToGo_Web_SRS_v2.md).
+Migrations live under `web/backend/alembic/versions/` and are applied with
+`uv run alembic upgrade head`.
 
 ### Git Hooks
 
@@ -276,7 +338,7 @@ is now preserved in maintenance-only status.
   trend analytics and time-series pagination.
 - **Milestone 4** — database enhancements.
 
-See the [SRS](docs/specs/WeighToGo_Web_SRS_v1.md) for the full milestone roadmap
+See the [SRS](docs/specs/WeighToGo_Web_SRS_v2.md) for the full milestone roadmap
 and the complete set of functional and non-functional requirements.
 
 ---
@@ -285,11 +347,14 @@ and the complete set of functional and non-functional requirements.
 
 | Document | Description |
 |----------|-------------|
-| [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
-| [Architecture Decision Records](docs/adr/) | Numbered engineering decisions, Android-era and web-rebuild |
-| [Design Decision Records](docs/ddr/) | Numbered design and UI decisions |
+| [Documentation index](docs/README.md) | Top-level map of the `docs/` tree |
+| [Architecture](ARCHITECTURE.md) | 30-second orientation; delegates to SRS §4 for the full spec |
+| [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v2.md) | Authoritative spec for the web rebuild: architecture, requirements, API, quality gates |
+| [Architecture Decision Records](docs/adr/README.md) | Numbered engineering decisions, Android-era and web-rebuild |
+| [Design Decision Records](docs/ddr/README.md) | Numbered design and UI decisions |
 | [Android Database Architecture](docs/architecture/WeighToGo_Database_Architecture.md) | SQLite schema, ER diagrams, SQL scripts, and DAO patterns |
 | [UI/UX Design Specifications](docs/design/) | Figma design specifications and quick-start guide |
+| [OpenAPI Snapshot](docs/api/openapi.json) | Generated REST API contract for the web backend |
 | [`SUMMARY.md`](SUMMARY.md) | Reverse-chronological narrative log of what changed and why |
 
 ---
@@ -318,17 +383,36 @@ This project is licensed under the MIT License — see [LICENSE.md](LICENSE.md).
 
 ## 🙏 Acknowledgments
 
+**Android stack**
+
 - [Material Design](https://material.io/) — design guidelines
 - [Android Developers](https://developer.android.com/) — documentation
 - [Google Fonts](https://fonts.google.com/) — Poppins and Source Sans Pro
+
+**Web stack**
+
+- [React](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
+- [Material UI](https://mui.com/) — component library
+- [TanStack Query](https://tanstack.com/query/latest) — server-state management
+- [Vite](https://vitejs.dev/) — frontend build tool
+- [FastAPI](https://fastapi.tiangolo.com/) — Python web framework
+- [Pydantic](https://docs.pydantic.dev/) — data validation
+- [SQLAlchemy](https://www.sqlalchemy.org/) — ORM
+- [Playwright](https://playwright.dev/) — E2E testing
+
+**Workflow**
+
+- [pre-commit](https://pre-commit.com/) — git hook framework
+- [release-please](https://github.com/googleapis/release-please) — release automation
+- [Conventional Commits](https://www.conventionalcommits.org/)
 
 ---
 
 ## 📞 Support
 
-If you encounter an issue or have a question, open an entry on the
+Open an entry on the
 [Issues](https://github.com/rgoshen-snhu/WeighToGo/issues) page with detailed
-information.
+information for any bug report or question.
 
 ---
 

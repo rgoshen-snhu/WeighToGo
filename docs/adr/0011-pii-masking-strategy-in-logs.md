@@ -113,5 +113,5 @@ module, or which bounded context — pass through the redaction step.
 ---
 
 **Last Updated**: 2026-05-22
-**Author**: Development Team
+**Author**: Rick Goshen
 **Approved By**: Technical Lead
