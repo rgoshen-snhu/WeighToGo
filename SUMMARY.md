@@ -7,6 +7,25 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(srs): reconcile Appendix A ADR index with on-disk ADRs
+
+**Change Type:** Docs
+**Scope:** `/docs/specs/WeighToGo_Web_SRS_v1.md` — §17.2 Appendix A and FR-W-2 cross-reference
+
+**Summary:**
+Two updates to the SRS:
+
+1. **Appendix A §17.2** — the web rebuild ADR table listed ADR-0014 as "Cursor-Based Pagination for Time-Series Data (M3)" and ADR-0015 as "TTL-Based Server-Side Caching Strategy (M3)". On disk those numbers were claimed during Milestone 2 work by "TanStack Query for Server State" (ADR-0014) and "Opaque Compound Cursor for Weight-Entry Pagination" (ADR-0015). The table now lists the actual on-disk M2 ADRs at their real numbers; the planned M3 caching ADR and the M3/M4 database ADRs slide up to ADR-0016 through ADR-0020.
+2. **FR-W-2 §6.2 line 579** — the in-text cross-reference pointed at "[ADR-0014] (planned, finalized in Milestone 3)" for the cursor pagination decision. That decision was actually authored in M2 as ADR-0015 during PR #30 review. Updated the link to point at the correct file and removed the "planned/finalized in M3" qualifier.
+
+**Rationale:**
+ADRs must be written at the time of the decision (per the M2 implementation brief, §3 Step 7 note). When the M2 work made decisions earlier than the SRS anticipated, the appendix drifted from reality. Closeout is the right moment to reconcile — leaving the drift in place would leave a future reader with two contradictory sources of ADR numbering and a broken FR-W-2 cross-reference.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Issue #17] docs: add DDR decision-log index
 
 **Change Type:** Docs
