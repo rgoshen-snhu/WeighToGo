@@ -7,6 +7,19 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 8 Subtasks 39–44] docs(api): refresh OpenAPI snapshot and update project docs
+
+**Change Type:** Docs
+**Scope:** API snapshot, README, milestone plan
+
+**Summary:**
+Regenerated `docs/api/openapi.json` with weight-entries (5 routes) and dashboard/summary (1 route). Updated README "What's working" to reflect M2 Phase 8 completion. Updated `docs/plans/milestone-two-plan.md` §6 DoD to mark Phase 8 items complete. This SUMMARY.md entry closes the Phase 8 documentation sweep (subtask 41).
+
+**References:**
+- Phase 8 Implementation Plan subtasks 39–44
+
+---
+
 ## [2026-05-23 Phase 8 Subtasks 34–38] test(e2e): add weight and dashboard Playwright specs
 
 **Change Type:** Test

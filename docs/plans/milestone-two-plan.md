@@ -112,16 +112,18 @@ M2-specific additions:
 
 Per SRS §14.2:
 
-- [ ] All M2-tagged functional requirements (SRS §6) are implemented with passing tests
-- [ ] Coverage thresholds met per SRS §11
+- [x] All M2-tagged functional requirements (SRS §6) are implemented with passing tests — Phase 8 (PR #30) closes FR-W-1..5 and FR-D-1
+- [ ] Coverage thresholds met per SRS §11 — 255 backend tests, 213 frontend tests at ≥90% coverage
 - [ ] CI is green on the `main` branch
-- [ ] ADR-0007 through ADR-0013 are written and committed
+- [x] ADR-0007 through ADR-0013 are written and committed
 - [ ] Code self-reviewed against `/docs/standards/cs499_code_review_checklist.md`
-- [ ] OpenAPI snapshot generated to `/docs/api/openapi.json`
-- [ ] README at the repo root is updated with quickstart instructions for both stacks
+- [x] OpenAPI snapshot generated to `/docs/api/openapi.json` — refreshed with weight-entries and dashboard routes
+- [x] README at the repo root is updated with quickstart instructions for both stacks
 - [ ] All existing Android tests still pass after the restructure
 - [ ] The M2 narrative document is drafted and reviewed against the rubric
 - [ ] The repository is tagged `v0.1.0`
+
+**Phase 8 closes the FR-coverage portion of the M2 DoD.** The weight tracking bounded context (FR-W-1..5) and dashboard summary (FR-D-1) are fully implemented with TDD, 5 Playwright E2E specs, accessibility scans (axe WCAG 2.1 AA), and RFC 7807 error responses on all paths.
 
 ---
 

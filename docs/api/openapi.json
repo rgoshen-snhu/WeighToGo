@@ -11,7 +11,7 @@
           "auth"
         ],
         "summary": "Register a new user account (FR-A-1)",
-        "description": "Create a new user account and return a session cookie.\n\nArgs:\n    payload: Validated registration fields.\n    response: The outgoing HTTP response (used to set cookies).\n    session: The active database session.\n    password_adapter: Bcrypt password hashing adapter.\n    jwt_adapter: JWT issuance adapter.\n\nReturns:\n    The newly created user's public data.\n\nRaises:\n    HTTPException: 409 when the email is already registered (generic message).\n    HTTPException: 422 when validation fails.",
+        "description": "Create a new user account and return a session cookie.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    payload: Validated registration fields.\n    response: The outgoing HTTP response (used to set cookies).\n    session: The active database session.\n    password_adapter: Bcrypt password hashing adapter.\n    jwt_adapter: JWT issuance adapter.\n\nReturns:\n    The newly created user's public data.\n\nRaises:\n    HTTPException: 409 when the email is already registered (generic message).\n    HTTPException: 422 when validation fails.",
         "operationId": "register_api_v1_auth_register_post",
         "requestBody": {
           "content": {
@@ -204,6 +204,256 @@
         }
       }
     },
+    "/api/v1/weight-entries": {
+      "post": {
+        "tags": [
+          "weight"
+        ],
+        "summary": "Create a new weight entry (FR-W-1)",
+        "description": "Create a weight entry for the authenticated user.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    payload: Validated request body.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The newly created weight entry.\n\nRaises:\n    HTTPException: 409 when a non-deleted entry already exists for the date.\n    HTTPException: 422 when the observation date is in the future.",
+        "operationId": "create_weight_entry_api_v1_weight_entries_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeightEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightEntryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "weight"
+        ],
+        "summary": "List weight entries (FR-W-2)",
+        "description": "Return a paginated list of weight entries for the authenticated user.\n\nArgs:\n    request: The incoming HTTP request.\n    limit: Maximum number of entries per page (default 20, max 100).\n    cursor: Pagination cursor (entry_id of the last item on the previous page).\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    A paginated envelope with ``items`` and ``next_cursor``.",
+        "operationId": "list_weight_entries_api_v1_weight_entries_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightEntryListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/weight-entries/{entry_id}": {
+      "get": {
+        "tags": [
+          "weight"
+        ],
+        "summary": "Get a single weight entry (FR-W-5)",
+        "description": "Retrieve a single weight entry by ID for the authenticated user.\n\nArgs:\n    entry_id: The entry primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The matching weight entry.\n\nRaises:\n    HTTPException: 404 when the entry does not exist or belongs to another user.",
+        "operationId": "get_weight_entry_api_v1_weight_entries__entry_id__get",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightEntryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "weight"
+        ],
+        "summary": "Update a weight entry (FR-W-3)",
+        "description": "Update a weight entry owned by the authenticated user.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    entry_id: The entry primary key.\n    payload: Validated request body.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    The updated weight entry.\n\nRaises:\n    HTTPException: 404 when the entry does not exist or belongs to another user.\n    HTTPException: 409 when the new date conflicts with another active entry.\n    HTTPException: 422 when the observation date is in the future.",
+        "operationId": "update_weight_entry_api_v1_weight_entries__entry_id__put",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeightEntryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightEntryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "weight"
+        ],
+        "summary": "Soft-delete a weight entry (FR-W-4)",
+        "description": "Soft-delete a weight entry owned by the authenticated user.\n\nIdempotent: re-deleting an already-deleted entry returns 204.\n\nArgs:\n    request: The incoming HTTP request (required by slowapi).\n    entry_id: The entry primary key.\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    Empty 204 response on success.\n\nRaises:\n    HTTPException: 404 when the entry does not exist or belongs to another user.",
+        "operationId": "delete_weight_entry_api_v1_weight_entries__entry_id__delete",
+        "parameters": [
+          {
+            "name": "entry_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Entry Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Dashboard summary (FR-D-1)",
+        "description": "Return the dashboard summary for the authenticated user.\n\nArgs:\n    session: The active database session.\n    current_user_id: The authenticated user's ID.\n\nReturns:\n    ``DashboardSummaryResponse`` with latest entry, entry count, and null goal.\n\nRaises:\n    HTTPException: 401 when no valid access token is present.",
+        "operationId": "get_dashboard_summary_api_v1_dashboard_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health",
@@ -230,6 +480,35 @@
   },
   "components": {
     "schemas": {
+      "DashboardSummaryResponse": {
+        "properties": {
+          "latest_entry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeightEntryResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "total_entries": {
+            "type": "integer",
+            "title": "Total Entries"
+          },
+          "active_goal": {
+            "type": "null",
+            "title": "Active Goal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latest_entry",
+          "total_entries"
+        ],
+        "title": "DashboardSummaryResponse",
+        "description": "Response body for GET /api/v1/dashboard/summary (SRS \u00a79.5, FR-D-1).\n\nAttributes:\n    latest_entry: The user's most recent active weight entry, or ``None``\n        when no entries exist.\n    total_entries: Count of non-deleted weight entries.\n    active_goal: Always ``None`` in M2 (SRS \u00a76.7, \u00a713.1.4 deferred to M3)."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -363,6 +642,140 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WeightEntryListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/WeightEntryResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "title": "WeightEntryListResponse",
+        "description": "Paginated list response envelope for weight entries (SRS \u00a79.4).\n\nAttributes:\n    items: The weight entries in the current page.\n    next_cursor: Opaque pagination token, or ``None`` when no further pages exist."
+      },
+      "WeightEntryRequest": {
+        "properties": {
+          "weight_value": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1500.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              }
+            ],
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "type": "string",
+            "enum": [
+              "lbs",
+              "kg"
+            ],
+            "title": "Weight Unit"
+          },
+          "observation_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Observation Date"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "weight_value",
+          "weight_unit",
+          "observation_date"
+        ],
+        "title": "WeightEntryRequest",
+        "description": "Request body for POST and PUT /api/v1/weight-entries (SRS \u00a79.4).\n\nAttributes:\n    weight_value: Positive decimal weight, \u2264 1500, two decimal places.\n    weight_unit: Either ``'lbs'`` or ``'kg'``.\n    observation_date: ISO-8601 date string; must not be in the future.\n    notes: Optional free-text note, max 500 characters."
+      },
+      "WeightEntryResponse": {
+        "properties": {
+          "entry_id": {
+            "type": "integer",
+            "title": "Entry Id"
+          },
+          "weight_value": {
+            "type": "number",
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "type": "string",
+            "title": "Weight Unit"
+          },
+          "observation_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Observation Date"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entry_id",
+          "weight_value",
+          "weight_unit",
+          "observation_date",
+          "notes",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "WeightEntryResponse",
+        "description": "Response body for a single weight entry (SRS \u00a79.4).\n\nAttributes:\n    entry_id: The surrogate primary key.\n    weight_value: The recorded weight as a JSON number (SRS \u00a73.2 micro-decision 1).\n    weight_unit: The unit of measurement.\n    observation_date: The date of the measurement.\n    notes: Optional note.\n    created_at: UTC timestamp of creation.\n    updated_at: UTC timestamp of the most recent update."
       }
     }
   }

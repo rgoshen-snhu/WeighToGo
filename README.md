@@ -209,10 +209,17 @@ gates.
 | Backend | FastAPI, Python, Pydantic, SQLAlchemy |
 | Database | PostgreSQL |
 
-The `web/frontend/` and `web/backend/` skeletons are scaffolded and runnable,
-with a local PostgreSQL database and CI pipelines in place. Feature development —
-authentication, weight tracking, and the rest of the rebuild — follows in
-subsequent steps.
+**What's working (Milestone 2):**
+
+- Full user authentication (register, login, logout, token refresh, account lockout)
+- Weight entry CRUD: create, list (paginated), get, update, soft-delete
+- Dashboard summary: latest entry, total entry count
+- Frontend: weight history page, weight entry form (create/edit), dashboard cards
+- Cookie-based session auth, rate limiting, RFC 7807 error responses, WCAG 2.1 AA
+- 255 backend tests (pytest) · 213 frontend tests (Vitest) · 5 E2E specs (Playwright)
+
+See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md)
+for the full milestone roadmap.
 
 ### Running the Backend
 
