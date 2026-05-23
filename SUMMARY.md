@@ -1471,3 +1471,18 @@ The previous 75% frontend threshold was below the global CLAUDE.md standard of 8
 
 **References:**
 - Issue: post code-review threshold alignment
+
+## [2026-05-23] Fix NFR-S-5 compliance: add rate limit to /register endpoint
+
+**Change Type:** Fix
+**Scope:** web/backend/src/weighttogo/auth/interface/router.py, web/backend/tests/integration/auth/test_c13_register_rate_limit.py
+
+**Summary:**
+Added `@limiter.limit("3/hour")` decorator and `request: Request` first parameter to the `register` endpoint. Added regression test C13 confirming the 4th registration attempt within an hour returns 429. Updated module docstring to document the rate limit alongside login/refresh.
+
+**Rationale:**
+NFR-S-5 explicitly mandates "3 requests per hour for registration." The login and refresh endpoints already carried rate limit decorators; register was the only auth endpoint missing one. Identified as a spec-compliance gap during the security review.
+
+**References:**
+- SRS: NFR-S-5
+- Security review finding (non-vulnerability, spec gap)
