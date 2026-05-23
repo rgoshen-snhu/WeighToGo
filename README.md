@@ -202,14 +202,15 @@ disabled.
 
 ---
 
-## 🌐 Web Application
+## 🌐 Web Application (in progress)
 
 The web rebuild is specified by the
 [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md), which
 is the authoritative source for its architecture, requirements, API, and quality
 gates. Milestone 2 (auth + weight-entry vertical slice + dashboard) is complete
 and tagged `v0.1.0`; Milestones 3 and 4 add algorithms/data-structures and
-database enhancements respectively.
+database enhancements respectively, with the full web rebuild reaching `v1.0.0`
+at final capstone submission.
 
 | Layer | Technology |
 |-------|------------|
@@ -224,7 +225,7 @@ database enhancements respectively.
 - Dashboard summary: latest entry, total entry count
 - Frontend: weight history page, weight entry form (create/edit), dashboard cards
 - Cookie-based session auth, rate limiting, RFC 7807 error responses, WCAG 2.1 AA
-- 255 backend tests (pytest) · 213 frontend tests (Vitest) · 5 E2E specs (Playwright)
+- 277 backend tests (pytest) · 241 frontend test cases (Vitest) · 5 E2E specs (Playwright)
 
 See the [Software Requirements Specification](docs/specs/WeighToGo_Web_SRS_v1.md)
 for the full milestone roadmap.

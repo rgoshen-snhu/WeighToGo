@@ -7,6 +7,25 @@ issues were resolved.
 
 ---
 
+## [2026-05-23 Phase 9] docs(readme): restore "in progress" status; refresh test counts
+
+**Change Type:** Docs (correctness fix)
+**Scope:** `README.md` — Web Application heading + What's working bullet
+
+**Summary:**
+Two small corrections:
+
+1. Restored the "(in progress)" qualifier on the **Web Application** heading. I had removed it in Batch 2 of this branch on the rationale that M2 was complete, but the heading scopes the *whole* web rebuild — Milestones 3 and 4 are still ahead, reaching `v1.0.0` only at final capstone submission. M2 completion belongs in the body paragraph, which already states it. Added a one-line note about the `v1.0.0` final-submission target so the milestone trajectory is visible at the heading level.
+2. Updated stale test counts in the "What's working (Milestone 2)" bullet from `255 backend · 213 frontend` to `277 backend · 241 frontend test cases` — matches the actual count verified during Phase 9 self-review.
+
+**Rationale:**
+The unqualified "Web Application" heading was a real misrepresentation, not a stylistic choice — it implied the web rebuild was done. Reviewer caught it. Test counts were similarly stale; the "What's working" bullet is the kind of fact a reader will check, and out-of-date numbers undermine the credibility of every other claim in that section.
+
+**References:**
+- Issue: GH-15
+
+---
+
 ## [2026-05-23 Phase 9] docs(narrative): replace section 4 placeholders with reflection drawn from SUMMARY.md
 
 **Change Type:** Docs (correctness fix)
