@@ -6,6 +6,7 @@ import { authClient, type AuthUser } from '../api/auth-client';
 import { ApiError, ValidationError } from '../../../lib/api-client';
 import { AuthProvider } from '../../../contexts/AuthContext';
 import { useLogin } from './useLogin';
+import { AUTH_INVALID_CREDENTIALS } from '../messages';
 
 const user: AuthUser = {
   user_id: 1,
@@ -43,11 +44,11 @@ describe('useLogin', () => {
     expect(authClient.login).toHaveBeenCalledWith({ email: 'a@b.co', password: 'pass' });
   });
 
-  it('sets formError to "Invalid credentials." on 401', async () => {
+  it('sets formError to AUTH_INVALID_CREDENTIALS on 401', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(401, 'Unauthorized'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'wrong' }, makeHelpers());
-    await waitFor(() => expect(result.current.formError).toBe('Invalid credentials.'));
+    await waitFor(() => expect(result.current.formError).toBe(AUTH_INVALID_CREDENTIALS));
   });
 
   it('sets formError on 423 account lockout', async () => {

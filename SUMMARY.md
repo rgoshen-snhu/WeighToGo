@@ -2738,3 +2738,19 @@ M2 quality review flagged code/spec drift as the sixth blocking finding (promote
 - Issue: GH-34
 - Plan: `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` §4.6
 - SRS v2 §6.1–6.6 (current FR identifier scheme)
+
+## [2026-05-28 20:15] Commit Summary
+
+**Change Type:** Test + Feature
+**Scope:** Frontend auth — ADR-0010 message consolidation (GH-42)
+
+**Summary:**
+TDD RED→GREEN: added import of `AUTH_INVALID_CREDENTIALS` from the not-yet-existent `../messages` module in `useLogin.test.tsx` and updated the 401 assertion to use the constant (RED — module resolution failure confirmed). Created `web/frontend/src/features/auth/messages.ts` with all five ADR-0010 auth-safe string constants as flat named exports (`AUTH_INVALID_CREDENTIALS`, `AUTH_ACCOUNT_LOCKED`, `AUTH_RATE_LIMITED`, `AUTH_REGISTER_FAILED`, `AUTH_GENERIC_FAILURE`) with a module-level docstring citing ADR-0010. Suite passes green (the hook still emits the byte-identical inline literal; `.toBe(CONST)` equals `.toBe('Invalid credentials.')`).
+
+**Rationale:**
+Flat named exports are the correct shape — not a status-keyed Record — because `useRegister` collapses every ApiError into a single message regardless of status, making a keyed lookup misleading. Values are byte-identical to current literals; no behavioral change in this step.
+
+**References:**
+- Issue: GH-42
+- ADR-0010: `docs/adr/0010-generic-auth-error-policy.md`
+- Design spec: `docs/specs/2026-05-28-adr-0010-message-consolidation-design.md`
