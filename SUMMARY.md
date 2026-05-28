@@ -7,6 +7,25 @@ issues were resolved.
 
 ---
 
+## [2026-05-28 19:05 UTC] docs(plans): land M2 quality remediation plan (GH-34)
+
+**Change Type:** Docs (baseline; closes existing dead-reference gap across multiple SUMMARY entries)
+**Scope:** `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` (new file), `SUMMARY.md`
+
+**Summary:**
+Lands the 2026-05-27 M2 quality remediation plan as `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md`. The file is the authoritative source for the F1–F6 remediation work; it spells out scope, the six-PR delivery model (PR 0 docs baseline + F1–F6 + PR 7 closeout), per-finding implementation outlines, ADR/DDR deliverables, risks, and the execution checklist. Source: commit `32fca2f` ("docs(plans): add issue #34 M2 quality remediation plan") on the abandoned `feature/issue-34-m2-web-quality-remediation` branch — same staging branch that PR #43 sourced the quality-review doc from.
+
+**Rationale:**
+The plan was authored alongside the quality-review doc on the abandoned branch but was never explicitly landed. PR 0 (PR #43) shipped the review doc; this PR completes the docs baseline by shipping the plan that operationalises it. SUMMARY entries on `main` from F1, F4, F5 (review-fix), and the queued F6 review-fix all cite this exact path under `**Plan:**` references — every one resolves on `main` simultaneously once this PR merges. Symmetric handling with PR #43: surfaced as a finding (PR #41 Finding 4), fixed by landing the file at the architectural layer rather than papering over the citation inside the PR being reviewed.
+
+**References:**
+- Issue: GH-34
+- Surfaced by: PR #41 Finding 4
+- Source commit: `32fca2f` on `feature/issue-34-m2-web-quality-remediation` (abandoned branch)
+- Related: PR #43 (same pattern for `docs/standards/M2_WEB_APP_QUALITY.md`)
+
+---
+
 ## [2026-05-28 18:05 UTC] docs(quality): add M2 Web App Quality Review documentation (GH-34)
 
 **Change Type:** Docs (baseline; closes a known dead-reference gap)
