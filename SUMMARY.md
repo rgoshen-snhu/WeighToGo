@@ -2532,3 +2532,19 @@ Addressed 9 of 13 PR review comments (pushed back on 4). Changes: add inflightRe
 **References:**
 - Issue: GH-34
 - PR #38 review comments
+
+## [2026-05-28 16:46] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Code comments + SRS prose — version drift cleanup (F6 / GH-34)
+
+**Summary:**
+Realigned eight documentation references to current identifiers. Code-comment FR-NN identifiers (Android-era naming, predating SRS v2's domain-prefixed scheme) were updated to FR-A-*, FR-G-*, FR-Ach-*, and FR-P-* in seven frontend files: `RegisterForm.tsx` (FR-03 → FR-A-1), `LoginForm.tsx` (FR-01 → FR-A-2), `LoginPage.tsx` (FR-01, FR-02 → FR-A-2, FR-A-3), `RegisterPage.tsx` (FR-03 → FR-A-1), `GoalsPlaceholderPage.tsx` (FR-07–FR-10 → FR-G-1–FR-G-5), `AchievementsPlaceholderPage.tsx` (FR-11–FR-12 → FR-Ach-1–FR-Ach-4), and `SettingsPlaceholderPage.tsx` (FR-13–FR-15 → FR-P-1–FR-P-3). In `docs/specs/WeighToGo_Web_SRS_v2.md`, three prose references to "React Router v6" updated to "React Router v7" (lines 185, 328, 1281) — the codebase has been on `react-router-dom@^7.15.1` since the M2 frontend bootstrap. Audit grep returned zero in-scope residual hits; three residuals in the frozen `WeighToGo_Web_SRS_v1.md` baseline were intentionally left untouched.
+
+**Rationale:**
+M2 quality review flagged code/spec drift as the sixth blocking finding (promoted from "follow-up" to formal F6 in the remediation plan). The drift erodes traceability: a reader following an `FR-NN` reference from a JSDoc block to the SRS finds no matching identifier, breaking the round-trip review path used during self-audit. The fix is mechanical (verified each FR-A-*/G-*/Ach-*/P-* mapping against SRS v2 §6.1–6.6 actual headings before applying) and surgical (eight files, ten line edits, zero behavioral changes).
+
+**References:**
+- Issue: GH-34
+- Plan: `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` §4.6
+- SRS v2 §6.1–6.6 (current FR identifier scheme)
