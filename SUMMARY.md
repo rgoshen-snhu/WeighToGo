@@ -2423,3 +2423,19 @@ Correcting the F1 process error where the ADR was written after the implementati
 **References:**
 - Issue: GH-34
 - SRS: NFR-S-9
+
+## [2026-05-27 02:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Backend CSRF middleware (F2 / GH-34)
+
+**Summary:**
+Add CSRF Origin/Referer validation middleware for state-changing requests. Creates `weighttogo/interface/middleware/csrf.py` (Hexagonal outer-layer adapter). Middleware checks `Origin` then falls back to `Referer`; safe methods bypass; missing/disallowed origin returns RFC 7807 403. Registered before `CORSMiddleware` in `main.py` so Starlette's LIFO stack makes CORS outermost. Updated integration conftest to include `Origin` header by default (simulates real browser behavior). Fixed pre-existing `test_cors_origins.py` cache contamination bug exposed by the new middleware (added `get_settings.cache_clear()` after `importlib.reload` in fixture teardown).
+
+**Rationale:**
+SRS NFR-S-9 requires server-side CSRF protection as defense-in-depth beyond `SameSite=Strict`. Origin/Referer validation is the correct approach when single-use tokens would add coordination complexity. Reusing `cors_allowed_origins` as the allowed-origin list ensures CORS and CSRF cannot drift out of sync.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-9
+- ADR-0017

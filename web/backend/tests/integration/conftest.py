@@ -85,7 +85,13 @@ def client(db_session: Session) -> Iterator[TestClient]:
 
     app.dependency_overrides[get_db_session] = _override_db
     limiter.enabled = False
-    with TestClient(app, raise_server_exceptions=True) as test_client:
+    # Include Origin so CSRF middleware treats requests as coming from the
+    # allowed frontend origin, matching real browser behaviour.
+    with TestClient(
+        app,
+        raise_server_exceptions=True,
+        headers={"Origin": "http://localhost:5173"},
+    ) as test_client:
         yield test_client
     limiter.enabled = True
     app.dependency_overrides.pop(get_db_session, None)
