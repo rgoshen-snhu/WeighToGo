@@ -27,4 +27,22 @@ export const theme = createTheme({
       secondary: '#757575',
     },
   },
+  // SRS NFR-A-5: every interactive control must meet a 44 × 44 CSS-pixel
+  // touch-target floor (DDR-0004). Applied here as targeted overrides on
+  // MuiButton and MuiIconButton rather than on MuiButtonBase, because
+  // ButtonBase is also the root for Checkbox, Radio, Tab, MenuItem, and
+  // similar controls that have their own designed sizing and would visually
+  // regress under a blanket 44px floor.
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: { minHeight: 44, minWidth: 44 },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        root: { minHeight: 44, minWidth: 44 },
+      },
+    },
+  },
 });

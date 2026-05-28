@@ -8,7 +8,7 @@
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {
-  IconButton,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -16,7 +16,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
 } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -64,28 +63,25 @@ export function WeightEntryTable({ entries, onDelete }: WeightEntryTableProps) {
               </TableCell>
               <TableCell>{entry.notes ?? '—'}</TableCell>
               <TableCell align="center">
-                <Tooltip title="Edit">
-                  <IconButton
-                    component={Link}
-                    to={`/weight/${entry.entry_id}/edit`}
-                    aria-label={`Edit entry from ${entry.observation_date}`}
-                    size="small"
-                  >
-                    <EditIcon fontSize="small" />
-                    <span style={{ marginLeft: 4 }}>Edit</span>
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                  <IconButton
-                    onClick={() => onDelete(entry.entry_id)}
-                    aria-label={`Delete entry from ${entry.observation_date}`}
-                    size="small"
-                    color="error"
-                  >
-                    <DeleteIcon fontSize="small" />
-                    <span style={{ marginLeft: 4 }}>Delete</span>
-                  </IconButton>
-                </Tooltip>
+                <Button
+                  component={Link}
+                  to={`/weight/${entry.entry_id}/edit`}
+                  aria-label={`Edit entry from ${entry.observation_date}`}
+                  variant="outlined"
+                  startIcon={<EditIcon />}
+                  sx={{ mr: 1 }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  onClick={() => onDelete(entry.entry_id)}
+                  aria-label={`Delete entry from ${entry.observation_date}`}
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                >
+                  Delete
+                </Button>
               </TableCell>
             </TableRow>
           ))}
