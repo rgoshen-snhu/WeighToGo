@@ -4,7 +4,7 @@
  * Composes AuthLayout, RegisterForm, and useRegister to provide a fully wired
  * registration screen. Redirects authenticated users immediately to the app root.
  *
- * Requirements: SRS §6.1 FR-A-1.
+ * Requirements: SRS §6.1 FR-A-1, FR-A-5.
  */
 
 import { Typography } from '@mui/material';

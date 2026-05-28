@@ -5,7 +5,7 @@
  * login screen. Redirects authenticated users immediately to the app root
  * (or to the ?from= destination if present).
  *
- * Requirements: SRS §6.1 FR-A-2, FR-A-3.
+ * Requirements: SRS §6.1 FR-A-2, FR-A-5.
  */
 
 import { Typography } from '@mui/material';

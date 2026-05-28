@@ -180,8 +180,8 @@ The system is a three-tier web application with a single-page application fronte
 +----------------------------+         +----------------------------+         +----------------------+
 |    Browser (Frontend)      |  HTTPS  |    FastAPI Application     |   TCP   |  PostgreSQL 16+      |
 |                            | <-----> |                            | <-----> |                      |
-|  React 18 + TypeScript     |  JSON   |  Python 3.12 + FastAPI     |   SSL   |  Strict schema       |
-|  Material UI v6            |         |  Pydantic v2 + SQLAlchemy  |         |  CHECK constraints   |
+|  React 19 + TypeScript     |  JSON   |  Python 3.12 + FastAPI     |   SSL   |  Strict schema       |
+|  Material UI v9            |         |  Pydantic v2 + SQLAlchemy  |         |  CHECK constraints   |
 |  React Router v7           |         |  Alembic for migrations    |         |  Foreign keys        |
 |  Vite build tooling        |         |  bcrypt + JWT auth         |         |                      |
 +----------------------------+         +----------------------------+         +----------------------+
