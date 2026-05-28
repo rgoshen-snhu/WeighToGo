@@ -2478,3 +2478,57 @@ Addressed 7 of 9 PR review comments (pushed back on lru_cache and TLS-proxy impl
 **References:**
 - Issue: GH-34
 - PR #37 review comments (1-9)
+
+## [2026-05-27 03:00] Commit Summary
+
+**Change Type:** Docs
+**Scope:** ADR-0018 (F3 / GH-34)
+
+**Summary:**
+Add ADR-0018 documenting the concurrent refresh token coalescing decision before any F3 implementation code is written.
+
+**Rationale:**
+ADR-first workflow established in F2. ADR-0013's family-revocation policy makes concurrent refresh calls a correctness bug, not just a performance issue — the second call triggers logout. The decision to use a module-level promise with .finally() cleanup is non-obvious and warrants an ADR.
+
+**References:**
+- Issue: GH-34
+- ADR-0013
+
+## [2026-05-27 03:01] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Frontend API client — concurrent refresh coalescing (F3 / GH-34)
+
+**Summary:**
+Add module-level inflightRefresh promise to api-client.ts. When two concurrent 401s occur, the first caller creates the refresh promise with onLogout wired in a .catch() (fires exactly once on failure, not once per concurrent caller). Subsequent callers await the same promise. .finally() clears inflightRefresh so the next 401 starts a fresh refresh. Added 2 tests: success-path coalescing (refresh called once, both retries succeed) and failure-path (refresh called once, onLogout called exactly once).
+
+**Rationale:**
+ADR-0013's family-revocation policy makes the second concurrent refresh call a logout trigger (stale token → revoke entire family). The coalescing fix restores ADR-0013 compliance. onLogout fires in the promise chain rather than per-caller to avoid double-redirect on failure.
+
+**References:**
+- Issue: GH-34
+- ADR-0013, ADR-0018
+
+## [2026-05-27 03:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Frontend API client — synchronous refresh throw (F3 / GH-34)
+
+**Summary:**
+Guard against synchronous throws from interceptor.refresh() by separating the call into a local try-catch before attaching the .catch()/.finally() chain. A synchronous throw previously escaped the handler, bypassing onLogout and returning a raw error to the caller instead of ApiError(401). Added a test pinning the fixed behaviour.
+
+**References:**
+- Issue: GH-34
+- PR #38 Codex review (P2 — synchronous refresh failures regress past behavior)
+
+## [2026-05-27 03:03] Commit Summary
+
+**Change Type:** Refactor / Fix
+**Scope:** Frontend API client — PR review comments (F3 / GH-34)
+
+**Summary:**
+Addressed 9 of 13 PR review comments (pushed back on 4). Changes: add inflightRefresh=null to resetAuthRefreshInterceptor; extract auth401() helper; capture const ix=interceptor before awaits to avoid stale-closure; fix retry-path interceptor.onLogout() to use ix; add beforeEach/unstubAllGlobals to tests; use Promise.allSettled in failure test; add call-ordering assertion; add retry-failure N-onLogout test; use mockResolvedValueOnce idiom; add local makeResponse helper. ADR-0018 corrected (onLogout once total, not once per caller) and extended with retry-failure and same-tick scope limitations.
+
+**References:**
+- Issue: GH-34
+- PR #38 review comments

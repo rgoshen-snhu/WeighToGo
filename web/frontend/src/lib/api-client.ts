@@ -72,6 +72,12 @@ interface AuthInterceptor {
 
 let interceptor: AuthInterceptor | null = null;
 
+// Coalesces concurrent 401 responses into a single refresh call (ADR-0018).
+// When two requests both receive 401 simultaneously, only the first starts a
+// refresh; subsequent callers await the same promise so ADR-0013's single-use
+// token policy is never violated by a double-refresh.
+let inflightRefresh: Promise<void> | null = null;
+
 /**
  * Install an interceptor that will attempt a token refresh when any request
  * returns 401.  Only one interceptor is active at a time.
@@ -85,19 +91,47 @@ export function installAuthRefreshInterceptor(i: AuthInterceptor): void {
  */
 export function resetAuthRefreshInterceptor(): void {
   interceptor = null;
+  inflightRefresh = null; // prevent stale promise leaking into the next test
 }
+
+/** Construct the standardised 401 error thrown on any unrecoverable auth failure. */
+const auth401 = (): ApiError => new ApiError(401, mapApiError(401));
 
 async function handle401AndRetry<T>(url: string, init: RequestInit): Promise<T> {
   const isRefreshEndpoint = url.includes('/api/v1/auth/refresh');
   if (!interceptor || isRefreshEndpoint) {
     interceptor?.onLogout();
-    throw new ApiError(401, mapApiError(401));
+    throw auth401();
+  }
+  // Capture before any await so closures below reference the same interceptor
+  // even if installAuthRefreshInterceptor/resetAuthRefreshInterceptor is called
+  // during an async operation (ADR-0018).
+  const ix = interceptor;
+  if (inflightRefresh === null) {
+    // Guard against synchronous throws from refresh() — typed as () => Promise<void>
+    // but a non-async implementation could throw before returning a promise.
+    let refreshPromise: Promise<void>;
+    try {
+      refreshPromise = ix.refresh();
+    } catch {
+      ix.onLogout();
+      throw auth401();
+    }
+    // Call onLogout inside the promise chain so it fires exactly once even when
+    // multiple callers are awaiting the same refresh (ADR-0018).
+    inflightRefresh = refreshPromise
+      .catch((err: unknown) => {
+        ix.onLogout();
+        throw err;
+      })
+      .finally(() => {
+        inflightRefresh = null;
+      });
   }
   try {
-    await interceptor.refresh();
+    await inflightRefresh;
   } catch {
-    interceptor.onLogout();
-    throw new ApiError(401, mapApiError(401));
+    throw auth401();
   }
   const retry = await fetch(url, init);
   if (retry.ok) {
@@ -111,7 +145,9 @@ async function handle401AndRetry<T>(url: string, init: RequestInit): Promise<T> 
       problem.detail ?? mapApiError(422),
     );
   }
-  interceptor.onLogout();
+  // Note: each coalesced caller independently reaches this branch on retry
+  // failure — see ADR-0018 Consequences for the known N-onLogout limitation.
+  ix.onLogout();
   throw new ApiError(retry.status, mapApiError(retry.status));
 }
 
