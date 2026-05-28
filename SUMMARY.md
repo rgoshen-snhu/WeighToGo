@@ -2362,3 +2362,19 @@ Replace `__dirname` with the ESM-compatible `path.dirname(fileURLToPath(import.m
 
 **References:**
 - PR #29 CI failure: Playwright end-to-end tests job
+
+## [2026-05-27 00:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Backend security middleware (F1 / GH-34)
+
+**Summary:**
+Add HSTS and path-aware Content-Security-Policy headers to the backend security middleware, completing the full SRS-required six-header set. Tests cover: CSP presence, strict default policy value, CDN-permissive override for `/api/docs` and `/api/redoc`, HSTS absent in non-production, and HSTS present with correct value in production.
+
+**Rationale:**
+The M2 quality review identified NFR-S-10 gap: the existing middleware emitted four of six SRS-required headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) but omitted HSTS and CSP. HSTS is environment-gated to avoid breaking local HTTP development. CSP is path-aware: JSON API responses receive a maximally-restrictive `default-src 'none'` policy; Swagger/ReDoc endpoints receive an override permitting CDN assets from `cdn.jsdelivr.net`. The `get_settings()` LRU cache is cleared in the production-env test to avoid cached settings bleeding into the assertion.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-10
+- ADR-0016 (to be added in docs commit)
