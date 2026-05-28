@@ -30,6 +30,53 @@
 
 ### Documentation
 
+* add design document for consolidating ADR-0010 auth-safe messag… ([424cddb](https://github.com/rgoshen-snhu/WeighToGo/commit/424cddb61981e3e4cffd5905ea3d87d6f8fdba30))
+* add design document for consolidating ADR-0010 auth-safe message strings ([4fa42f2](https://github.com/rgoshen-snhu/WeighToGo/commit/4fa42f2dd389ed71cb216726e07f18bd855ecaca))
+* **closeout:** record Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (GH-34) ([edcac82](https://github.com/rgoshen-snhu/WeighToGo/commit/edcac82e83ff86202447af65d19512ae03fb1236))
+* **closeout:** Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (PR 7, GH-34) ([90e3f79](https://github.com/rgoshen-snhu/WeighToGo/commit/90e3f79dc5304b2cba91654b93ff82365e97d5c8))
+* **F3:** add ADR-0018 concurrent refresh token coalescing (GH-34) ([a994e21](https://github.com/rgoshen-snhu/WeighToGo/commit/a994e219624971210c2c770f2a4e61141b96d396))
+* **F4:** summary entry (GH-34) ([32c16d7](https://github.com/rgoshen-snhu/WeighToGo/commit/32c16d75d0d6a55a44617494130292c83ae80c3d))
+* **F5:** add DDR-0004 weight table action button conversion (GH-34) ([1666696](https://github.com/rgoshen-snhu/WeighToGo/commit/1666696b9f68436af909325ae2995cbfc6af09c2))
+* **F5:** summary entry (GH-34) ([c5ae148](https://github.com/rgoshen-snhu/WeighToGo/commit/c5ae14838cf08e992cd6f0ede3245f8619542e30))
+* **F6:** address PR [#41](https://github.com/rgoshen-snhu/WeighToGo/issues/41) review — fix React/MUI version drift + FR-A mapping (GH-34) ([1af23bd](https://github.com/rgoshen-snhu/WeighToGo/commit/1af23bdc5f577c43ec2092b5aed0b1470729b0de))
+* **F6:** align code comments and SRS prose with current identifiers (GH-34) ([6472a39](https://github.com/rgoshen-snhu/WeighToGo/commit/6472a3928c725d9fe0226378fcfa234167a1f330))
+* **F6:** cleanup version drift in code comments and SRS (GH-34) ([eac6ccc](https://github.com/rgoshen-snhu/WeighToGo/commit/eac6ccc2b398c53778205bdfec479f2b6561fc4e))
+* **F6:** SUMMARY entry for version-drift cleanup (GH-34) ([0b1ffb8](https://github.com/rgoshen-snhu/WeighToGo/commit/0b1ffb82dc71a6d002292ee106bf9ea5fd3713ce))
+* **plans:** land M2 quality remediation plan (GH-34) ([067e30e](https://github.com/rgoshen-snhu/WeighToGo/commit/067e30e1bc6373e6054d490c37e41506132f32f9))
+* **plans:** land M2 quality remediation plan (GH-34) ([fff372a](https://github.com/rgoshen-snhu/WeighToGo/commit/fff372a63f913d60128d01ae5027068eea803454))
+* **quality:** add M2 Web App Quality Review documentation (GH-34) ([245e0ac](https://github.com/rgoshen-snhu/WeighToGo/commit/245e0acf00a43525f36d09173f5ba5d9439fc205))
+* **quality:** add M2 Web App Quality Review documentation (PR 0, GH-34) ([32acab1](https://github.com/rgoshen-snhu/WeighToGo/commit/32acab16e29323a0cff640e57c2c924602c6b3aa))
+
+## [0.1.0](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.1.0...v0.1.0) (2026-05-28)
+
+
+### Added
+
+* **F1:** add HSTS and path-aware CSP security headers (GH-34) ([#35](https://github.com/rgoshen-snhu/WeighToGo/issues/35)) ([364eee6](https://github.com/rgoshen-snhu/WeighToGo/commit/364eee67b1a354175551f19e7be1adf1f26c4667))
+* **F2:** add CSRF Origin/Referer validation middleware (GH-34) ([#37](https://github.com/rgoshen-snhu/WeighToGo/issues/37)) ([1c8fc33](https://github.com/rgoshen-snhu/WeighToGo/commit/1c8fc33746ce3650c34c4a3407e8d927b3cfa33e))
+* **F3:** coalesce concurrent 401 refresh calls via shared promise (GH-34) ([ff0450b](https://github.com/rgoshen-snhu/WeighToGo/commit/ff0450bbf26ac072b3cd5beb125ed01b6bf285f1))
+* **F3:** coalesce concurrent 401 refresh calls via shared promise (GH-34) ([4b82435](https://github.com/rgoshen-snhu/WeighToGo/commit/4b824356237eaa824ffc589f63f0acd0891d26ee))
+* **F5:** convert weight table actions to Button meeting 44px target (GH-34) ([c758bd9](https://github.com/rgoshen-snhu/WeighToGo/commit/c758bd9955d318081f5c75ac01a8ab9dbd666f24))
+* **F5:** meet 44px target size for weight table actions (GH-34) ([0df4751](https://github.com/rgoshen-snhu/WeighToGo/commit/0df47516b072484e280224d40bf44d631edbb635))
+
+
+### Fixed
+
+* **F3:** guard against synchronous throws from interceptor.refresh() (GH-34) ([0414e98](https://github.com/rgoshen-snhu/WeighToGo/commit/0414e98fc9fcfb0ee07f4a53aec17c900ce6e13e))
+* **F4:** address PR [#39](https://github.com/rgoshen-snhu/WeighToGo/issues/39) review — neutral copy + parameterized invariant test (GH-34) ([af5c37b](https://github.com/rgoshen-snhu/WeighToGo/commit/af5c37b4c76bee806f061c12008cd53b0fb09b08))
+* **F4:** remove email-existence disclosure on registration (GH-34) ([9e27394](https://github.com/rgoshen-snhu/WeighToGo/commit/9e27394391dd32761b1d1b1afa7ec7086eed270c))
+* **F4:** use generic creation-failure message for ApiError (GH-34) ([ff3d2bd](https://github.com/rgoshen-snhu/WeighToGo/commit/ff3d2bd2b5792faaa5dab166ec7cf6add4b32f39))
+* **F5:** address PR [#40](https://github.com/rgoshen-snhu/WeighToGo/issues/40) review — move 44px floor to theme; minWidth + comment fixes (GH-34) ([5d4fc08](https://github.com/rgoshen-snhu/WeighToGo/commit/5d4fc0895f0e2c03c0f6a05125cc550666a79930))
+
+
+### Changed
+
+* **auth:** consolidate ADR-0010 auth-safe message strings into a shared module (GH-42) ([#46](https://github.com/rgoshen-snhu/WeighToGo/issues/46)) ([eacba23](https://github.com/rgoshen-snhu/WeighToGo/commit/eacba23f2855c3df04f4b9666e75621ffa5eb751))
+* **F3:** address PR review comments — ix capture, auth401 helper, test hardening (GH-34) ([db45329](https://github.com/rgoshen-snhu/WeighToGo/commit/db453293cc30b65b3d4439cab5de4ec053d6750d))
+
+
+### Documentation
+
 * **closeout:** record Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (GH-34) ([edcac82](https://github.com/rgoshen-snhu/WeighToGo/commit/edcac82e83ff86202447af65d19512ae03fb1236))
 * **closeout:** Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (PR 7, GH-34) ([90e3f79](https://github.com/rgoshen-snhu/WeighToGo/commit/90e3f79dc5304b2cba91654b93ff82365e97d5c8))
 * **F3:** add ADR-0018 concurrent refresh token coalescing (GH-34) ([a994e21](https://github.com/rgoshen-snhu/WeighToGo/commit/a994e219624971210c2c770f2a4e61141b96d396))
