@@ -2520,3 +2520,15 @@ Guard against synchronous throws from interceptor.refresh() by separating the ca
 **References:**
 - Issue: GH-34
 - PR #38 Codex review (P2 — synchronous refresh failures regress past behavior)
+
+## [2026-05-27 03:03] Commit Summary
+
+**Change Type:** Refactor / Fix
+**Scope:** Frontend API client — PR review comments (F3 / GH-34)
+
+**Summary:**
+Addressed 9 of 13 PR review comments (pushed back on 4). Changes: add inflightRefresh=null to resetAuthRefreshInterceptor; extract auth401() helper; capture const ix=interceptor before awaits to avoid stale-closure; fix retry-path interceptor.onLogout() to use ix; add beforeEach/unstubAllGlobals to tests; use Promise.allSettled in failure test; add call-ordering assertion; add retry-failure N-onLogout test; use mockResolvedValueOnce idiom; add local makeResponse helper. ADR-0018 corrected (onLogout once total, not once per caller) and extended with retry-failure and same-tick scope limitations.
+
+**References:**
+- Issue: GH-34
+- PR #38 review comments

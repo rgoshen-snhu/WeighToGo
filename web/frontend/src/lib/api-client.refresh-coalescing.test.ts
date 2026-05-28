@@ -5,7 +5,7 @@
  * refresh call, not two — preventing the double-refresh that ADR-0013's
  * family-revocation policy would turn into an involuntary logout.
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ApiError,
@@ -14,32 +14,42 @@ import {
   resetAuthRefreshInterceptor,
 } from './api-client';
 
-// Minimal 401 response factory.
-const make401 = () => new Response(null, { status: 401 });
+function makeResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+const make401 = (): Response => new Response(null, { status: 401 });
 
 describe('fetchJson concurrent refresh coalescing', () => {
+  beforeEach(() => {
+    resetAuthRefreshInterceptor();
+  });
+
   afterEach(() => {
     resetAuthRefreshInterceptor();
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
   it('coalesces parallel 401 responses into a single refresh call', async () => {
     // ARRANGE
-    const refresh = vi.fn().mockResolvedValue(undefined);
+    const callLog: string[] = [];
+    const refresh = vi.fn(async () => {
+      callLog.push('refresh');
+    });
     const onLogout = vi.fn();
     installAuthRefreshInterceptor({ refresh, onLogout });
 
-    // First two fetch calls (the original concurrent requests) return 401;
-    // all subsequent calls (retries after refresh) return 200.
-    let callCount = 0;
+    let fetchN = 0;
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => {
-        callCount += 1;
-        if (callCount <= 2) {
-          return new Response(null, { status: 401 });
-        }
-        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+        fetchN += 1;
+        callLog.push(`fetch:${fetchN}`);
+        return fetchN <= 2 ? make401() : makeResponse({ ok: true });
       }),
     );
 
@@ -49,11 +59,14 @@ describe('fetchJson concurrent refresh coalescing', () => {
       fetchJson<{ ok: boolean }>('/api/v1/dashboard/summary'),
     ]);
 
-    // ASSERT — exactly one refresh despite two 401s
+    // ASSERT — exactly one refresh despite two 401s, and it happens before retries
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(onLogout).not.toHaveBeenCalled();
     expect(r1).toEqual({ ok: true });
     expect(r2).toEqual({ ok: true });
+    // Pin refresh-before-retry ordering: refresh must appear between the two 401s
+    // and the two retries in the call log.
+    expect(callLog).toEqual(['fetch:1', 'fetch:2', 'refresh', 'fetch:3', 'fetch:4']);
   });
 
   it('calls onLogout exactly once when concurrent refresh fails', async () => {
@@ -62,20 +75,54 @@ describe('fetchJson concurrent refresh coalescing', () => {
     const onLogout = vi.fn();
     installAuthRefreshInterceptor({ refresh, onLogout });
 
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => new Response(null, { status: 401 })),
-    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(make401()));
 
     // ACT — both requests get 401, share the same failing refresh
-    await expect(
-      Promise.all([fetchJson('/api/v1/me'), fetchJson('/api/v1/dashboard/summary')]),
-    ).rejects.toBeInstanceOf(ApiError);
+    const results = await Promise.allSettled([
+      fetchJson('/api/v1/me'),
+      fetchJson('/api/v1/dashboard/summary'),
+    ]);
 
-    // ASSERT — single refresh call, single onLogout (fired in the promise chain,
+    // ASSERT — single refresh, single onLogout (fired in the promise chain,
     // not per-caller, so there is no double-redirect on concurrent failure)
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(onLogout).toHaveBeenCalledTimes(1);
+    // Both callers receive a standardised ApiError, not the raw rejection
+    for (const r of results) {
+      expect(r.status).toBe('rejected');
+      expect((r as PromiseRejectedResult).reason).toBeInstanceOf(ApiError);
+    }
+  });
+
+  it('calls onLogout once per caller when coalesced retries fail after a successful refresh', async () => {
+    // ARRANGE — refresh succeeds but the retried requests both return 5xx
+    const refresh = vi.fn().mockResolvedValue(undefined);
+    const onLogout = vi.fn();
+    installAuthRefreshInterceptor({ refresh, onLogout });
+
+    let fetchN = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        fetchN += 1;
+        return fetchN <= 2 ? make401() : makeResponse({ error: 'server error' }, 500);
+      }),
+    );
+
+    // ACT
+    const results = await Promise.allSettled([
+      fetchJson('/api/v1/me'),
+      fetchJson('/api/v1/dashboard/summary'),
+    ]);
+
+    // ASSERT — documents the known N-onLogout limitation on the retry-failure
+    // path (see ADR-0018 Consequences).  Refresh happens once, but each caller
+    // independently calls onLogout when its own retry fails.
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(onLogout).toHaveBeenCalledTimes(2);
+    for (const r of results) {
+      expect(r.status).toBe('rejected');
+    }
   });
 
   it('handles a synchronously-throwing refresh as a standardised 401 ApiError', async () => {
@@ -89,10 +136,7 @@ describe('fetchJson concurrent refresh coalescing', () => {
       onLogout,
     });
 
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async () => make401()),
-    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(make401()));
 
     // ASSERT — caller receives standardised ApiError, not the raw sync error
     await expect(fetchJson('/api/v1/me')).rejects.toBeInstanceOf(ApiError);

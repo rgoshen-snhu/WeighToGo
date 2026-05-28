@@ -19,7 +19,7 @@ Hoist a module-level variable `let inflightRefresh: Promise<void> | null = null`
 
 The `.finally()` clears `inflightRefresh` after every settle so the next 401 (minutes later, after a new access token also expires) starts a fresh refresh rather than awaiting a stale, already-settled promise.
 
-All concurrent callers share both the success and the failure outcome of the single in-flight refresh — if the refresh fails, every waiting caller calls `onLogout` exactly once (deduplicated by the shared throw).
+All concurrent callers share both the success and the failure outcome of the single in-flight refresh. On failure, `onLogout` is called **once** — inside the shared promise's `.catch()` handler — regardless of how many callers are coalesced. This prevents the double-redirect that would result from each caller independently calling `onLogout`.
 
 ## Rationale
 
@@ -35,12 +35,15 @@ The interceptor is replaced by `installAuthRefreshInterceptor` each time the aut
 **Why module-level rather than inside a closure or class?**
 `api-client.ts` exports a set of functions operating on shared module state (`interceptor`). The in-flight promise follows the same pattern. Module-level state is appropriate here: there is one API client per tab, and cross-tab coordination is explicitly out of scope (each tab's auth state is independent).
 
-**Failure-mode semantics:** When `inflightRefresh` rejects, every caller that awaited it receives the same rejection. Each caller independently calls `onLogout`. Since `onLogout` is typically idempotent (clears auth state, redirects to login), multiple calls are harmless — but callers should not assume it is called exactly once.
+**Failure-mode semantics (refresh fails):** `onLogout` fires once, inside the `.catch()` of the shared `inflightRefresh` promise. All coalesced callers receive the same rejection, each throwing `ApiError(401)` — but `onLogout` is not called again per caller.
+
+**Failure-mode semantics (refresh succeeds, retry fails):** Each coalesced caller independently retries its original request after the shared refresh completes. If a retry returns a non-2xx non-422 status, the caller calls `onLogout` independently. With N coalesced callers all receiving 401-on-retry, this produces N `onLogout` calls. This is an accepted limitation for the M2 scope (the dashboard issues two concurrent requests, so N≤2 in practice); `onLogout` clearing auth state and redirecting is idempotent so double-calling it is harmless.
 
 ## Consequences
 
-- **Positive**: ADR-0013 compliance restored. Concurrent 401s no longer trigger multiple refresh calls. Normal dashboard usage no longer involuntarily logs the user out.
-- **Negative**: A subtle failure mode if `onLogout` is not idempotent — callers will each call it. This is an acceptable constraint documented here.
+- **Positive**: ADR-0013 compliance restored. Concurrent 401s no longer trigger multiple refresh calls. Normal dashboard usage no longer involuntarily logs the user out. `onLogout` fires exactly once on refresh failure regardless of concurrent caller count.
+- **Negative (retry-failure)**: If the shared refresh succeeds but the coalesced retries then fail with a non-2xx status, each caller independently calls `onLogout`. For the current dashboard pattern (two requests), this means at most two `onLogout` calls on an unlikely double-retry-failure. Since `onLogout` is idempotent (clears auth state, redirects), this is acceptable. A future hardening pass could add a one-shot gate around the post-retry `onLogout` calls.
+- **Negative (same-tick scope)**: Coalescing only prevents double-refresh when both 401s arrive before the first refresh's `.finally` clears the slot — roughly within the same microtask batch. Two 401s arriving hundreds of milliseconds apart (e.g. a polling widget and a user action) will each trigger their own refresh. This is acceptable for M2's dashboard-request pattern; future polling features may need a longer-lived lock (e.g. a `sessionStorage` flag with a TTL).
 - **Follow-ups**: If cross-tab coordination is ever required (e.g. shared-worker auth), a BroadcastChannel or shared storage approach would be needed. That is out of scope for M2.
 
 ## Alternatives Considered
