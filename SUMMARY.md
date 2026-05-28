@@ -2393,3 +2393,18 @@ Architecture Decision Records are required for every significant decision with v
 **References:**
 - Issue: GH-34
 - SRS: NFR-S-10
+
+## [2026-05-27 00:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Backend security middleware — docs CSP (F1 / GH-34)
+
+**Summary:**
+Add `'unsafe-inline'` to `script-src` in the docs-path CSP. FastAPI's Swagger UI page includes a dynamic inline `<script>` block initialising SwaggerUIBundle; the previous policy blocked it, preventing the UI from rendering. Updated the test to assert `'unsafe-inline'` is present in the docs CSP so this cannot silently regress.
+
+**Rationale:**
+The inline script content is parameterised at runtime (openapi_url, swagger_ui_parameters), making a static SHA256 hash impractical. A nonce would require intercepting and rewriting the response body. `'unsafe-inline'` on the docs path only is the minimal correct fix — consistent with the existing `'unsafe-inline'` already applied to `style-src` in the same policy, and acceptable given docs endpoints are developer tooling.
+
+**References:**
+- Issue: GH-34
+- PR #35 review comment (P2 — inline bootstrap script blocked by docs CSP)

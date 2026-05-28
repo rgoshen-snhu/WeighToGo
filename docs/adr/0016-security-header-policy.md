@@ -21,7 +21,7 @@ Constraints relevant to the decision:
 
 | Path | Policy |
 |------|--------|
-| `/api/docs`, `/api/redoc`, `/api/v1/openapi.json` | `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'` |
+| `/api/docs`, `/api/redoc`, `/api/v1/openapi.json` | `default-src 'self'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'` |
 | All other paths | `default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'` |
 
 The default policy (`default-src 'none'`) is maximally restrictive. For a JSON API, HTML content never reaches the browser from production endpoints, so this policy provides defense-in-depth at zero functional cost. The docs-path override is the minimal relaxation required for the OpenAPI UI libraries to load their assets.
@@ -32,6 +32,9 @@ Constants are defined at module level in `main.py` (`_DEFAULT_CSP`, `_DOCS_CSP`,
 
 **Why environment-gated HSTS instead of always emitting it?**
 HSTS over HTTP is ignored by browsers but confusing in log output and misleading in test assertions. The existing `cookie_secure` property uses the same pattern. Cross-environment consistency in the settings model outweighs the marginal benefit of emitting a no-op header in development.
+
+**Why `'unsafe-inline'` in `script-src` for docs paths?**
+FastAPI's `get_swagger_ui_html` generates a dynamic inline `<script>` block that initialises `SwaggerUIBundle`. Because the script content is parameterised at runtime (`openapi_url`, `swagger_ui_parameters`), a static SHA256 hash is impractical. A per-request nonce would require intercepting and rewriting the response body, which is disproportionate complexity for a developer tooling endpoint. `'unsafe-inline'` on the docs path only is the minimal correct allowance — it is consistent with the existing `'unsafe-inline'` already required for `style-src` (Swagger UI's CSS also uses inline styles), and the risk profile of a developer documentation page is substantially lower than a user-facing endpoint.
 
 **Why a path-aware CSP instead of a uniform permissive policy?**
 A uniform permissive CSP (e.g., `default-src 'self'`) would allow all same-origin resources. Since none of the JSON API endpoints serve HTML, the strict `default-src 'none'` policy is both correct and more protective. Restricting the relaxed policy to only the docs paths limits the attack surface: if an endpoint unexpectedly begins returning HTML content, it inherits the strict policy rather than the permissive one.

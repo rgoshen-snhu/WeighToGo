@@ -63,7 +63,7 @@ app.add_middleware(
 _DEFAULT_CSP = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 _DOCS_CSP = (
     "default-src 'self'; "
-    "script-src 'self' https://cdn.jsdelivr.net; "
+    "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
     "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
     "img-src 'self' data: https://fastapi.tiangolo.com; "
     "connect-src 'self'"

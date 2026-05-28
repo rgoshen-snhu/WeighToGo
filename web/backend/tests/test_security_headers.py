@@ -26,12 +26,21 @@ def test_csp_default_policy_is_strict_for_json_responses(client: TestClient) -> 
     assert "frame-ancestors 'none'" in csp
 
 
-def test_csp_override_allows_swagger_cdn_for_docs_endpoint(client: TestClient) -> None:
-    """Docs endpoints must use CDN-permissive CSP so Swagger UI and ReDoc load correctly."""
+def test_csp_override_allows_swagger_cdn_and_inline_script_for_docs_endpoint(
+    client: TestClient,
+) -> None:
+    """Docs CSP must allow CDN assets and inline scripts.
+
+    FastAPI's Swagger UI page includes a dynamic inline <script> block that
+    initialises SwaggerUIBundle.  Because the content is parameterised at
+    runtime a static SHA256 hash is impractical, so 'unsafe-inline' is the
+    required allowance for script-src on docs paths only.
+    """
     response = client.get("/api/docs")
 
     csp = response.headers["Content-Security-Policy"]
     assert "cdn.jsdelivr.net" in csp
+    assert "'unsafe-inline'" in csp
 
 
 def test_hsts_is_not_emitted_outside_production(client: TestClient) -> None:
