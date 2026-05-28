@@ -7,6 +7,25 @@ issues were resolved.
 
 ---
 
+## [2026-05-28 18:05 UTC] docs(quality): add M2 Web App Quality Review documentation (GH-34)
+
+**Change Type:** Docs (baseline; closes a known dead-reference gap)
+**Scope:** `docs/standards/M2_WEB_APP_QUALITY.md` (new file), `SUMMARY.md`
+
+**Summary:**
+Lands the 2026-05-23 M2 Web App Quality Review document as `docs/standards/M2_WEB_APP_QUALITY.md`. The file is the authoritative review that catalogues the five blocking findings (and the sixth promoted finding) which the F1–F6 remediation PRs implement against. Source: commit `5041269` ("docs(quality): add M2 Web App Quality Review documentation") on the abandoned `feature/issue-34-m2-web-quality-remediation` branch — the same staged content the remediation plan §3.1 designated as PR 0.
+
+**Rationale:**
+The remediation plan §3.1 explicitly sequenced this doc as PR 0, ahead of the F-series, so subsequent finding PRs could reference it. PR 0 was skipped — F1, F2, F3, F4, F5, and F6 all merged (or were about to merge) with the file referenced by relative path even though the file didn't exist on `main`. PR #40 review (Finding 2) made the gap visible: the citations in F5's DDR-0004 and SUMMARY.md were dead links, untraceable for reviewers and future maintainers. Rather than repointing F5's references inside F5 (which would still leave F1/F2/F3/F6 with the same dead links), this PR closes all five references simultaneously by adding the file the plan said should already be there.
+
+**References:**
+- Issue: GH-34
+- Plan: `docs/plans/2026-05-27-issue-34-m2-web-quality-remediation-plan.md` §3.1 (PR 0 — docs baseline)
+- Source commit: `5041269` on `feature/issue-34-m2-web-quality-remediation` (abandoned branch)
+- Surfaced by: PR #40 Finding 2
+
+---
+
 ## [2026-05-28 17:28 UTC] fix(F4): address PR #39 review — neutral copy + parameterized invariant test (GH-34)
 
 **Change Type:** Fix (UX wording + test hardening)
