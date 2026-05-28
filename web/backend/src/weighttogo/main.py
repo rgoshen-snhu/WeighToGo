@@ -60,10 +60,21 @@ app.add_middleware(
 
 # ── Security headers middleware (SRS §NFR-S-10) ───────────────────────────────
 
+_DEFAULT_CSP = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+_DOCS_CSP = (
+    "default-src 'self'; "
+    "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+    "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+    "img-src 'self' data: https://fastapi.tiangolo.com; "
+    "connect-src 'self'"
+)
+_DOCS_PATHS = frozenset({"/api/docs", "/api/redoc", "/api/v1/openapi.json"})
+_HSTS_VALUE = "max-age=31536000; includeSubDomains"
+
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next: object) -> object:
-    """Add OWASP-recommended security headers to every response."""
+    """Add OWASP-recommended security headers to every response (SRS §NFR-S-10)."""
     from collections.abc import Awaitable, Callable
 
     from starlette.responses import Response
@@ -74,6 +85,10 @@ async def add_security_headers(request: Request, call_next: object) -> object:
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+    csp = _DOCS_CSP if request.url.path in _DOCS_PATHS else _DEFAULT_CSP
+    response.headers["Content-Security-Policy"] = csp
+    if get_settings().environment == "production":
+        response.headers["Strict-Transport-Security"] = _HSTS_VALUE
     return response
 
 

@@ -2362,3 +2362,49 @@ Replace `__dirname` with the ESM-compatible `path.dirname(fileURLToPath(import.m
 
 **References:**
 - PR #29 CI failure: Playwright end-to-end tests job
+
+## [2026-05-27 00:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Backend security middleware (F1 / GH-34)
+
+**Summary:**
+Add HSTS and path-aware Content-Security-Policy headers to the backend security middleware, completing the full SRS-required six-header set. Tests cover: CSP presence, strict default policy value, CDN-permissive override for `/api/docs` and `/api/redoc`, HSTS absent in non-production, and HSTS present with correct value in production.
+
+**Rationale:**
+The M2 quality review identified NFR-S-10 gap: the existing middleware emitted four of six SRS-required headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy) but omitted HSTS and CSP. HSTS is environment-gated to avoid breaking local HTTP development. CSP is path-aware: JSON API responses receive a maximally-restrictive `default-src 'none'` policy; Swagger/ReDoc endpoints receive an override permitting CDN assets from `cdn.jsdelivr.net`. The `get_settings()` LRU cache is cleared in the production-env test to avoid cached settings bleeding into the assertion.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-10
+- ADR-0016 (to be added in docs commit)
+
+## [2026-05-27 00:01] Commit Summary
+
+**Change Type:** Docs
+**Scope:** ADR-0016 (F1 / GH-34)
+
+**Summary:**
+Add ADR-0016 documenting the security header policy decision: path-aware CSP (strict `default-src 'none'` for JSON endpoints, CDN-permissive override for docs) and production-gated HSTS.
+
+**Rationale:**
+Architecture Decision Records are required for every significant decision with viable alternatives. The path-aware vs. uniform CSP choice and the environment-gated vs. always-on HSTS choice are both non-obvious decisions that future maintainers need context for.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-10
+
+## [2026-05-27 00:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Backend security middleware — docs CSP (F1 / GH-34)
+
+**Summary:**
+Add `'unsafe-inline'` to `script-src` in the docs-path CSP. FastAPI's Swagger UI page includes a dynamic inline `<script>` block initialising SwaggerUIBundle; the previous policy blocked it, preventing the UI from rendering. Updated the test to assert `'unsafe-inline'` is present in the docs CSP so this cannot silently regress.
+
+**Rationale:**
+The inline script content is parameterised at runtime (openapi_url, swagger_ui_parameters), making a static SHA256 hash impractical. A nonce would require intercepting and rewriting the response body. `'unsafe-inline'` on the docs path only is the minimal correct fix — consistent with the existing `'unsafe-inline'` already applied to `style-src` in the same policy, and acceptable given docs endpoints are developer tooling.
+
+**References:**
+- Issue: GH-34
+- PR #35 review comment (P2 — inline bootstrap script blocked by docs CSP)
