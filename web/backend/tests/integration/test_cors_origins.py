@@ -28,6 +28,11 @@ def cors_client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
 
     get_settings.cache_clear()
     importlib.reload(main_module)
+    # Clear again: the reload calls _get_cors_origins() → get_settings(), which
+    # re-caches settings while CORS_ALLOWED_ORIGINS is still patched.  Clearing
+    # here ensures the next get_settings() call (after monkeypatch reverts the
+    # env var) reconstructs from the correct environment.
+    get_settings.cache_clear()
 
 
 def test_cors_allows_configured_origin(cors_client: TestClient) -> None:

@@ -2408,3 +2408,73 @@ The inline script content is parameterised at runtime (openapi_url, swagger_ui_p
 **References:**
 - Issue: GH-34
 - PR #35 review comment (P2 — inline bootstrap script blocked by docs CSP)
+
+## [2026-05-27 01:00] Commit Summary
+
+**Change Type:** Docs
+**Scope:** ADR-0017 (F2 / GH-34)
+
+**Summary:**
+Add ADR-0017 documenting the CSRF Origin/Referer validation decision before any F2 implementation code is written.
+
+**Rationale:**
+Correcting the F1 process error where the ADR was written after the implementation. ADRs must precede implementation to guide decisions, not retrospectively describe them.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-9
+
+## [2026-05-27 02:00] Commit Summary
+
+**Change Type:** Feature
+**Scope:** Backend CSRF middleware (F2 / GH-34)
+
+**Summary:**
+Add CSRF Origin/Referer validation middleware for state-changing requests. Creates `weighttogo/interface/middleware/csrf.py` (Hexagonal outer-layer adapter). Middleware checks `Origin` then falls back to `Referer`; safe methods bypass; missing/disallowed origin returns RFC 7807 403. Registered before `CORSMiddleware` in `main.py` so Starlette's LIFO stack makes CORS outermost. Updated integration conftest to include `Origin` header by default (simulates real browser behavior). Fixed pre-existing `test_cors_origins.py` cache contamination bug exposed by the new middleware (added `get_settings.cache_clear()` after `importlib.reload` in fixture teardown).
+
+**Rationale:**
+SRS NFR-S-9 requires server-side CSRF protection as defense-in-depth beyond `SameSite=Strict`. Origin/Referer validation is the correct approach when single-use tokens would add coordination complexity. Reusing `cors_allowed_origins` as the allowed-origin list ensures CORS and CSRF cannot drift out of sync.
+
+**References:**
+- Issue: GH-34
+- SRS: NFR-S-9
+- ADR-0017
+
+## [2026-05-27 02:01] Commit Summary
+
+**Change Type:** Fix
+**Scope:** CSRF middleware — same-origin allowance (F2 / GH-34)
+
+**Summary:**
+Allow same-origin requests (Origin or Referer matching the API's own host) through the CSRF middleware. Previously, Swagger UI at /api/docs posting back to the same host was blocked because the API host is not in cors_allowed_origins. Added _request_own_origin() helper and unioned it with the CORS allowlist. Added two tests for the same-origin scenarios. Updated ADR-0017 to document the decision.
+
+**Rationale:**
+Same-origin requests are not CSRF attacks by definition. Blocking them breaks the documented interactive Swagger UI flow with no security benefit.
+
+**References:**
+- Issue: GH-34
+- PR #37 Codex review comment (P2 — same-origin requests blocked)
+
+## [2026-05-27 02:02] Commit Summary
+
+**Change Type:** Fix
+**Scope:** CSRF middleware — allow absent-header requests (F2 / GH-34)
+
+**Summary:**
+Changed CSRF check from "block when no Origin and no Referer" to "block only when a header is present and points to a disallowed origin." Same-origin browser requests proxied via Vite dev server (changeOrigin=true) arrive at the backend with no Origin and no Referer after header transformation. A cross-origin CSRF attack always includes Origin per the CORS spec; no-header requests cannot be browser CSRF attacks. SameSite=Strict cookies already guard the no-header path independently.
+
+**References:**
+- Issue: GH-34
+- PR #37 CI failure: Playwright E2E weight-delete test (Vite proxy stripped headers)
+
+## [2026-05-27 02:03] Commit Summary
+
+**Change Type:** Fix / Refactor
+**Scope:** CSRF middleware — PR review comments (F2 / GH-34)
+
+**Summary:**
+Addressed 7 of 9 PR review comments (pushed back on lru_cache and TLS-proxy implementation). Changes: added _normalize_origin() helper (RFC 6454 case/trailing-slash normalization); used RequestResponseEndpoint type alias eliminating type: ignore and local imports; fixed permissive_client fixture to use context manager; simplified OPTIONS test assertion to != 403; added 5 new tests (DELETE/PUT/null-origin/Origin-precedence/HEAD). Updated ADR-0017 with TLS-proxy production prerequisite and normalization rationale.
+
+**References:**
+- Issue: GH-34
+- PR #37 review comments (1-9)
