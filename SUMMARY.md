@@ -2752,7 +2752,7 @@ Flat named exports are the correct shape — not a status-keyed Record — becau
 
 **References:**
 - Issue: GH-42
-- ADR-0010: `docs/adr/0010-generic-auth-error-policy.md`
+- ADR-0010: `docs/adr/0010-generic-authentication-error-policy.md`
 - Design spec: `docs/specs/2026-05-28-adr-0010-message-consolidation-design.md`
 
 ## [2026-05-28 20:25] Commit Summary
@@ -2761,7 +2761,7 @@ Flat named exports are the correct shape — not a status-keyed Record — becau
 **Scope:** Frontend auth hooks and tests — ADR-0010 message consolidation (GH-42)
 
 **Summary:**
-REFACTOR: migrated `useLogin.ts` and `useRegister.ts` to import ADR-0010 string constants from `messages.ts` — zero inline message literals remain in either hook's `onError` branches. Migrated `useLogin.test.tsx` to import all four relevant constants (AUTH_INVALID_CREDENTIALS, AUTH_ACCOUNT_LOCKED, AUTH_RATE_LIMITED, AUTH_GENERIC_FAILURE) and tightened three previously-regex assertions (`.toMatch(/locked/i)`, `/too many/i`, `/something went wrong/i`) to exact `.toBe(CONST)`. Migrated `useRegister.test.tsx` to import AUTH_REGISTER_FAILED and AUTH_GENERIC_FAILURE and replace inline string literals in the `it.each` and network-error tests with exact constant equality. All 228 tests green. Grep AC verified: `grep -rn "Invalid credentials\." src` returns one definition site (messages.ts) plus unrelated layer tests.
+REFACTOR: migrated `useLogin.ts` and `useRegister.ts` to import ADR-0010 string constants from `messages.ts` — zero inline message literals remain in either hook's `onError` branches. Migrated `useLogin.test.tsx` to import all four relevant constants (AUTH_INVALID_CREDENTIALS, AUTH_ACCOUNT_LOCKED, AUTH_RATE_LIMITED, AUTH_GENERIC_FAILURE) and tightened three previously-regex assertions (`.toMatch(/locked/i)`, `/too many/i`, `/something went wrong/i`) to exact `.toBe(CONST)`. Migrated `useRegister.test.tsx` to import AUTH_REGISTER_FAILED and AUTH_GENERIC_FAILURE and replace inline string literals in the `it.each` and network-error tests with exact constant equality. All 228 tests green. Grep AC verified: `grep -rn "Invalid credentials\." src` returns one definition site (messages.ts); two other hits are in presentation-layer and transport-layer tests that intentionally use the literal directly (not hook-layer duplicates). Hook-layer AC satisfied; LoginForm.test.tsx:68 tracked as a follow-up (GH-42).
 
 **Rationale:**
 Tightening loose regex matchers to exact `.toBe(CONST)` eliminates the risk that future wording changes partially match the pattern and silently pass. The refactor also decouples wording from test files: a single `messages.ts` edit propagates automatically to all consumers and assertions.
@@ -2769,4 +2769,19 @@ Tightening loose regex matchers to exact `.toBe(CONST)` eliminates the risk that
 **References:**
 - Issue: GH-42
 - Design spec: `docs/specs/2026-05-28-adr-0010-message-consolidation-design.md`
-- ADR-0010: `docs/adr/0010-generic-auth-error-policy.md`
+- ADR-0010: `docs/adr/0010-generic-authentication-error-policy.md`
+
+## [2026-05-28 21:00] Commit Summary
+
+**Change Type:** Fix / Refactor
+**Scope:** Frontend auth — PR #46 review fixes (GH-42)
+
+**Summary:**
+Addressed four findings from PR #46 review: (1) added `messages.test.ts` with five value-pinning assertions (each constant is asserted to its exact ADR-0010 string) — closes the tautological-test gap; (2) shortened two test names in `useLogin.test.tsx` that exceeded the 100-char line limit; (3) corrected two broken ADR-0010 path references in SUMMARY.md (`0010-generic-auth-error-policy.md` → `0010-generic-authentication-error-policy.md`); (4) clarified imprecise grep-AC claim in SUMMARY.md. Rebased onto snhu/main (2 commits). Suite: 233/233 green, lint 0 errors, tsc clean.
+
+**Rationale:**
+Value-pinning tests are the correct safety net for a security-policy module: without them, renaming a constant to an arbitrary string silently passes every consumer test. The five new assertions ensure any wording change forces a deliberate policy review.
+
+**References:**
+- Issue: GH-42
+- PR #46 review comments

@@ -85,14 +85,14 @@ describe('useLogin', () => {
     );
   });
 
-  it('sets formError to AUTH_GENERIC_FAILURE when ApiError status is not 401, 423, or 429', async () => {
+  it('sets AUTH_GENERIC_FAILURE on ApiError with unhandled status (e.g. 500)', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new ApiError(500, 'Server error'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
     await waitFor(() => expect(result.current.formError).toBe(AUTH_GENERIC_FAILURE));
   });
 
-  it('sets formError to AUTH_GENERIC_FAILURE when error is not an ApiError or ValidationError', async () => {
+  it('sets AUTH_GENERIC_FAILURE on non-ApiError (e.g. network failure)', async () => {
     vi.spyOn(authClient, 'login').mockRejectedValueOnce(new Error('Network failure'));
     const { result } = renderHook(() => useLogin(), { wrapper });
     result.current.submit({ email: 'a@b.co', password: 'pass' }, makeHelpers());
