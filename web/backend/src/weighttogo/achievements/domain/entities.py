@@ -17,6 +17,7 @@ class AchievementType(StrEnum):
 
     GOAL_REACHED = "goal_reached"
     MILESTONE = "milestone"
+    STREAK = "streak"
 
 
 @dataclass
@@ -27,9 +28,10 @@ class Achievement:
         achievement_id: Surrogate primary key. ``None`` for unsaved records.
         user_id: FK to the owning user.
         goal_id: FK to the goal this achievement belongs to.
-        achievement_type: ``goal_reached`` or ``milestone``.
-        threshold: The lb threshold crossed for milestones (5/10/25/50),
-            or ``None`` for ``goal_reached`` achievements.
+        achievement_type: ``goal_reached``, ``milestone``, or ``streak``.
+        threshold: The lb threshold crossed for milestones (5/10/25/50), the
+            day count for streaks (7/30), or ``None`` for ``goal_reached``
+            achievements.
         earned_at: UTC datetime when the achievement was first recorded.
     """
 

@@ -15,6 +15,12 @@ def test_achievement_type_milestone_value() -> None:
     assert AchievementType.MILESTONE.value == "milestone"
 
 
+def test_achievement_type_streak_value() -> None:
+    from weighttogo.achievements.domain.entities import AchievementType
+
+    assert AchievementType.STREAK.value == "streak"
+
+
 def test_achievement_dataclass_stores_milestone_threshold() -> None:
     from datetime import UTC, datetime
     from decimal import Decimal
