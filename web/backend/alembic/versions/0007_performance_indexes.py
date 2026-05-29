@@ -30,6 +30,7 @@ def upgrade() -> None:
         ["user_id", "created_at"],
         postgresql_where=sa.text("is_deleted = FALSE"),
     )
+    # Non-unique: SQLite fallback to a full index is acceptable (same precedent as 0002).
 
 
 def downgrade() -> None:

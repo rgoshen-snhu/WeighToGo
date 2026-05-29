@@ -71,6 +71,11 @@ def test_migration_0007_creates_created_at_index() -> None:
             mod.upgrade()
     names = {ix["name"] for ix in inspect(engine).get_indexes("weight_entries")}
     assert "idx_weight_entries_user_created_at" in names
+    idx_map = {ix["name"]: ix for ix in inspect(engine).get_indexes("weight_entries")}
+    assert idx_map["idx_weight_entries_user_created_at"]["column_names"] == [
+        "user_id",
+        "created_at",
+    ]
 
 
 def test_migration_0007_downgrade_removes_created_at_index() -> None:

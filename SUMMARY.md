@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 12:00] Commit Summary
+
+**Change Type:** Fix
+**Scope:** test_migration_0007
+
+**Summary:**
+Add column-membership assertion to index test; clarify SQLite fallback intent in migration
+
+**Rationale:**
+Index-name-only assertion would miss a wrong column list in upgrade(). SQLite comment makes the non-unique partial-index trade-off explicit per 0002 precedent.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 11:44] Commit Summary
 
 **Change Type:** Feature
