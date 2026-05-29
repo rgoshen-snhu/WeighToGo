@@ -17,7 +17,7 @@ the same try/except pattern as the weight-entries router.
 from __future__ import annotations
 
 import structlog
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
@@ -166,23 +166,31 @@ def get_active_goal(
     "",
     status_code=status.HTTP_200_OK,
     response_model=GoalListResponse,
-    summary="List all goals for the current user",
+    summary="List goals for the current user (capped at 100)",
 )
+@limiter.limit("30/minute")
 def list_goals(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=100, description="Maximum goals to return (1–100)."),
     session: Session = Depends(get_db_session),
     current_user_id: int = Depends(get_current_user_id),
 ) -> GoalListResponse:
-    """Return all goals (active and historical) for the authenticated user.
+    """Return recent goals (active and historical) for the authenticated user.
+
+    Results are ordered newest-first and capped at *limit* (max 100) to prevent
+    unbounded DB reads and serialization cost on accounts with large goal histories.
 
     Args:
+        request: The incoming HTTP request (required by slowapi).
+        limit: Maximum number of goals to return (1 – 100, default 50).
         session: The active database session.
         current_user_id: The authenticated user's ID.
 
     Returns:
-        A list of all goals, newest first.
+        A list of at most *limit* goals, newest first.
     """
     goals = ListGoals(goal_repo=_goal_repo(session)).execute(
-        ListGoalsCommand(user_id=current_user_id)
+        ListGoalsCommand(user_id=current_user_id, limit=limit)
     )
     return GoalListResponse(goals=[GoalResponse.model_validate(g) for g in goals])
 

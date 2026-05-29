@@ -7,6 +7,31 @@ issues were resolved.
 
 ---
 
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Security — PR #63 follow-up findings (bounded list + DB direction constraint)
+
+**Summary:**
+Addressed two follow-up security findings on PR #63:
+
+1. `GET /goals` was unbounded — the repository materialised every historical goal with `.all()`, no rate limiter, no cap. Fixed by:
+   - Adding `limit: int` (keyword-only) to `IGoalRepository.list_for_user`, `SqlAlchemyGoalRepository.list_for_user`, and `ListGoalsCommand`
+   - `ListGoals` enforces a hard 100-row ceiling via `_MAX_LIMIT` regardless of caller input
+   - Router accepts `limit: int = Query(default=50, ge=1, le=100)` and gains `@limiter.limit("30/minute")`
+
+2. Missing DB-level direction-invariant CHECK constraint — the application/domain layer already enforces `lose → target < start` (added in commit `19e426c`), but the `goals` table had no cross-column CHECK as a final safety net. Added migration `0004_goals_direction_check.py` with `(goal_type = 'lose' AND target_value < start_value) OR (goal_type = 'gain' AND target_value > start_value)`.
+
+**Pushed back on:** The finding also claimed the application-layer enforcement was missing at `set_active_goal.py:52`. This was stale analysis — `validate_target_direction` has been called at `set_active_goal.py:54` since commit `19e426c`. The reviewer noted their pytest run hit the wrong working directory; their code analysis also reflected the pre-fix state.
+
+**Rationale:**
+The unbounded list is a legitimate authenticated-DoS path — a user who creates/abandons goals 30/min can build unbounded history, and each `GET /goals` then forces a full DB scan and serialisation. A hard cap at 100 with a `limit` query param is proportionate: typical goal histories are O(tens), not O(thousands), so cursor pagination would be disproportionate scope. The DB CHECK is defense-in-depth — it cannot be bypassed via direct SQL inserts or future use-case changes that skip the application validator.
+
+**References:**
+- PR #63 / GH-53 (Phase 1 goals feature branch)
+
+---
+
 ## [2026-05-28 20:43] Commit Summary
 
 **Change Type:** Fix

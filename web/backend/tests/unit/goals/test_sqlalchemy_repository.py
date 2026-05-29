@@ -152,5 +152,25 @@ def test_list_for_user_returns_all_goals(db_session: Session) -> None:
     db_session.commit()
     repo.save(_make_goal())
     db_session.commit()
-    goals = repo.list_for_user(user_id=1)
+    goals = repo.list_for_user(user_id=1, limit=50)
+    assert len(goals) == 2
+
+
+def test_list_for_user_respects_limit(db_session: Session) -> None:
+    repo = SqlAlchemyGoalRepository(db_session)
+    # Persist three goals: create one, abandon it, repeat, then create a third
+    first = repo.save(_make_goal())
+    db_session.commit()
+    first.abandon()
+    repo.save(first)
+    db_session.commit()
+    second = repo.save(_make_goal())
+    db_session.commit()
+    second.abandon()
+    repo.save(second)
+    db_session.commit()
+    repo.save(_make_goal())
+    db_session.commit()
+
+    goals = repo.list_for_user(user_id=1, limit=2)
     assert len(goals) == 2

@@ -131,21 +131,23 @@ class SqlAlchemyGoalRepository:
         row = self._session.query(GoalModel).filter_by(user_id=user_id, is_active=True).first()
         return _goal_to_domain(row) if row else None
 
-    def list_for_user(self, user_id: int) -> list[Goal]:
-        """Return all goals (active and historical) for *user_id*.
+    def list_for_user(self, user_id: int, *, limit: int) -> list[Goal]:
+        """Return the most recent goals (active and historical) for *user_id*.
 
         Results are ordered by ``created_at DESC``.
 
         Args:
             user_id: The owning user's ID.
+            limit: Maximum number of goals to materialise.
 
         Returns:
-            A list of all ``Goal`` entities for the user, newest first.
+            At most *limit* ``Goal`` entities for the user, newest first.
         """
         rows = (
             self._session.query(GoalModel)
             .filter_by(user_id=user_id)
             .order_by(GoalModel.created_at.desc())
+            .limit(limit)
             .all()
         )
         return [_goal_to_domain(r) for r in rows]

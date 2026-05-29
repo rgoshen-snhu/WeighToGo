@@ -40,7 +40,7 @@ def test_list_goals_returns_all_user_goals() -> None:
     uc = ListGoals(goal_repo=repo)
     result = uc.execute(ListGoalsCommand(user_id=1))
     assert result == goals
-    repo.list_for_user.assert_called_once_with(1)
+    repo.list_for_user.assert_called_once_with(1, limit=50)
 
 
 def test_list_goals_returns_empty_list_when_none() -> None:
@@ -48,3 +48,18 @@ def test_list_goals_returns_empty_list_when_none() -> None:
     uc = ListGoals(goal_repo=repo)
     result = uc.execute(ListGoalsCommand(user_id=1))
     assert result == []
+
+
+def test_list_goals_respects_custom_limit() -> None:
+    goals = [_make_goal(1)]
+    repo = _make_repo(goals)
+    uc = ListGoals(goal_repo=repo)
+    uc.execute(ListGoalsCommand(user_id=1, limit=10))
+    repo.list_for_user.assert_called_once_with(1, limit=10)
+
+
+def test_list_goals_caps_limit_at_100() -> None:
+    repo = _make_repo([])
+    uc = ListGoals(goal_repo=repo)
+    uc.execute(ListGoalsCommand(user_id=1, limit=999))
+    repo.list_for_user.assert_called_once_with(1, limit=100)
