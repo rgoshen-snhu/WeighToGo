@@ -125,7 +125,8 @@ def to_active_goal_response(result: GoalWithProgress) -> ActiveGoalResponse:
     """Map a ``GoalWithProgress`` application result to the ``ActiveGoalResponse`` DTO.
 
     Args:
-        result: The use-case result (``goal`` may be ``None``).
+        result: A non-``None`` ``GoalWithProgress`` from the use case. The
+            ``goal`` field within it may be ``None`` (no active goal).
 
     Returns:
         An ``ActiveGoalResponse`` envelope; ``goal=None`` when no active goal.

@@ -111,3 +111,26 @@ def test_dashboard_active_goal_null_when_no_goal(client: TestClient) -> None:
     )
     resp = client.get("/api/v1/dashboard/summary")
     assert resp.json()["active_goal"] is None
+
+
+def test_dashboard_active_goal_progress_null_when_goal_but_no_entries(
+    client: TestClient,
+) -> None:
+    _register_and_login(client)
+    client.post(
+        "/api/v1/goals",
+        json={
+            "goal_type": "lose",
+            "start_value": 200.0,
+            "target_value": 150.0,
+            "target_unit": "lbs",
+            "target_date": None,
+        },
+    )
+    resp = client.get("/api/v1/dashboard/summary")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["active_goal"] is not None
+    assert data["active_goal"]["goal"]["goal_type"] == "lose"
+    assert data["active_goal"]["progress_percent"] is None
+    assert data["active_goal"]["current_value"] is None

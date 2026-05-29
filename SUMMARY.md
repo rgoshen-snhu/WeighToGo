@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 20:00] Commit Summary
+
+**Change Type:** Test
+**Scope:** dashboard integration test / goals mapper docstring
+
+**Summary:**
+Add integration test for goal-exists/no-entries branch (progress_percent=None); clarify to_active_goal_response input contract in docstring
+
+**Rationale:**
+Exercises the mapper's progress=None arm through the live HTTP stack. Docstring clarifies that the caller must guard against None before calling.
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29 19:10] Commit Summary
 
 **Change Type:** Feature
