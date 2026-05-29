@@ -55,7 +55,7 @@ The narrative is drafted in parallel with the code work and finalized once imple
 
 Two discrepancies between SRS v2 and the on-disk state were found during planning. The plan accounts for both, and Step 6 reconciles the documents:
 
-1. **ADR numbering.** SRS Appendix A §17.2 reserves ADR-0016/0017/0018 for M3 (TTL caching, milestone detection, composite index). Those numbers are already taken on disk by M2 quality-remediation decisions (ADR-0016 security headers, ADR-0017 CSRF Origin/Referer, ADR-0018 concurrent-refresh coalescing). Per the ADR README policy ("use the next available number"), M3 ADRs are renumbered to **0019–0022**.
+1. **ADR numbering.** SRS Appendix A §17.2 reserves ADR-0016/0017/0018 for M3 (TTL caching, milestone detection, composite index). Those numbers are already taken on disk by M2 quality-remediation decisions (ADR-0016 security headers, ADR-0017 CSRF Origin/Referer, ADR-0018 concurrent-refresh coalescing). ADR-0020 was consumed by Phase 3 (preferences storage data structure). Per the ADR README policy ("use the next available number"), M3 ADRs are **0019, 0021, 0022, 0023**.
 2. **Cursor pagination.** SRS §13.2.1 deliverable 4 still lists cursor-based pagination as M3 work; it was actually delivered in M2 (ADR-0015). It is treated here as already complete.
 
 ---
@@ -185,9 +185,9 @@ Implements the composite indexes, the rate-of-change algorithm, and the trend ch
 
 **Functional requirements:** NFR-P-3 (composite indexes), FR-D-2 (trend chart), FR-D-3 (weekly rate of change). FR-D-4 progress bar was delivered in Step 1; here the dashboard aggregates it.
 
-**ADR (write before any code in this step):** ADR-0020 Composite Index Strategy for Trend Queries.
+**ADR (write before any code in this step):** ADR-0021 Composite Index Strategy for Weight-History Reads.
 
-**Migration:** `web/backend/alembic/versions/0006_performance_indexes.py` — add the composite/partial indexes SRS §7.2 (NFR-P-3) requires: `(user_id, observation_date)` and `(user_id, created_at)`, scoped `WHERE is_deleted = FALSE`. Confirm against indexes already created in migration `0002` to avoid duplicates.
+**Migration:** `web/backend/alembic/versions/0007_performance_indexes.py` — add the composite/partial indexes SRS §7.2 (NFR-P-3) requires: `(user_id, observation_date)` and `(user_id, created_at)`, scoped `WHERE is_deleted = FALSE`. Confirm against indexes already created in migration `0002` to avoid duplicates.
 
 **Backend (create / modify):**
 
@@ -210,14 +210,14 @@ Implements the composite indexes, the rate-of-change algorithm, and the trend ch
 
 Implemented in priority order if core lands with milestone headroom. Streak detection is first because it is the strongest remaining algorithmic showcase. Any item not reached is deferred with documented rationale in Step 6 and the narrative.
 
-1. **Streak detection (FR-Ach-3) — ADR-0021 (write first).**
+1. **Streak detection (FR-Ach-3) — ADR-0022 (write first).**
    - `achievements/domain/streak_detector.py` — pure function `detect_streaks(observation_dates: set[date], today) -> list[Streak]`. Algorithm: consecutive-day run scan over a sorted/`set`-backed date sequence; detect 7- and 30-day streaks; record idempotently via the `(goal_id, achievement_type, threshold)` constraint. Document complexity (O(n) scan when dates arrive sorted from the indexed query; O(n log n) if a sort is needed).
    - Hook into the same composition-root orchestration as Step 2 (`DetectAchievements`); extend, do not duplicate.
    - Unit tests: exact 7-day run, broken run, 30-day run, gaps, duplicate-day entries collapse to one calendar day.
 2. **Achievement listing (FR-Ach-4)** — sorted-by-date-descending listing endpoint + UI (mostly delivered by Step 2's `GET /achievements`; add ordering + pagination reuse).
 3. **Goal history (FR-G-5)** — list past achieved/abandoned goals; reuse `GET /api/v1/goals`.
 4. **Weight unit conversion (FR-W-6)** — `shared` or `weight_tracking/domain/unit_conversion.py` pure converter (`lbs <-> kg`), driven by the preference from Step 3; display-only, original unit preserved on the row.
-5. **TTL caching (NFR-P-5) — ADR-0022 (write first).**
+5. **TTL caching (NFR-P-5) — ADR-0023 (write first).**
    - `shared/cache.py` — small TTL cache for expensive, stable computed values (rate-of-change, milestone counters), with a documented TTL. Document the eviction/expiry data structure.
    - Unit tests: hit, miss, expiry, invalidation on new weight entry.
 
@@ -227,9 +227,9 @@ Implemented in priority order if core lands with milestone headroom. Streak dete
 
 Verification and reconciliation only — ADRs and DDRs are authored during their steps, not here.
 
-- Verify ADR-0019 through ADR-0022 are committed (those that were reached) and listed in `docs/adr/README.md` with correct numbers and status.
+- Verify ADR-0019 through ADR-0023 are committed (those that were reached) and listed in `docs/adr/README.md` with correct numbers and status.
 - Verify DDR-0005 through DDR-0008 are committed in `docs/ddr/`.
-- **Reconcile SRS v2 drift:** update Appendix A §17.2 to renumber the M3 ADRs to 0019–0022 and record 0016–0018 as the M2 remediation decisions they actually are; correct §13.2.1 deliverable 4 to mark cursor pagination as M2-delivered; update `docs/adr/README.md` index (currently stops at 0015) to include 0016–0018 plus the new M3 ADRs.
+- **Reconcile SRS v2 drift:** update Appendix A §17.2 to renumber the M3 ADRs to 0019–0023 and record 0016–0018 as the M2 remediation decisions they actually are; correct §13.2.1 deliverable 4 to mark cursor pagination as M2-delivered; update `docs/adr/README.md` index (currently stops at 0015) to include 0016–0018 plus the new M3 ADRs.
 - Update the root `README.md` with the M3 feature set (goals, achievements, trends, preferences).
 - Regenerate and commit the OpenAPI snapshot to `/docs/api/openapi.json` with the new goal, achievement, and preference routes.
 - Self-review all M3 code against `/docs/standards/cs499_code_review_checklist.md`; record findings as PR comments and resolve before merge.
@@ -243,14 +243,14 @@ Verification and reconciliation only — ADRs and DDRs are authored during their
 
 ## 4. New ADRs Required
 
-Four new ADRs for M3, numbered from the next available slot (0019) because 0016–0018 are already taken by M2 remediation work. Each documents an engineering decision with viable alternatives considered and includes explicit time/space complexity analysis for the algorithm it governs. None reference course requirements as rationale. The "When to write" column is the gate.
+Four new ADRs for M3, numbered starting at 0019 (0016–0018 are taken by M2 remediation work; 0020 was consumed by Phase 3 preferences storage, so M3 ADRs are 0019, 0021, 0022, 0023). Each documents an engineering decision with viable alternatives considered and includes explicit time/space complexity analysis for the algorithm it governs. None reference course requirements as rationale. The "When to write" column is the gate.
 
 | ID | Title | Decision Captured | When to Write |
 | --- | --- | --- | --- |
 | ADR-0019 | Milestone Detection Algorithm | Threshold-crossing detection at 5/10/25/50 lb from goal start; idempotency via an in-memory recorded-milestone set plus a DB unique constraint; synchronous detection on weight-entry write vs an event-driven alternative; O(k) per entry. | Before Step 2 — before writing `milestone_detector.py` |
-| ADR-0020 | Composite Index Strategy for Trend Queries | Which composite/partial indexes back the trend and rate-of-change read paths and why; how rate-of-change resolves via two indexed lookups; trade-offs vs scanning. | Before Step 4 — before writing migration `0006` and `rate_of_change.py` |
-| ADR-0021 | Streak Detection Algorithm | Consecutive-day run detection over a set-backed sorted date sequence; how duplicate same-day entries collapse; idempotent recording; O(n) scan trade-offs. | Before the streak slice in Step 5 — before writing `streak_detector.py` |
-| ADR-0022 | TTL-Based Server-Side Caching Strategy | What is cached (rate-of-change, milestone counters), the TTL, the expiry data structure, and invalidation triggers; trade-offs vs recompute-on-read. | Before the caching slice in Step 5 — before writing `shared/cache.py` |
+| ADR-0021 | Composite Index Strategy for Weight-History Reads | Which composite/partial indexes back the trend and rate-of-change read paths and why; how rate-of-change resolves via two indexed lookups; trade-offs vs scanning. (Note: ADR-0020 was consumed by Phase 3 — preferences storage data structure.) | Before Step 4 — before writing migration `0007` and `rate_of_change.py` |
+| ADR-0022 | Streak Detection Algorithm | Consecutive-day run detection over a set-backed sorted date sequence; how duplicate same-day entries collapse; idempotent recording; O(n) scan trade-offs. | Before the streak slice in Step 5 — before writing `streak_detector.py` |
+| ADR-0023 | TTL-Based Server-Side Caching Strategy | What is cached (rate-of-change, milestone counters), the TTL, the expiry data structure, and invalidation triggers; trade-offs vs recompute-on-read. | Before the caching slice in Step 5 — before writing `shared/cache.py` |
 
 SRS Appendix A §17.2 is updated in Step 6 to reflect this numbering.
 
@@ -292,7 +292,7 @@ Adapted from SRS §14 for Milestone Three:
 - [ ] Stretch items are either implemented or deferred with documented rationale
 - [ ] Coverage thresholds met per SRS §11.5 (backend domain 95%/90%, application 90%/85%; frontend 90%/90%)
 - [ ] CI is green on every relevant workflow
-- [ ] ADR-0019 through ADR-0022 (those reached) are written, committed, and indexed in `docs/adr/README.md`
+- [ ] ADR-0019 through ADR-0023 (those reached) are written, committed, and indexed in `docs/adr/README.md`
 - [ ] DDR-0005 through DDR-0008 (those reached) are committed in `docs/ddr/`
 - [ ] SRS v2 drift reconciled (Appendix A numbering, §13.2.1 cursor note, ADR README index)
 - [ ] Code self-reviewed against `/docs/standards/cs499_code_review_checklist.md`

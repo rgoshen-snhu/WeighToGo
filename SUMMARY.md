@@ -7,6 +7,22 @@ issues were resolved.
 
 ---
 
+## [2026-05-29 11:29] Commit Summary
+
+**Change Type:** Docs
+**Scope:** ADR / docs
+
+**Summary:**
+Add ADR-0021 composite index strategy for weight-history reads; correct Phase-4 ADR/migration numbers in milestone brief.
+
+**Rationale:**
+ADR-0021 documents the (user_id, created_at) partial index decision (NFR-P-3). ADR-0020 and migration 0006 were consumed by Phase 3 (preferences); numbers corrected in plan. Cascade-corrected downstream references (streak detection ADR-0022, TTL caching ADR-0023, and all range references in §1.2, §3 Step 6, §4, §7 DoD).
+
+**References:**
+- Issue: GH-56
+
+---
+
 ## [2026-05-29] Commit Summary
 
 **Change Type:** Fix

@@ -29,3 +29,4 @@ the next available number.
 | [0013](0013-refresh-token-rotation-family-revocation.md) | Refresh Token Rotation with Family-Based Revocation | Accepted | 2026-05-22 | Web |
 | [0014](0014-tanstack-query-for-server-state.md) | TanStack Query for Server State | Accepted | 2026-05-23 | Web |
 | [0015](0015-opaque-compound-cursor-pagination.md) | Opaque Compound Cursor for Weight-Entry Pagination | Accepted | 2026-05-23 | Web |
+| [0021](0021-composite-index-strategy.md) | Composite Index Strategy for Weight-History Reads | Accepted | 2026-05-29 | Web |
