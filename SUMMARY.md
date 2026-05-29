@@ -7,6 +7,21 @@ issues were resolved.
 
 ---
 
+## [2026-05-28] Commit Summary
+
+**Change Type:** Chore
+**Scope:** Docs / version control
+
+**Summary:**
+Track Milestone Three planning artifacts under version control. Commits `docs/plans/milestone-three-plan.md` (the M3 implementation brief covering Steps 1–6, the six-step Goals→Achievements→Preferences→Trends→Stretch→Closeout sequence) and extends `.gitignore` with the M3 rubric file pattern (`docs/plans/CS 499 Milestone Three Guidelines and Rubric.md`), mirroring how the M2 rubric was handled.
+
+**Rationale:**
+The plan file contains authoritative step sequencing, ADR/DDR numbering reconciliation, and locked architectural decisions referenced by every Phase 1–5 feature branch. Committing it makes the decision record part of the history alongside the code it governs.
+
+**References:**
+- Issue: GH-53
+- Plan: `docs/plans/milestone-three-plan.md`
+
 ## [2026-05-28 19:30 UTC] docs(closeout): record Resolution Review for issue #34 (GH-34)
 
 **Change Type:** Docs (closeout — issue resolution record)
