@@ -35,8 +35,8 @@ test.describe.serial('achievement notification flow', () => {
     await expect(page).toHaveURL('/', { timeout: 10_000 });
 
     await page.goto('/weight/new');
-    await page.getByLabel(/weight/i).fill('195');
-    await page.getByRole('button', { name: /save|log|submit/i }).click();
+    await page.getByLabel(/weight value/i).fill('195');
+    await page.getByRole('button', { name: /save/i }).click();
 
     // Achievement toast should appear (role="status", FR-N-1)
     await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
