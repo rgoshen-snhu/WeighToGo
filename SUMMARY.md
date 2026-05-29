@@ -2928,3 +2928,17 @@ Leaving `get_by_id` (which returns any owned goal regardless of state) as the so
 **References:**
 - Adversarial Codex review findings (Finding 2 and Finding 3)
 - FR-G-3: SRS §6.3
+
+## [2026-05-30] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Frontend — Playwright E2E failures (date timezone bug + goal target_date empty-string bug)
+
+**Summary:**
+Fixed three distinct frontend bugs that caused 8/35 Playwright E2E tests to fail. (1) Date timezone mismatch: `WeightEntryForm.tsx` and `weight-schemas.ts` used `new Date().toISOString().split('T')[0]` which returns the UTC date. In US timezones after sunset the UTC date is tomorrow relative to the local date, so the backend's `observation_date > date.today()` check rejected the entry as future. Fixed by computing the date from local date parts (getFullYear/getMonth/getDate). Same fix applied to the unit test file and the `weight-delete.spec.ts` E2E test which used `toISOString()` for its "yesterday" calculation. (2) Empty-string `target_date`: `GoalsPage.tsx` sent `values.target_date ?? null` but an empty date input produces `""` not `null`; `??` (nullish coalescing) passes `""` through unchanged. The backend rejected `""` as an invalid date. Fixed by using `|| null` in both `handleCreate` and `handleUpdate`. (3) Dev database migration: the `goals` table (migration 0003) had not been applied to the local dev database; `alembic upgrade head` was run to bring it current. 35/35 Playwright tests pass; 274/274 unit tests pass; ESLint and tsc clean.
+
+**Rationale:**
+The timezone bug was always latent but only manifested at night in US timezones when the UTC clock advances to the next day. Using `toISOString()` for dates that are compared to local server dates is a systematic error; the fix is to always use local date parts for user-facing date fields. The empty-string bug stemmed from using `??` (nullish coalescing) instead of `||` for a field that HTML date inputs emit as `""` when blank.
+
+**References:**
+- PR #63 / GH-53 (Phase 1 goals feature branch)

@@ -1,9 +1,13 @@
 import { z } from 'zod';
 
-const isNotFuture = (dateStr: string): boolean => {
-  const today = new Date().toISOString().split('T')[0]!;
-  return dateStr <= today;
+const localDateStr = (d = new Date()): string => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 };
+
+const isNotFuture = (dateStr: string): boolean => dateStr <= localDateStr();
 
 export const weightEntrySchema = z.object({
   weight_value: z.coerce

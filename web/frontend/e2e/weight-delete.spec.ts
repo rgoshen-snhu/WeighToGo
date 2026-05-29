@@ -21,7 +21,8 @@ test.describe.serial('weight entry delete flow', () => {
     await expect(page).toHaveURL('/weight', { timeout: 10_000 });
 
     // Second entry: yesterday
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]!;
+    const dy = new Date(Date.now() - 86_400_000);
+    const yesterday = `${dy.getFullYear()}-${String(dy.getMonth() + 1).padStart(2, '0')}-${String(dy.getDate()).padStart(2, '0')}`;
     await page.goto('/weight/new');
     await page.getByLabel(/weight value/i).fill('174');
     await page.getByLabel(/observation date/i).fill(yesterday);

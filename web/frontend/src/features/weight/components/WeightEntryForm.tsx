@@ -35,7 +35,8 @@ interface WeightEntryFormProps {
   isSubmitting?: boolean;
 }
 
-const TODAY = new Date().toISOString().split('T')[0]!;
+const d = new Date();
+const TODAY = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 /**
  * Weight entry form with full validation and accessibility.

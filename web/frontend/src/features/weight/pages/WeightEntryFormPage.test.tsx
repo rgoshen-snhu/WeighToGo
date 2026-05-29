@@ -97,11 +97,13 @@ describe('WeightEntryFormPage', () => {
   });
 
   it('calls weightClient.update on submit in edit mode', async () => {
+    const d = new Date();
+    const localToday = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     vi.spyOn(weightClient, 'get').mockResolvedValue({
       entry_id: 1,
       weight_value: 175.5,
       weight_unit: 'lbs',
-      observation_date: new Date().toISOString().split('T')[0]!,
+      observation_date: localToday,
       notes: null,
       created_at: '2026-05-20T12:00:00Z',
       updated_at: '2026-05-20T12:00:00Z',
@@ -110,7 +112,7 @@ describe('WeightEntryFormPage', () => {
       entry_id: 1,
       weight_value: 180,
       weight_unit: 'lbs',
-      observation_date: new Date().toISOString().split('T')[0]!,
+      observation_date: localToday,
       notes: null,
       created_at: '2026-05-20T12:00:00Z',
       updated_at: '2026-05-21T12:00:00Z',

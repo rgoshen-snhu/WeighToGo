@@ -62,7 +62,7 @@ export function GoalsPage() {
         target_value: values.target_value,
         target_unit: values.target_unit,
         start_value: values.start_value,
-        target_date: values.target_date ?? null,
+        target_date: values.target_date || null,
       });
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
@@ -77,7 +77,7 @@ export function GoalsPage() {
       goalId: activeGoal.goal_id,
       payload: {
         target_value: values.target_value,
-        target_date: values.target_date ?? null,
+        target_date: values.target_date || null,
       },
     });
     setIsEditing(false);

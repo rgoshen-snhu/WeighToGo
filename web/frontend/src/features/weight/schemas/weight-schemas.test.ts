@@ -2,9 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { weightEntrySchema } from './weight-schemas';
 
-const TODAY = new Date().toISOString().split('T')[0]!;
-const TOMORROW = new Date(Date.now() + 86_400_000).toISOString().split('T')[0]!;
-const YESTERDAY = new Date(Date.now() - 86_400_000).toISOString().split('T')[0]!;
+const localDate = (d = new Date()) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+};
+const TODAY = localDate();
+const TOMORROW = localDate(new Date(Date.now() + 86_400_000));
+const YESTERDAY = localDate(new Date(Date.now() - 86_400_000));
 
 function valid(overrides: Record<string, unknown> = {}) {
   return {
