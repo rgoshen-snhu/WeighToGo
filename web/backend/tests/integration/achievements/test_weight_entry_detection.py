@@ -93,3 +93,101 @@ def test_weight_entry_reaching_target_returns_goal_reached(client: TestClient) -
     data = _post_entry(client, 195.0)
     types = [a["achievement_type"] for a in data["newly_earned_achievements"]]
     assert "goal_reached" in types
+
+
+# ── Fix 1 regression: weight entry survives when detection finds nothing new ──
+# The original bug: session.rollback() in the IntegrityError handler cancelled
+# the weight entry too. The real race condition (concurrent duplicate) cannot be
+# reproduced without threading, but the non-race path exercises the same commit:
+# when no achievements are newly earned the entry must still be persisted.
+
+
+def test_weight_entry_is_persisted_when_no_new_achievements_detected(
+    client: TestClient,
+) -> None:
+    _register_and_login(client, "persist@example.com")
+    _create_goal(client)
+    _post_entry(client, 195.0, "2026-01-10")  # earns 5 lb milestone
+    # Second entry: nothing new to earn; verify the entry is still saved
+    data = _post_entry(client, 195.0, "2026-01-11")
+    assert data["entry_id"] is not None
+    # Confirm the entry is retrievable (it wasn't rolled back)
+    resp = client.get(f"/api/v1/weight-entries/{data['entry_id']}")
+    assert resp.status_code == 200
+
+
+# ── Fix 2 regression: cross-unit detection ────────────────────────────────────
+# Goal in lbs, entry in kg: without unit normalisation the raw kg value is
+# compared against lbs thresholds → wrong milestones.  A kg entry of ~88.45 kg
+# (195 lbs) against a lbs goal starting at 200 lbs should correctly fire the
+# 5 lb (≈2.27 kg) milestone.
+
+
+def _create_goal_unit(
+    client: TestClient,
+    start: float,
+    target: float,
+    unit: str,
+    goal_type: str = "lose",
+) -> None:
+    client.post(
+        "/api/v1/goals",
+        json={
+            "goal_type": goal_type,
+            "target_value": target,
+            "target_unit": unit,
+            "start_value": start,
+            "target_date": None,
+        },
+    )
+
+
+def _post_entry_unit(
+    client: TestClient, weight: float, unit: str, obs_date: str = "2026-01-10"
+) -> dict[str, Any]:
+    resp = client.post(
+        "/api/v1/weight-entries",
+        json={"weight_value": weight, "weight_unit": unit, "observation_date": obs_date},
+    )
+    assert resp.status_code == 201, resp.json()
+    return cast(dict[str, Any], resp.json())
+
+
+def test_lbs_goal_with_kg_entry_detects_milestone_correctly(client: TestClient) -> None:
+    # ARRANGE: goal in lbs (start=200, target=150); entry in kg
+    _register_and_login(client, "crossunit1@example.com")
+    _create_goal_unit(client, start=200.0, target=150.0, unit="lbs")
+    # 195 lbs = 88.45 kg → delta_lbs = 5 → should fire the 5 lb milestone
+    weight_kg = round(195.0 * 0.45359237, 4)
+    data = _post_entry_unit(client, weight_kg, "kg")
+    types = [a["achievement_type"] for a in data["newly_earned_achievements"]]
+    assert "milestone" in types
+
+
+def test_kg_goal_with_lbs_entry_detects_milestone_correctly(client: TestClient) -> None:
+    # ARRANGE: goal in kg (start=90.718, ≈200 lbs; target=68.039, ≈150 lbs); entry in lbs
+    _register_and_login(client, "crossunit2@example.com")
+    start_kg = round(200.0 * 0.45359237, 3)  # ≈90.718 kg
+    target_kg = round(150.0 * 0.45359237, 3)  # ≈68.039 kg
+    _create_goal_unit(client, start=start_kg, target=target_kg, unit="kg")
+    # 195 lbs → delta_lbs=5 → should fire 5 lb milestone
+    data = _post_entry_unit(client, 195.0, "lbs")
+    types = [a["achievement_type"] for a in data["newly_earned_achievements"]]
+    assert "milestone" in types
+
+
+# ── Fix 3 regression: goal is marked achieved when target is reached ──────────
+# FR-G-4: the POST that reaches the target must flip is_achieved=True and
+# is_active=False on the goal in the same transaction.
+
+
+def test_goal_is_marked_achieved_when_target_entry_is_posted(client: TestClient) -> None:
+    _register_and_login(client, "goalmark@example.com")
+    _create_goal(client, start=200.0, target=195.0)
+    # Entry exactly at target weight
+    data = _post_entry(client, 195.0)
+    assert "goal_reached" in [a["achievement_type"] for a in data["newly_earned_achievements"]]
+    # Active goal should now be gone (is_active=False after mark_achieved)
+    active_resp = client.get("/api/v1/goals/active")
+    assert active_resp.status_code == 200
+    assert active_resp.json()["goal"] is None
