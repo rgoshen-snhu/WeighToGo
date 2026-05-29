@@ -1,5 +1,98 @@
 # Changelog
 
+## [0.1.0](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.1.0...v0.1.0) (2026-05-29)
+
+
+### Added
+
+* **achievements:** application layer — DetectAchievements use case + import-linter contracts ([3c57b47](https://github.com/rgoshen-snhu/WeighToGo/commit/3c57b47f0d83cbbbb85aee1015960a3f864cdbac))
+* **achievements:** domain layer — Achievement entity, detect_milestones O(k), IAchievementRepository ([9e17506](https://github.com/rgoshen-snhu/WeighToGo/commit/9e17506a15de9bb8e2a292bd8c85f688f62ef0ec))
+* **achievements:** frontend — AchievementsPage, AchievementNotification, wire into WeightEntryFormPage (FR-N-1) ([750c969](https://github.com/rgoshen-snhu/WeighToGo/commit/750c969273238dc7eb52731ad15f5984a3eadce9))
+* **achievements:** infrastructure layer — migration 0005, ORM model, SQLAlchemy repository ([da793d9](https://github.com/rgoshen-snhu/WeighToGo/commit/da793d95a15021669c8da15a3d70094220e3c609))
+* **achievements:** interface layer — router, schemas, wire detection into weight-entry POST ([d4a1536](https://github.com/rgoshen-snhu/WeighToGo/commit/d4a153685cd5330bc8a712033276ea2000f30664))
+* **achievements:** Phase 2 — Achievements & Milestone Detection ([#54](https://github.com/rgoshen-snhu/WeighToGo/issues/54)) ([baf4064](https://github.com/rgoshen-snhu/WeighToGo/commit/baf40643dd5b618610976cdc2ec14d6a31968e7e))
+* composite indexes & dashboard goal aggregation (NFR-P-3, FR-D-4, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([d70a7b1](https://github.com/rgoshen-snhu/WeighToGo/commit/d70a7b1e426e8dbfa412b6f4aa9e6c203710cf48))
+* **dashboard:** aggregate active-goal progress into summary use case (FR-D-4, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([6840bb3](https://github.com/rgoshen-snhu/WeighToGo/commit/6840bb378c12b45206e5a240031576478854b474))
+* **dashboard:** expose active-goal progress on /dashboard/summary (FR-D-1, FR-D-4, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([82e9383](https://github.com/rgoshen-snhu/WeighToGo/commit/82e9383488955ff8b51fa411d5453d7dd77f31b2))
+* **db:** add (user_id, created_at) partial index for trend reads (NFR-P-3, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([d9b9a17](https://github.com/rgoshen-snhu/WeighToGo/commit/d9b9a17771616a2df382437117f7a26be66e6d69))
+* **F1:** add HSTS and path-aware CSP security headers (GH-34) ([#35](https://github.com/rgoshen-snhu/WeighToGo/issues/35)) ([364eee6](https://github.com/rgoshen-snhu/WeighToGo/commit/364eee67b1a354175551f19e7be1adf1f26c4667))
+* **F2:** add CSRF Origin/Referer validation middleware (GH-34) ([#37](https://github.com/rgoshen-snhu/WeighToGo/issues/37)) ([1c8fc33](https://github.com/rgoshen-snhu/WeighToGo/commit/1c8fc33746ce3650c34c4a3407e8d927b3cfa33e))
+* **F3:** coalesce concurrent 401 refresh calls via shared promise (GH-34) ([ff0450b](https://github.com/rgoshen-snhu/WeighToGo/commit/ff0450bbf26ac072b3cd5beb125ed01b6bf285f1))
+* **F3:** coalesce concurrent 401 refresh calls via shared promise (GH-34) ([4b82435](https://github.com/rgoshen-snhu/WeighToGo/commit/4b824356237eaa824ffc589f63f0acd0891d26ee))
+* **F5:** convert weight table actions to Button meeting 44px target (GH-34) ([c758bd9](https://github.com/rgoshen-snhu/WeighToGo/commit/c758bd9955d318081f5c75ac01a8ab9dbd666f24))
+* **F5:** meet 44px target size for weight table actions (GH-34) ([0df4751](https://github.com/rgoshen-snhu/WeighToGo/commit/0df47516b072484e280224d40bf44d631edbb635))
+* goals application use cases — set/update/progress/abandon/list (FR-G-1..3) ([2009812](https://github.com/rgoshen-snhu/WeighToGo/commit/20098127942dd4ce721909b0750e42572fa5b16c))
+* goals domain layer — entity, progress, exceptions, ports (FR-G-1..3) ([b7e5f57](https://github.com/rgoshen-snhu/WeighToGo/commit/b7e5f57a4b134a9987453ef948bdd57f693363ad))
+* goals frontend feature, DDR-0005, dashboard card (issue Tasks 2 & 8) ([ec3fde4](https://github.com/rgoshen-snhu/WeighToGo/commit/ec3fde4a5854d401bc7cc4de36ad1cf8d4c24d04))
+* goals interface — schemas, router, main.py, IDOR tests (issue Tasks 7 & 10) ([3ee24d5](https://github.com/rgoshen-snhu/WeighToGo/commit/3ee24d52647de7fa3c031eec88d6225c0a6fd537))
+* goals migration 0003, GoalModel, and SqlAlchemyGoalRepository (issue Tasks 3 & 6) ([9e05b39](https://github.com/rgoshen-snhu/WeighToGo/commit/9e05b3930860dc4bc7ac461bf6d4d0a97b8ecb31))
+* **preferences:** add 0006_user_preferences migration ([7816400](https://github.com/rgoshen-snhu/WeighToGo/commit/781640004fe5ec0a3b7a105cb3dd5af78fd1f344))
+* **preferences:** implement 4-layer backend bounded context (TDD) ([1affe93](https://github.com/rgoshen-snhu/WeighToGo/commit/1affe935ffdb0409380929c3c08fca73ef0fec4c))
+* **preferences:** implement frontend settings feature + context wiring ([d3623fa](https://github.com/rgoshen-snhu/WeighToGo/commit/d3623fae590a6193b53dbb54c88aa1e29b804c07))
+* **preferences:** Phase 3 — user preferences (FR-P-1, FR-P-3) ([8a8fe30](https://github.com/rgoshen-snhu/WeighToGo/commit/8a8fe301a6d07251d08a0575df3f61ae3a01b18f))
+* shared/units.py — lbs↔kg converter for goal progress (Option B) ([6b9d3b2](https://github.com/rgoshen-snhu/WeighToGo/commit/6b9d3b24ad5fad272dfa812ae4ed2075204ba002))
+
+
+### Fixed
+
+* **achievements:** address 3 Codex adversarial findings — savepoint isolation, unit normalisation, mark goal achieved ([eec01ee](https://github.com/rgoshen-snhu/WeighToGo/commit/eec01eec9fbaac944ef31816aae53ee34ae37f2a))
+* **achievements:** strip trailing zeros from Numeric(6,2) threshold in labels and toasts ([fe3275e](https://github.com/rgoshen-snhu/WeighToGo/commit/fe3275e75c5a01af2910463e70e830877dbcbe7f))
+* **dashboard:** make summary read-only — skip mark_achieved on GET ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([f01ba71](https://github.com/rgoshen-snhu/WeighToGo/commit/f01ba712f2671040cf78c21902b77447557961c9))
+* **dashboard:** restore GET idempotency, simplify active_goal type, add test cases ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([e7718b2](https://github.com/rgoshen-snhu/WeighToGo/commit/e7718b2c2115a6c05bc8311351f2fb49ec7331b4))
+* **dashboard:** show goal card even when total_entries is 0 ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([bb1f4c2](https://github.com/rgoshen-snhu/WeighToGo/commit/bb1f4c270d0ac596b18f6c0eee9cba690cad25da))
+* **e2e:** use getByLabel(/weight value/i) to avoid strict-mode ambiguity ([dcff87a](https://github.com/rgoshen-snhu/WeighToGo/commit/dcff87aecedd462bc422ca88da5957abfd6e3369))
+* **F3:** guard against synchronous throws from interceptor.refresh() (GH-34) ([0414e98](https://github.com/rgoshen-snhu/WeighToGo/commit/0414e98fc9fcfb0ee07f4a53aec17c900ce6e13e))
+* **F4:** address PR [#39](https://github.com/rgoshen-snhu/WeighToGo/issues/39) review — neutral copy + parameterized invariant test (GH-34) ([af5c37b](https://github.com/rgoshen-snhu/WeighToGo/commit/af5c37b4c76bee806f061c12008cd53b0fb09b08))
+* **F4:** remove email-existence disclosure on registration (GH-34) ([9e27394](https://github.com/rgoshen-snhu/WeighToGo/commit/9e27394391dd32761b1d1b1afa7ec7086eed270c))
+* **F4:** use generic creation-failure message for ApiError (GH-34) ([ff3d2bd](https://github.com/rgoshen-snhu/WeighToGo/commit/ff3d2bd2b5792faaa5dab166ec7cf6add4b32f39))
+* **F5:** address PR [#40](https://github.com/rgoshen-snhu/WeighToGo/issues/40) review — move 44px floor to theme; minWidth + comment fixes (GH-34) ([5d4fc08](https://github.com/rgoshen-snhu/WeighToGo/commit/5d4fc0895f0e2c03c0f6a05125cc550666a79930))
+* **frontend:** local-date for weight forms and empty-string target_date in goals ([be558fe](https://github.com/rgoshen-snhu/WeighToGo/commit/be558fe7855ba48e1bfbfd1e46600a58e230ba85))
+* **goals:** address all 15 PR [#63](https://github.com/rgoshen-snhu/WeighToGo/issues/63) review findings ([19e426c](https://github.com/rgoshen-snhu/WeighToGo/commit/19e426c6a30450bcebd416830f6d384ca4ac8a76))
+* **goals:** cap GET /goals list and add DB direction-invariant constraint ([326b169](https://github.com/rgoshen-snhu/WeighToGo/commit/326b1694ba714ee60e41bbe6f86a30196f7df4d3))
+* **goals:** enforce active-only and direction invariants in UpdateGoal (FR-G-3) ([de90b94](https://github.com/rgoshen-snhu/WeighToGo/commit/de90b94c3310ecabfc7fda321936a8951906feda))
+* **goals:** lift usePreferences to GoalsPage to avoid nested subscription ([b718c2c](https://github.com/rgoshen-snhu/WeighToGo/commit/b718c2c102ac5cfda5312f99b035c84fc8d87ba7))
+* **perf:** harden pg_engine fixture teardown and tighten EXPLAIN assertion ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([8c397cc](https://github.com/rgoshen-snhu/WeighToGo/commit/8c397cc0df683ca3b649acddaa5ffc620482ebcb))
+* **preferences:** address 6 code review findings (P2-1 through P2-5, P3-1) ([9e7e887](https://github.com/rgoshen-snhu/WeighToGo/commit/9e7e887c21a8c5f0db2251018021917de38dea09))
+* **preferences:** fix E2E locators and sync RHF unit default on prefs load ([609483e](https://github.com/rgoshen-snhu/WeighToGo/commit/609483e3b7eee6670a833f140a24635ea08cbe6e))
+* **test:** address PR review comments on Postgres index test ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([0b50bdc](https://github.com/rgoshen-snhu/WeighToGo/commit/0b50bdc4dbb85073a89de53aa02c6a13f5f95c19))
+* **test:** assert index name not direction prefix for DESC scan ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([800fc2e](https://github.com/rgoshen-snhu/WeighToGo/commit/800fc2e98deda35eb8cd3877b07b70042686daf4))
+* **test:** seed once per module to avoid unique-email violation in Postgres tests ([#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([5c93ef1](https://github.com/rgoshen-snhu/WeighToGo/commit/5c93ef1d76528c32d155bdb6c4f1bb5af32fbadc))
+
+
+### Changed
+
+* **auth:** consolidate ADR-0010 auth-safe message strings into a shared module (GH-42) ([#46](https://github.com/rgoshen-snhu/WeighToGo/issues/46)) ([eacba23](https://github.com/rgoshen-snhu/WeighToGo/commit/eacba23f2855c3df04f4b9666e75621ffa5eb751))
+* **dashboard:** drive GoalProgressCard from the summary (FR-D-4, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([1adf58a](https://github.com/rgoshen-snhu/WeighToGo/commit/1adf58a71a7b6ea7cbc94e4ec6f4a825deb5f2ca))
+* **F3:** address PR review comments — ix capture, auth401 helper, test hardening (GH-34) ([db45329](https://github.com/rgoshen-snhu/WeighToGo/commit/db453293cc30b65b3d4439cab5de4ec053d6750d))
+* **shared:** extract build_problem_detail RFC-7807 helper ([15afc80](https://github.com/rgoshen-snhu/WeighToGo/commit/15afc8099ea911509d2b232a909998db856282d7))
+
+
+### Documentation
+
+* add design document for consolidating ADR-0010 auth-safe messag… ([424cddb](https://github.com/rgoshen-snhu/WeighToGo/commit/424cddb61981e3e4cffd5905ea3d87d6f8fdba30))
+* add design document for consolidating ADR-0010 auth-safe message strings ([f5c5ff9](https://github.com/rgoshen-snhu/WeighToGo/commit/f5c5ff90f3fbbffe49c7088efa82191cdcb39a71))
+* add design document for consolidating ADR-0010 auth-safe message strings ([023b807](https://github.com/rgoshen-snhu/WeighToGo/commit/023b807c188c60628be986565df7e6a3e3373048))
+* add design document for consolidating ADR-0010 auth-safe message strings ([4fa42f2](https://github.com/rgoshen-snhu/WeighToGo/commit/4fa42f2dd389ed71cb216726e07f18bd855ecaca))
+* **adr:** add ADR-0020 preferences storage data structure ([04ab66f](https://github.com/rgoshen-snhu/WeighToGo/commit/04ab66f2a171dfb65b66fe33c9196770a461b9a4))
+* **adr:** add ADR-0021 composite index strategy (NFR-P-3, [#56](https://github.com/rgoshen-snhu/WeighToGo/issues/56)) ([265a9c3](https://github.com/rgoshen-snhu/WeighToGo/commit/265a9c38c8e5653f41a8a109da5fed8adfdc80a8))
+* **adr:** remove off-topic side-effect note from ADR-0021 ([0c45e74](https://github.com/rgoshen-snhu/WeighToGo/commit/0c45e74f81639c697a89cbaa3f48b1c85d6d131f))
+* **closeout:** record Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (GH-34) ([edcac82](https://github.com/rgoshen-snhu/WeighToGo/commit/edcac82e83ff86202447af65d19512ae03fb1236))
+* **closeout:** Resolution Review for issue [#34](https://github.com/rgoshen-snhu/WeighToGo/issues/34) (PR 7, GH-34) ([90e3f79](https://github.com/rgoshen-snhu/WeighToGo/commit/90e3f79dc5304b2cba91654b93ff82365e97d5c8))
+* **ddr:** add DDR-0008 settings page layout ([e299b8f](https://github.com/rgoshen-snhu/WeighToGo/commit/e299b8f51845046b4b76ed88904a9026c402fbd6))
+* **F3:** add ADR-0018 concurrent refresh token coalescing (GH-34) ([a994e21](https://github.com/rgoshen-snhu/WeighToGo/commit/a994e219624971210c2c770f2a4e61141b96d396))
+* **F4:** summary entry (GH-34) ([32c16d7](https://github.com/rgoshen-snhu/WeighToGo/commit/32c16d75d0d6a55a44617494130292c83ae80c3d))
+* **F5:** add DDR-0004 weight table action button conversion (GH-34) ([1666696](https://github.com/rgoshen-snhu/WeighToGo/commit/1666696b9f68436af909325ae2995cbfc6af09c2))
+* **F5:** summary entry (GH-34) ([c5ae148](https://github.com/rgoshen-snhu/WeighToGo/commit/c5ae14838cf08e992cd6f0ede3245f8619542e30))
+* **F6:** address PR [#41](https://github.com/rgoshen-snhu/WeighToGo/issues/41) review — fix React/MUI version drift + FR-A mapping (GH-34) ([1af23bd](https://github.com/rgoshen-snhu/WeighToGo/commit/1af23bdc5f577c43ec2092b5aed0b1470729b0de))
+* **F6:** align code comments and SRS prose with current identifiers (GH-34) ([6472a39](https://github.com/rgoshen-snhu/WeighToGo/commit/6472a3928c725d9fe0226378fcfa234167a1f330))
+* **F6:** cleanup version drift in code comments and SRS (GH-34) ([eac6ccc](https://github.com/rgoshen-snhu/WeighToGo/commit/eac6ccc2b398c53778205bdfec479f2b6561fc4e))
+* **F6:** SUMMARY entry for version-drift cleanup (GH-34) ([0b1ffb8](https://github.com/rgoshen-snhu/WeighToGo/commit/0b1ffb82dc71a6d002292ee106bf9ea5fd3713ce))
+* **plans:** land M2 quality remediation plan (GH-34) ([067e30e](https://github.com/rgoshen-snhu/WeighToGo/commit/067e30e1bc6373e6054d490c37e41506132f32f9))
+* **plans:** land M2 quality remediation plan (GH-34) ([fff372a](https://github.com/rgoshen-snhu/WeighToGo/commit/fff372a63f913d60128d01ae5027068eea803454))
+* **quality:** add M2 Web App Quality Review documentation (GH-34) ([245e0ac](https://github.com/rgoshen-snhu/WeighToGo/commit/245e0acf00a43525f36d09173f5ba5d9439fc205))
+* **quality:** add M2 Web App Quality Review documentation (PR 0, GH-34) ([32acab1](https://github.com/rgoshen-snhu/WeighToGo/commit/32acab16e29323a0cff640e57c2c924602c6b3aa))
+* record pipeline-stayed-red root cause (unpushed fix commits) in SUMMARY (GH-53) ([7a5c490](https://github.com/rgoshen-snhu/WeighToGo/commit/7a5c490242bd0d83820cafdfc756e12463941a4a))
+
 ## [0.1.0](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.1.0...v0.1.0) (2026-05-28)
 
 
