@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 from weighttogo.goals.application.get_active_goal_with_progress import GoalWithProgress
 from weighttogo.weight_tracking.domain.entities import WeightEntry
+from weighttogo.weight_tracking.domain.rate_of_change import RateOfChange
 
 
 def _make_entry(entry_id: int = 1) -> WeightEntry:
@@ -31,8 +32,15 @@ def _run(repo: MagicMock, gag: MagicMock | None = None, user_id: int = 1) -> obj
     if gag is None:
         gag = MagicMock()
         gag.execute.return_value = GoalWithProgress(goal=None, progress=None, current_value=None)
-    uc = BuildDashboardSummary(weight_repo=repo, get_active_goal_with_progress=gag)
-    return uc.execute(user_id=user_id)
+    grc = MagicMock()
+    grc.execute.return_value = RateOfChange(weekly_rate=None, unit=None, reason="insufficient_data")
+    repo.list_for_user_in_range.return_value = []
+    uc = BuildDashboardSummary(
+        weight_repo=repo,
+        get_active_goal_with_progress=gag,
+        get_rate_of_change=grc,
+    )
+    return uc.execute(user_id=user_id, today=date(2026, 5, 29))
 
 
 def test_empty_user_returns_null_latest_entry() -> None:
@@ -133,6 +141,56 @@ def test_goal_exists_with_no_entries_sets_active_goal_with_null_progress() -> No
     result = _run(repo, gag=gag)
     assert result.active_goal.goal is not None  # type: ignore[attr-defined]
     assert result.active_goal.progress is None  # type: ignore[attr-defined]
+
+
+def test_summary_includes_rate_of_change() -> None:
+    repo = MagicMock()
+    repo.get_latest_for_user.return_value = _make_entry()
+    repo.count_for_user.return_value = 5
+    repo.list_for_user_in_range.return_value = []
+    gag = MagicMock()
+    gag.execute.return_value = GoalWithProgress(goal=None, progress=None, current_value=None)
+    grc = MagicMock()
+    grc.execute.return_value = RateOfChange(weekly_rate=Decimal("-1.5"), unit="lbs", reason=None)
+    from weighttogo.dashboard.application.build_dashboard_summary import BuildDashboardSummary
+
+    uc = BuildDashboardSummary(
+        weight_repo=repo, get_active_goal_with_progress=gag, get_rate_of_change=grc
+    )
+    result = uc.execute(user_id=1, today=date(2026, 5, 29))
+    assert result.rate_of_change.weekly_rate == Decimal("-1.5")
+    assert result.rate_of_change.unit == "lbs"
+
+
+def test_summary_includes_trend_series_oldest_first() -> None:
+    repo = MagicMock()
+    older = _make_entry(entry_id=1)
+    newer = WeightEntry(
+        entry_id=2,
+        user_id=1,
+        weight_value=Decimal("170.00"),
+        weight_unit="lbs",
+        observation_date=date(2026, 5, 25),
+        notes=None,
+        created_at=datetime(2026, 5, 25, tzinfo=UTC),
+        updated_at=datetime(2026, 5, 25, tzinfo=UTC),
+    )
+    repo.get_latest_for_user.return_value = newer
+    repo.count_for_user.return_value = 2
+    # repository returns oldest-first per its contract
+    repo.list_for_user_in_range.return_value = [older, newer]
+    gag = MagicMock()
+    gag.execute.return_value = GoalWithProgress(goal=None, progress=None, current_value=None)
+    grc = MagicMock()
+    grc.execute.return_value = RateOfChange(weekly_rate=None, unit=None, reason="insufficient_data")
+    from weighttogo.dashboard.application.build_dashboard_summary import BuildDashboardSummary
+
+    uc = BuildDashboardSummary(
+        weight_repo=repo, get_active_goal_with_progress=gag, get_rate_of_change=grc
+    )
+    result = uc.execute(user_id=1, today=date(2026, 5, 29))
+    assert [p.observation_date for p in result.trend] == [date(2026, 5, 20), date(2026, 5, 25)]
+    assert result.trend[0].weight_value == Decimal("175.50")
 
 
 def test_dashboard_does_not_write_when_goal_at_100_percent() -> None:
