@@ -3042,3 +3042,24 @@ N/A
 - ADR-0019: Milestone detection algorithm
 - DDR-0007: Achievement notification UI
 - FR-Ach-1, FR-Ach-2, FR-G-4, FR-N-1
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Docs
+**Scope:** Architecture Decision Records
+
+**Summary:**
+Added ADR-0020 documenting the EAV key-value storage shape selected for the
+`user_preferences` table (Issue #55). Records the EAV-vs-columnar trade-off,
+the `ON CONFLICT DO UPDATE` upsert algorithm choice, and the rationale for
+aligning with SRS §8.2.6 and Android ADR-0004.
+
+**Rationale:**
+EAV selected over columnar to match SRS §8.2.6 verbatim and maintain continuity
+with Android ADR-0004; open-ended extension path requires no future migrations
+for new preference keys. Upsert chosen over catch-IntegrityError for atomicity
+and idempotency. Committed before the migration per §9 "docs first" gate.
+
+**References:**
+- Issue: GH-55
+- ADR-0020: Preferences storage data structure (EAV key-value)
