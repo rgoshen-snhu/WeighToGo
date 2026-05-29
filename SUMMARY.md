@@ -3193,3 +3193,28 @@ back. Serial execution and unique email per run avoid data collisions in CI.
 **References:**
 - Issue: GH-55
 - FR-P-1, FR-P-3, DDR-0008
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** E2E / WeightEntryForm / GoalForm
+
+**Summary:**
+Fixed two E2E failures in preferences.spec.ts:
+1. `toHaveValue()` on a MUI Select's combobox div — replaced with
+   `locator('input[name="weight_unit"]')` (MUI's hidden native input) and
+   `combobox.click()` + `option.click()` for selection.
+2. RHF `defaultValues` set once at mount: added a `useEffect` in WeightEntryForm
+   and GoalForm that calls `setValue('weight_unit/target_unit', preferences.weightUnit)`
+   when the preferences query resolves after a full-page navigation (which resets the
+   QueryClient cache in the browser).
+
+**Rationale:**
+`page.goto()` in Playwright is a full HTTP navigation — it destroys the QueryClient
+cache. On fresh page load, `usePreferences()` returns the loading fallback ('lbs')
+before the server response arrives. RHF captures this at mount; the `useEffect` sync
+corrects the value once the query resolves.
+
+**References:**
+- Issue: GH-55
+- PR: #67

@@ -21,6 +21,7 @@ import {
   TextField,
 } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { usePreferences } from '../../../contexts/PreferencesContext';
 import { type WeightEntryFormValues, weightEntrySchema } from '../schemas/weight-schemas';
@@ -50,13 +51,14 @@ export function WeightEntryForm({
   conflictError,
   isSubmitting = false,
 }: WeightEntryFormProps) {
-  const { preferences } = usePreferences();
+  const { preferences, isLoading: prefsLoading } = usePreferences();
 
   const {
     register,
     handleSubmit,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<WeightEntryFormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -68,6 +70,15 @@ export function WeightEntryForm({
       notes: '',
     },
   });
+
+  // Sync weight_unit when the preferences query resolves after mount.
+  // RHF defaultValues are set once at mount; if prefs were still loading
+  // then, this effect applies the real preference once it arrives.
+  useEffect(() => {
+    if (!prefsLoading && !defaultValues) {
+      setValue('weight_unit', preferences.weightUnit, { shouldDirty: false });
+    }
+  }, [prefsLoading, preferences.weightUnit, defaultValues, setValue]);
 
   const notesValue = watch('notes') ?? '';
 

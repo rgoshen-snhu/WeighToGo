@@ -48,9 +48,10 @@ test.describe.serial('preferences flow', () => {
     await expect(page.getByText(/preferences saved/i)).toBeVisible({ timeout: 5_000 });
 
     // Navigate to the new weight-entry form and verify the default unit is kg.
+    // MUI Select renders a hidden <input> for form submission — target that for
+    // toHaveValue(), since toHaveValue() requires a native input element.
     await page.goto('/weight/new');
-    const unitSelect = page.getByLabel(/weight unit/i);
-    await expect(unitSelect).toHaveValue('kg', { timeout: 5_000 });
+    await expect(page.locator('input[name="weight_unit"]')).toHaveValue('kg', { timeout: 5_000 });
   });
 
   // ── FR-P-3: notification toggle suppresses toast ──────────────────────────
@@ -74,8 +75,10 @@ test.describe.serial('preferences flow', () => {
     // Log a weight entry that would normally trigger the 5 lb milestone.
     await page.goto('/weight/new');
     await page.getByLabel(/weight value/i).fill('195');
-    // Unit might now be kg from the previous test; fill in lbs explicitly.
-    await page.getByLabel(/weight unit/i).selectOption('lbs');
+    // Unit might be kg from the previous test; explicitly choose lbs.
+    // MUI Select is not a native <select>, so use click-to-open + option click.
+    await page.getByRole('combobox', { name: /weight unit/i }).click();
+    await page.getByRole('option', { name: 'lbs' }).click();
     await page.getByRole('button', { name: /save/i }).click();
 
     // The milestone toast should NOT appear (FR-P-3 toggle off).
