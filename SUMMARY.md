@@ -3242,3 +3242,18 @@ corrects the value once the query resolves.
 **References:**
 - Issue: GH-55
 - PR: #67
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** GoalsPage / GoalFormWithPrefill
+
+**Summary:**
+Moved usePreferences() call from GoalFormWithPrefill to GoalsPage and passed
+defaultUnit as a prop. GoalFormWithPrefill's nested context subscription
+caused extra async re-renders during form interaction on slow CI machines,
+intermittently breaking the goal-create and achievement-notification E2E specs.
+
+**References:**
+- Issue: GH-55
+- PR: #67
