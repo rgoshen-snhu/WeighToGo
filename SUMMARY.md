@@ -9,6 +9,18 @@ issues were resolved.
 
 ## [2026-05-28] Commit Summary
 
+**Change Type:** Test
+**Scope:** Frontend — Playwright E2E for goal creation and accessibility (issue Task 9)
+
+**Summary:**
+`e2e/goal-create.spec.ts`: register → /goals → fill GoalForm (target_value=150, start_value=200, defaults lose+lbs) → submit → assert progress bar visible; assert "No entries yet" on second login. `e2e/goal-a11y.spec.ts`: axe-core WCAG 2.1 critical violation scans of /goals with no active goal (assert creation form visible) and with active goal (assert progress bar visible). Mirrors `weight-create.spec.ts` + `weight-a11y.spec.ts` patterns; requires live backend + Vite dev server.
+
+**References:**
+- Issue: GH-53
+- NFR-A-1, NFR-A-3 (ARIA), NFR-A-4 (contrast)
+
+## [2026-05-28] Commit Summary
+
 **Change Type:** Feature
 **Scope:** Frontend — goals feature + DDR-0005 (issue Tasks 2 & 8)
 
