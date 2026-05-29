@@ -3106,3 +3106,23 @@ serves as ON CONFLICT conflict target for the atomic upsert in the repository.
 - Issue: GH-55
 - ADR-0020: Preferences storage data structure (EAV key-value)
 - SRS §8.2.6
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Refactor
+**Scope:** Shared / RFC-7807
+
+**Summary:**
+Extracted `build_problem_detail()` into `shared/problem_detail.py`. Provides a
+consistent RFC-7807 Problem Details dict builder (type, title, status, detail,
+instance, errors, request_id) so the preferences router and future routers avoid
+hand-building the body. Added 9 unit tests (TDD red→green).
+
+**Rationale:**
+Goals router hand-builds the RFC-7807 dict per handler; preferences uses the shared
+helper from the start. DRY: one function, one source of the `about:blank` type and
+key ordering. Goals/achievements migration to the helper is a tracked follow-up issue.
+
+**References:**
+- Issue: GH-55
+- SRS §9.2
