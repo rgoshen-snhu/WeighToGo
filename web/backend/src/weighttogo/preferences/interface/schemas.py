@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, StrictBool, StrictStr
 
 from weighttogo.preferences.domain.entities import PreferenceKey
 
@@ -38,7 +38,7 @@ class UpdatePreferenceRequest(BaseModel):
         value: The new preference value.
     """
 
-    value: bool | str
+    value: StrictBool | StrictStr
 
 
 def preferences_response_from_dict(resolved: dict[PreferenceKey, str]) -> PreferencesResponse:

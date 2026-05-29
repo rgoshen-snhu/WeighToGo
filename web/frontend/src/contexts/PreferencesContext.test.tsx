@@ -5,6 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { PreferencesProvider, usePreferences } from './PreferencesContext';
 
+vi.mock('./AuthContext', () => ({
+  useAuth: () => ({ user: { user_id: 1 }, isAuthenticated: true, isLoading: false }),
+}));
+
 vi.mock('../features/settings/api/preferences-client', () => ({
   preferencesClient: {
     fetch: vi.fn().mockResolvedValue({

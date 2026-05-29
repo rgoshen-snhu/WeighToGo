@@ -30,6 +30,7 @@ import { useAbandonGoal } from '../hooks/useAbandonGoal';
 import { useSetGoal } from '../hooks/useSetGoal';
 import { useUpdateGoal } from '../hooks/useUpdateGoal';
 import type { GoalFormValues } from '../schemas/goal-schemas';
+import { usePreferences } from '../../../contexts/PreferencesContext';
 
 function mapError(err: unknown): string {
   if (err instanceof ApiError) {
@@ -235,10 +236,12 @@ function GoalFormWithPrefill({
   conflictError: string | null;
   isSubmitting: boolean;
 }) {
+  const { preferences } = usePreferences();
   const [isPrefetching, setIsPrefetching] = useState(true);
   const [prefillValues, setPrefillValues] = useState<Partial<GoalFormValues>>({
     goal_type: 'lose',
-    target_unit: 'lbs',
+    // Use the user's preferred unit when there is no latest entry to infer from.
+    target_unit: preferences.weightUnit,
   });
 
   useEffect(() => {

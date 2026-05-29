@@ -25,13 +25,19 @@ function wrapper({ children }: { children: ReactNode }) {
 }
 
 describe('usePreferencesQuery', () => {
-  it('returns loading state initially', () => {
-    const { result } = renderHook(() => usePreferencesQuery(), { wrapper });
+  it('is disabled when userId is null (unauthenticated)', () => {
+    const { result } = renderHook(() => usePreferencesQuery(null), { wrapper });
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.fetchStatus).toBe('idle');
+  });
+
+  it('returns loading state when userId is provided', () => {
+    const { result } = renderHook(() => usePreferencesQuery(1), { wrapper });
     expect(result.current.isLoading).toBe(true);
   });
 
   it('returns mapped camelCase preferences after fetch', async () => {
-    const { result } = renderHook(() => usePreferencesQuery(), { wrapper });
+    const { result } = renderHook(() => usePreferencesQuery(1), { wrapper });
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.data?.weightUnit).toBe('lbs');
     expect(result.current.data?.notifyStreak).toBe(false);

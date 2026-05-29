@@ -1,5 +1,5 @@
 /**
- * Tests for SettingsPage — renders controls and calls setPreference.
+ * Tests for SettingsPage — renders controls, calls mutation, shows feedback on success.
  */
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,7 +7,9 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { SettingsPage } from './SettingsPage';
 
-const mockSetPreference = vi.fn();
+const mockMutate = vi.fn((_, options?: { onSuccess?: () => void }) => {
+  options?.onSuccess?.();
+});
 
 vi.mock('../../../contexts/PreferencesContext', () => ({
   usePreferences: () => ({
@@ -18,8 +20,12 @@ vi.mock('../../../contexts/PreferencesContext', () => ({
       notifyStreak: false,
     },
     isLoading: false,
-    setPreference: mockSetPreference,
+    setPreference: vi.fn(),
   }),
+}));
+
+vi.mock('../hooks/useUpdatePreference', () => ({
+  useUpdatePreference: () => ({ mutate: mockMutate }),
 }));
 
 describe('SettingsPage', () => {
@@ -39,36 +45,38 @@ describe('SettingsPage', () => {
     expect(screen.getByLabelText(/milestone alerts toggle/i)).toBeInTheDocument();
   });
 
-  it('calls setPreference when unit changes', async () => {
+  it('calls mutation when unit changes', async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
-    const kgRadio = screen.getByRole('radio', { name: 'kg' });
-    await user.click(kgRadio);
-    expect(mockSetPreference).toHaveBeenCalledWith('weight_unit', 'kg');
+    await user.click(screen.getByRole('radio', { name: 'kg' }));
+    expect(mockMutate).toHaveBeenCalledWith(
+      { key: 'weight_unit', value: 'kg' },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    );
   });
 
-  it('calls setPreference when achievement toggle changes', async () => {
+  it('calls mutation when achievement toggle changes', async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
-    const toggle = screen.getByLabelText(/achievement alerts toggle/i);
-    await user.click(toggle);
-    expect(mockSetPreference).toHaveBeenCalledWith('notify_achievement', false);
+    await user.click(screen.getByLabelText(/achievement alerts toggle/i));
+    expect(mockMutate).toHaveBeenCalledWith(
+      { key: 'notify_achievement', value: false },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    );
   });
 
-  it('shows save feedback after preference change', async () => {
+  it('shows save feedback after mutation succeeds', async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
-    const kgRadio = screen.getByRole('radio', { name: 'kg' });
-    await user.click(kgRadio);
+    await user.click(screen.getByRole('radio', { name: 'kg' }));
+    // mockMutate calls onSuccess immediately, so feedback appears synchronously.
     expect(screen.getByText('Preferences saved')).toBeInTheDocument();
   });
 
   it('resets save feedback timer on rapid consecutive changes', async () => {
     const user = userEvent.setup();
     render(<SettingsPage />);
-    const kgRadio = screen.getByRole('radio', { name: 'kg' });
-    // Click twice rapidly to trigger the clearTimeout branch in showSaved.
-    await user.click(kgRadio);
+    await user.click(screen.getByRole('radio', { name: 'kg' }));
     await user.click(screen.getByLabelText(/achievement alerts toggle/i));
     expect(screen.getByText('Preferences saved')).toBeInTheDocument();
   });

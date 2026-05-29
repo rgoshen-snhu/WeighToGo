@@ -68,6 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearAuth = useCallback(() => {
     queryClient.setQueryData<AuthUser | null>(AUTH_QUERY_KEY, null);
+    // Remove all user-scoped preference caches so the next authenticated user
+    // does not see the previous user's preferences (P2-1 fix).
+    queryClient.removeQueries({ queryKey: ['preferences'] });
   }, [queryClient]);
 
   const value = useMemo<AuthContextValue>(

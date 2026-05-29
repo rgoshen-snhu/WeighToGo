@@ -2,20 +2,23 @@
  * Settings page — replaces SettingsPlaceholderPage (DDR-0008, FR-P-1, FR-P-3).
  *
  * Two-section card layout (Units, Notifications) within the existing PageLayout shell.
- * Changes persist immediately on interaction; aria-live region announces "Preferences saved".
+ * Changes persist immediately on interaction; aria-live region announces "Preferences saved"
+ * only after the mutation succeeds (not on optimistic start).
  */
 
 import { Box, Card, CardContent, Container, Typography } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { usePreferences } from '../../../contexts/PreferencesContext';
+import { useUpdatePreference } from '../hooks/useUpdatePreference';
 import { NotificationTogglesControl } from '../components/NotificationTogglesControl';
 import { UnitPreferenceControl } from '../components/UnitPreferenceControl';
 
 const SAVE_FEEDBACK_MS = 2000;
 
 export function SettingsPage() {
-  const { preferences, setPreference } = usePreferences();
+  const { preferences } = usePreferences();
+  const { mutate } = useUpdatePreference();
   const [saveMessage, setSaveMessage] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,18 +37,16 @@ export function SettingsPage() {
 
   const handleUnitChange = useCallback(
     (unit: 'lbs' | 'kg') => {
-      setPreference('weight_unit', unit);
-      showSaved();
+      mutate({ key: 'weight_unit', value: unit }, { onSuccess: showSaved });
     },
-    [setPreference, showSaved],
+    [mutate, showSaved],
   );
 
   const handleToggleChange = useCallback(
     (key: 'notify_achievement' | 'notify_milestone' | 'notify_streak', value: boolean) => {
-      setPreference(key, value);
-      showSaved();
+      mutate({ key, value }, { onSuccess: showSaved });
     },
-    [setPreference, showSaved],
+    [mutate, showSaved],
   );
 
   return (

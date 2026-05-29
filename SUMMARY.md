@@ -3218,3 +3218,27 @@ corrects the value once the query resolves.
 **References:**
 - Issue: GH-55
 - PR: #67
+
+## [2026-05-29] Commit Summary
+
+**Change Type:** Fix
+**Scope:** Code review — 6 findings (P2-1 through P2-5, P3-1)
+
+**Summary:**
+- P2-1: Scoped preferences query key to userId; disabled query when unauthenticated;
+  cleared preferences cache in clearAuth to prevent cross-user cache leakage.
+- P2-2: handleDismissOne now removes the specific displayed achievement by achievement_id
+  rather than slicing raw queue position 0 (fixes duplicate toast when milestone is hidden
+  but goal_reached is visible).
+- P2-3: Added UniqueConstraint(user_id, pref_key) to UserPreferenceModel __table_args__
+  to mirror migration 0006's UNIQUE constraint in ORM metadata.
+- P2-4: SettingsPage now calls useUpdatePreference directly and passes showSaved as
+  onSuccess; "Preferences saved" only fires after the API call succeeds.
+- P2-5: GoalFormWithPrefill initial target_unit now seeds from preferences.weightUnit
+  instead of hardcoded 'lbs' for first-goal create flow.
+- P3-1: UpdatePreferenceRequest.value uses StrictBool | StrictStr to prevent JSON integer
+  1/0 from coercing to True/False.
+
+**References:**
+- Issue: GH-55
+- PR: #67

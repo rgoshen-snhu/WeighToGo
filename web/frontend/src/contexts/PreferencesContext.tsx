@@ -3,6 +3,8 @@
  *
  * Backed by TanStack Query (ADR-0014: Query = server state).
  * Falls back to DEFAULT_PREFERENCES while the initial fetch is in flight.
+ * Query is scoped to the authenticated user — prevents /login from firing
+ * an unauthenticated fetch and prevents stale data after user switching.
  * colorScheme (FR-P-2 / theme) is deferred to the Final enhancement.
  *
  * SRS §10.4 governs the preferences management strategy.
@@ -10,12 +12,13 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 
+import { useAuth } from './AuthContext';
+import { usePreferencesQuery } from '../features/settings/hooks/usePreferencesQuery';
+import { useUpdatePreference } from '../features/settings/hooks/useUpdatePreference';
 import {
   DEFAULT_PREFERENCES,
   type Preferences,
 } from '../features/settings/schemas/preferences-schemas';
-import { usePreferencesQuery } from '../features/settings/hooks/usePreferencesQuery';
-import { useUpdatePreference } from '../features/settings/hooks/useUpdatePreference';
 
 export type { Preferences };
 
@@ -37,10 +40,11 @@ const PreferencesContext = createContext<PreferencesContextValue | undefined>(un
 
 /**
  * Wrap the component tree that needs access to user preferences.
- * Requires a QueryClientProvider ancestor.
+ * Requires QueryClientProvider and AuthProvider ancestors.
  */
 export function PreferencesProvider({ children }: { children: ReactNode }) {
-  const query = usePreferencesQuery();
+  const { user } = useAuth();
+  const query = usePreferencesQuery(user?.user_id ?? null);
   const mutation = useUpdatePreference();
 
   const setPreference = useMemo(

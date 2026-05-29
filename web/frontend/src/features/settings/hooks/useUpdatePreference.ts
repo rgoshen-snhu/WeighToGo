@@ -3,13 +3,18 @@
  *
  * Optimistic update: immediately reflects the new value in the Query cache.
  * On error: rolls back to the snapshot taken before the mutation started.
+ *
+ * The cache key is user-scoped (resolved from the auth cache at call time)
+ * so mutations never touch another user's cached preferences.
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { AUTH_QUERY_KEY } from '../../../contexts/AuthContext';
+import type { AuthUser } from '../../auth/api/auth-client';
 import { preferencesClient } from '../api/preferences-client';
 import { apiToPreferences, type Preferences } from '../schemas/preferences-schemas';
-import { PREFERENCES_KEY } from './usePreferencesQuery';
+import { preferencesQueryKey } from './usePreferencesQuery';
 
 interface UpdatePreferenceVariables {
   key: keyof Preferences extends infer K
@@ -28,28 +33,30 @@ export function useUpdatePreference() {
     mutationFn: ({ key, value }: UpdatePreferenceVariables) => preferencesClient.update(key, value),
 
     onMutate: async ({ key, value }: UpdatePreferenceVariables) => {
-      await queryClient.cancelQueries({ queryKey: PREFERENCES_KEY });
-      const snapshot = queryClient.getQueryData<Preferences>(PREFERENCES_KEY);
+      const userId = queryClient.getQueryData<AuthUser | null>(AUTH_QUERY_KEY)?.user_id ?? null;
+      const qKey = preferencesQueryKey(userId);
 
-      // Build the optimistic camelCase key from the snake_case API key.
+      await queryClient.cancelQueries({ queryKey: qKey });
+      const snapshot = queryClient.getQueryData<Preferences>(qKey);
+
       const camelKey = key.replace(/_([a-z])/g, (_, c: string) =>
         c.toUpperCase(),
       ) as keyof Preferences;
-      queryClient.setQueryData<Preferences>(PREFERENCES_KEY, (prev) =>
+      queryClient.setQueryData<Preferences>(qKey, (prev) =>
         prev ? { ...prev, [camelKey]: value } : prev,
       );
 
-      return { snapshot };
+      return { snapshot, qKey };
     },
 
     onError: (_err, _vars, context) => {
-      if (context?.snapshot) {
-        queryClient.setQueryData(PREFERENCES_KEY, context.snapshot);
-      }
+      // context is always defined when onMutate returns; restore snapshot.
+      if (context) queryClient.setQueryData(context.qKey, context.snapshot);
     },
 
-    onSuccess: (raw) => {
-      queryClient.setQueryData(PREFERENCES_KEY, apiToPreferences(raw));
+    onSuccess: (raw, _vars, context) => {
+      // context is always defined when onMutate returns; update cache.
+      if (context) queryClient.setQueryData(context.qKey, apiToPreferences(raw));
     },
   });
 }
