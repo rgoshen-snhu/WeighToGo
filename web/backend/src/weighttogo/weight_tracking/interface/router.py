@@ -158,6 +158,10 @@ def create_weight_entry(
         target_lbs = convert_weight(goal.target_value, goal.target_unit, "lbs")
         current_lbs = convert_weight(entry.weight_value, entry.weight_unit, "lbs")
 
+        # Streak detection (FR-Ach-3) needs the user's logging history as a set
+        # of calendar days; the set collapses any duplicate same-day entries.
+        observation_dates = repo.list_observation_dates(current_user_id)
+
         ach_list: list[Achievement] = []
         try:
             # Fix 1 (data integrity): run achievement writes inside a SAVEPOINT
@@ -165,7 +169,9 @@ def create_weight_entry(
             # achievement inserts, leaving the already-flushed weight entry
             # intact in the outer transaction.  A plain session.rollback() would
             # cancel the weight entry too while still returning a 201 to the
-            # client (Codex adversarial review finding).
+            # client (adversarial review finding).  The SAVEPOINT also makes the
+            # streak-achievement unique-index insert (FR-Ach-3) an idempotent
+            # no-op on a concurrent duplicate.
             with session.begin_nested():
                 ach_list = DetectAchievements(
                     achievement_repo=SqlAlchemyAchievementRepository(session)
@@ -177,6 +183,8 @@ def create_weight_entry(
                         start_value=start_lbs,
                         target_value=target_lbs,
                         current_weight=current_lbs,
+                        observation_dates=frozenset(observation_dates),
+                        today=date.today(),
                     )
                 )
         except IntegrityError:

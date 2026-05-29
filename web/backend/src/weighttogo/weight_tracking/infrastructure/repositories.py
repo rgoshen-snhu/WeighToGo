@@ -196,6 +196,25 @@ class SqlAlchemyWeightEntryRepository:
             .count()
         )
 
+    def list_observation_dates(self, user_id: int) -> set[date]:
+        """Return the set of distinct active observation dates for *user_id*.
+
+        Duplicate same-day entries collapse to one date via set semantics; this
+        feeds the streak detector (FR-Ach-3).  Soft-deleted entries are excluded.
+
+        Args:
+            user_id: The owning user's ID.
+
+        Returns:
+            A set of distinct ``date`` values for non-deleted entries.
+        """
+        rows = (
+            self._session.query(WeightEntryModel.observation_date)
+            .filter_by(user_id=user_id, is_deleted=False)
+            .all()
+        )
+        return {r.observation_date for r in rows}
+
     def get_latest_for_user(self, user_id: int) -> WeightEntry | None:
         """Return the most recent active entry for *user_id* by observation_date.
 

@@ -84,6 +84,43 @@ def test_second_entry_at_same_weight_returns_no_new_achievements(client: TestCli
     assert data["newly_earned_achievements"] == []
 
 
+# ── Streak detection (FR-Ach-3) ───────────────────────────────────────────────
+
+
+def _consecutive_dates(start_day: int, count: int) -> list[str]:
+    """Return *count* consecutive ISO dates in January 2026 from *start_day*."""
+    return [f"2026-01-{start_day + i:02d}" for i in range(count)]
+
+
+def test_seven_consecutive_daily_entries_earn_streak(client: TestClient) -> None:
+    # ARRANGE: lose goal; entries at 199 lbs (delta=1) so no milestone fires
+    _register_and_login(client, "streak7@example.com")
+    _create_goal(client)
+    dates = _consecutive_dates(1, 7)  # Jan 1..7
+    # ACT: post the first six entries, then the seventh completes the streak
+    last = None
+    for d in dates:
+        last = _post_entry(client, 199.0, d)
+    assert last is not None
+    # ASSERT: the 7th POST response carries the streak(7) achievement
+    streaks = [a for a in last["newly_earned_achievements"] if a["achievement_type"] == "streak"]
+    assert len(streaks) == 1
+    assert float(streaks[0]["threshold"]) == 7.0
+
+
+def test_eighth_consecutive_entry_does_not_re_earn_seven_day_streak(client: TestClient) -> None:
+    # ARRANGE: earn the 7-day streak first
+    _register_and_login(client, "streak8@example.com")
+    _create_goal(client)
+    for d in _consecutive_dates(1, 7):  # Jan 1..7 earns streak(7)
+        _post_entry(client, 199.0, d)
+    # ACT: an eighth consecutive day extends the run but 7 is already recorded
+    data = _post_entry(client, 199.0, "2026-01-08")
+    # ASSERT: no new streak(7) achievement (idempotent); 30 not yet reached
+    streaks = [a for a in data["newly_earned_achievements"] if a["achievement_type"] == "streak"]
+    assert streaks == []
+
+
 # ── Goal-reached detection (FR-G-4) ──────────────────────────────────────────
 
 
