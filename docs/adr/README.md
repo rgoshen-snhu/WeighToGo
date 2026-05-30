@@ -29,4 +29,10 @@ the next available number.
 | [0013](0013-refresh-token-rotation-family-revocation.md) | Refresh Token Rotation with Family-Based Revocation | Accepted | 2026-05-22 | Web |
 | [0014](0014-tanstack-query-for-server-state.md) | TanStack Query for Server State | Accepted | 2026-05-23 | Web |
 | [0015](0015-opaque-compound-cursor-pagination.md) | Opaque Compound Cursor for Weight-Entry Pagination | Accepted | 2026-05-23 | Web |
+| [0016](0016-security-header-policy.md) | Security Header Policy (HSTS + CSP) | Accepted | 2026-05-27 | Web |
+| [0017](0017-csrf-origin-referer-validation.md) | CSRF Origin/Referer Validation for State-Changing Requests | Accepted | 2026-05-27 | Web |
+| [0018](0018-concurrent-refresh-coalescing.md) | Concurrent Refresh Token Coalescing | Accepted | 2026-05-27 | Web |
+| [0019](0019-milestone-detection-algorithm.md) | Milestone Detection Algorithm | Accepted | 2026-05-29 | Web |
+| [0020](0020-preferences-storage-data-structure.md) | Preferences Storage Data Structure | Accepted | 2026-05-29 | Web |
 | [0021](0021-composite-index-strategy.md) | Composite Index Strategy for Weight-History Reads | Accepted | 2026-05-29 | Web |
+| [0022](0022-streak-detection-algorithm.md) | Streak Detection Algorithm | Accepted | 2026-05-29 | Web |

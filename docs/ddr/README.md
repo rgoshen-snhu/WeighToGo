@@ -20,3 +20,4 @@ the next available number.
 | [0003](0003-user-menu-in-appbar.md) | User Menu in AppBar | Accepted | — | Web |
 | [0004](0004-weight-table-action-button-conversion.md) | Weight Table Action Button Conversion | Accepted | 2026-05-28 | Web |
 | [0005](0005-goal-progress-visualization.md) | Goal Progress Visualization | Accepted | 2026-05-28 | Web |
+| [0006](0006-weight-trend-chart.md) | Weight Trend Chart | Accepted | 2026-05-29 | Web |
