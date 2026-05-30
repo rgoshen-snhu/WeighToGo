@@ -1,9 +1,8 @@
 /**
  * Notification toggle controls (DDR-0008, FR-P-3).
  *
- * Three MUI Switches: achievement, milestone, and streak alerts.
- * Streak is stored-but-inert (no producer in Phase 3) — shown disabled
- * with "(coming soon)" so the row appears without re-layout at Phase 5.
+ * Three MUI Switches: achievement, milestone, and streak alerts, each wired
+ * to its preference.
  */
 
 import { FormControl, FormControlLabel, FormGroup, FormLabel, Switch } from '@mui/material';
@@ -51,14 +50,14 @@ export function NotificationTogglesControl({
           label="Milestone alerts"
         />
         <FormControlLabel
-          disabled
           control={
             <Switch
               checked={notifyStreak}
-              slotProps={{ input: { 'aria-label': 'Streak alerts toggle (coming soon)' } }}
+              onChange={(e) => onChange('notify_streak', e.target.checked)}
+              slotProps={{ input: { 'aria-label': 'Streak alerts toggle' } }}
             />
           }
-          label="Streak alerts (coming soon)"
+          label="Streak alerts"
         />
       </FormGroup>
     </FormControl>

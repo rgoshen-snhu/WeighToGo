@@ -14,3 +14,15 @@ export const achievementListSchema = z.object({
 
 export type AchievementRecord = z.infer<typeof achievementSchema>;
 export type AchievementListResponse = z.infer<typeof achievementListSchema>;
+
+/**
+ * Parse an achievement threshold to a number for display, or `null` when it is
+ * absent or malformed. The schema allows a null threshold (only `goal_reached`
+ * legitimately uses it); guarding here keeps a bad milestone/streak row from
+ * rendering "NaN" to the user.
+ */
+export function parseThreshold(threshold: string | number | null): number | null {
+  if (threshold === null) return null;
+  const value = typeof threshold === 'number' ? threshold : parseFloat(threshold);
+  return Number.isNaN(value) ? null : value;
+}

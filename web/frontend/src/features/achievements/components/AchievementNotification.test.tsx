@@ -51,6 +51,20 @@ describe('AchievementNotification', () => {
     expect(screen.getByText(/7-day logging streak/i)).toBeInTheDocument();
   });
 
+  it('falls back to plain streak copy when threshold is null (no NaN)', () => {
+    const nullStreak: AchievementRecord = { ...streak7, achievement_id: 5, threshold: null };
+    render(<AchievementNotification achievements={[nullStreak]} onDismissOne={() => undefined} />);
+    expect(screen.getByText('Logging streak! Keep it up.')).toBeInTheDocument();
+  });
+
+  it('falls back to plain milestone copy when threshold is null (no NaN)', () => {
+    const nullMilestone: AchievementRecord = { ...milestone5, achievement_id: 6, threshold: null };
+    render(
+      <AchievementNotification achievements={[nullMilestone]} onDismissOne={() => undefined} />,
+    );
+    expect(screen.getByText('Milestone reached!')).toBeInTheDocument();
+  });
+
   it('has role status for ARIA live region (NFR-A-3)', () => {
     render(<AchievementNotification achievements={[milestone5]} onDismissOne={() => undefined} />);
     expect(screen.getByRole('status')).toBeInTheDocument();

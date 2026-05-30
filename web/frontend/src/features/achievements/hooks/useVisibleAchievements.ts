@@ -1,10 +1,9 @@
 /**
  * Single toggle-enforcement home for achievement notifications [G10].
  *
- * Filters the achievements queue against the user's notify preferences.
- * One home → SRP; independently unit-testable without rendering a toast.
- *
- * notify_streak is stored-but-inert (no streak producer in Phase 3).
+ * Filters the achievements queue against the user's notify preferences
+ * (achievement, milestone, and streak). One home → SRP; independently
+ * unit-testable without rendering a toast.
  */
 
 import { useMemo } from 'react';
@@ -25,8 +24,13 @@ export function useVisibleAchievements(achievements: AchievementRecord[]): Achie
       achievements.filter((a) => {
         if (a.achievement_type === 'goal_reached') return preferences.notifyAchievement;
         if (a.achievement_type === 'milestone') return preferences.notifyMilestone;
-        return true;
+        return preferences.notifyStreak;
       }),
-    [achievements, preferences.notifyAchievement, preferences.notifyMilestone],
+    [
+      achievements,
+      preferences.notifyAchievement,
+      preferences.notifyMilestone,
+      preferences.notifyStreak,
+    ],
   );
 }

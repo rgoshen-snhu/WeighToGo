@@ -13,7 +13,7 @@
 import { Alert, Snackbar } from '@mui/material';
 import { useCallback } from 'react';
 
-import type { AchievementRecord } from '../schemas/achievement';
+import { parseThreshold, type AchievementRecord } from '../schemas/achievement';
 
 interface Props {
   /** Achievements queue — the first element is the one currently displayed. */
@@ -26,13 +26,15 @@ function toastMessage(ach: AchievementRecord): string {
   if (ach.achievement_type === 'goal_reached') {
     return 'Goal reached! You hit your target weight.';
   }
-  // parseFloat strips trailing zeros from the Numeric(6,2) serialised string.
+  // parseThreshold strips trailing zeros from the Numeric(6,2) serialised
+  // string and guards against a null/NaN value.
+  const value = parseThreshold(ach.threshold);
   if (ach.achievement_type === 'streak') {
-    const days = parseFloat(String(ach.threshold));
-    return `${days}-day logging streak! Keep it up.`;
+    return value === null
+      ? 'Logging streak! Keep it up.'
+      : `${value}-day logging streak! Keep it up.`;
   }
-  const lbs = parseFloat(String(ach.threshold));
-  return `${lbs} lb milestone reached!`;
+  return value === null ? 'Milestone reached!' : `${value} lb milestone reached!`;
 }
 
 export function AchievementNotification({ achievements, onDismissOne }: Props) {
