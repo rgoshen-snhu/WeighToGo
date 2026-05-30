@@ -33,4 +33,10 @@ describe('convertWeight', () => {
     // Cast past the type system to exercise the explicit default branch.
     expect(() => convertWeight(100, 'stones' as 'lbs', 'kg')).toThrow(/Unknown weight unit/);
   });
+
+  it('throws on an unrecognised target unit rather than mislabelling the result', () => {
+    // A valid source with an invalid target must not silently return a
+    // converted-but-mislabelled value; cast past the type system to reach it.
+    expect(() => convertWeight(100, 'lbs', 'stones' as 'kg')).toThrow(/Unknown weight unit/);
+  });
 });

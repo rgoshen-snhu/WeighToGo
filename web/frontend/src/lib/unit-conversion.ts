@@ -28,19 +28,24 @@ const LBS_TO_KG = 0.45359237;
  * @param fromUnit - The source unit, 'lbs' or 'kg'.
  * @param toUnit   - The target unit, 'lbs' or 'kg'.
  * @returns The converted weight as a number.
- * @throws {Error} When `fromUnit` is not a recognised unit. The typed parameter
- *   is the primary guard; this branch is defence in depth at runtime.
+ * @throws {Error} When `fromUnit` or `toUnit` is not a recognised unit. The
+ *   typed parameters are the primary guard; these branches are defence in depth
+ *   at runtime, mirroring the backend `convert_weight` which validates both
+ *   units before converting so an unknown target can never be mislabelled.
  */
 export function convertWeight(value: number, fromUnit: WeightUnit, toUnit: WeightUnit): number {
   if (fromUnit === toUnit) {
     return value;
   }
-  if (fromUnit === 'lbs') {
+  if (fromUnit === 'lbs' && toUnit === 'kg') {
     return value * LBS_TO_KG;
   }
-  if (fromUnit === 'kg') {
+  if (fromUnit === 'kg' && toUnit === 'lbs') {
     return value / LBS_TO_KG;
   }
-  // Unreachable for well-typed callers; explicit default keeps the branch total.
-  throw new Error(`Unknown weight unit: ${String(fromUnit)}`);
+  // Unreachable for well-typed callers; explicit default keeps the branch total
+  // and prevents a valid source with an unknown target returning a mislabelled
+  // value. `fromUnit === toUnit` above already handled the matching-unit case.
+  const unknown = fromUnit === 'lbs' || fromUnit === 'kg' ? toUnit : fromUnit;
+  throw new Error(`Unknown weight unit: ${String(unknown)}`);
 }
