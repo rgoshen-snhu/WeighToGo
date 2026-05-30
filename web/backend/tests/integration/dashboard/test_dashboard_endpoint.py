@@ -101,6 +101,34 @@ def test_dashboard_includes_active_goal_progress(client: TestClient) -> None:
     assert data["active_goal"]["progress_percent"] == pytest.approx(50.0)
 
 
+def test_dashboard_empty_user_has_insufficient_rate_and_empty_trend(client: TestClient) -> None:
+    _register_and_login(client)
+    resp = client.get("/api/v1/dashboard/summary")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["rate_of_change"]["weekly_rate"] is None
+    assert data["rate_of_change"]["reason"] == "insufficient_data"
+    assert data["trend"] == []
+
+
+def test_dashboard_populated_user_returns_trend_point(client: TestClient) -> None:
+    _register_and_login(client)
+    client.post(
+        "/api/v1/weight-entries",
+        json={
+            "weight_value": 175.5,
+            "weight_unit": "lbs",
+            "observation_date": date.today().isoformat(),
+        },
+    )
+    resp = client.get("/api/v1/dashboard/summary")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["trend"]) == 1
+    assert data["trend"][0]["weight_value"] == 175.5
+    assert data["trend"][0]["observation_date"] == date.today().isoformat()
+
+
 def test_dashboard_active_goal_null_when_no_goal(client: TestClient) -> None:
     _register_and_login(client)
     entry_resp = client.post(

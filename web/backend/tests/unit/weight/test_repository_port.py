@@ -33,6 +33,9 @@ def test_concrete_class_satisfying_port_passes_isinstance_check() -> None:
         ) -> list[WeightEntry]:
             return []
 
+        def list_for_user_in_range(self, user_id: int, start: date, end: date) -> list[WeightEntry]:
+            return []
+
         def count_for_user(self, user_id: int) -> int:
             return 0
 

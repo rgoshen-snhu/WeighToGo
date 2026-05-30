@@ -154,3 +154,35 @@ def test_created_at_composite_index_present(pg_engine: Engine) -> None:
             )
         }
     assert "idx_weight_entries_user_created_at" in names, names
+
+
+def test_observation_date_range_query_uses_index_not_seqscan(
+    pg_engine: Engine, seeded_uid: int
+) -> None:
+    """The trend / rate-of-change range read uses the (user_id, observation_date)
+    index from migration 0002 rather than a sequential scan (NFR-P-3, FR-D-2/3).
+
+    Mirrors ``SqlAlchemyWeightEntryRepository.list_for_user_in_range``: a
+    ``user_id`` equality plus a closed ``observation_date`` range, ordered
+    oldest-first.
+    """
+    sql = (
+        "EXPLAIN SELECT * FROM weight_entries "
+        "WHERE user_id = :u AND is_deleted = FALSE "
+        "AND observation_date >= :start AND observation_date <= :end "
+        "ORDER BY observation_date ASC, entry_id ASC"
+    )
+    params = {
+        "u": seeded_uid,
+        "start": date(2020, 1, 1),
+        "end": date(2020, 1, 1) + timedelta(days=14),
+    }
+    with pg_engine.connect() as conn:
+        conn.execute(text("SET enable_seqscan = off"))
+        plan = "\n".join(row[0] for row in conn.execute(text(sql), params))
+    # Assert the composite index is used (Index Scan or Bitmap Index Scan — the
+    # ASC order over a DESC index makes the planner choose a bitmap scan) and
+    # that no sequential scan occurs. Match on the index name, not the scan-type
+    # prefix, since the prefix varies with the chosen access path.
+    assert "idx_weight_entries_user_observation_desc" in plan, plan
+    assert "Seq Scan on weight_entries" not in plan, plan

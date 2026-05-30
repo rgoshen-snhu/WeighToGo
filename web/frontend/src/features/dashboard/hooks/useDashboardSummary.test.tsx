@@ -9,6 +9,8 @@ const mockSummary: dashboardClientModule.DashboardSummaryResponse = {
   latest_entry: null,
   total_entries: 0,
   active_goal: null,
+  rate_of_change: { weekly_rate: null, unit: null, reason: 'insufficient_data' },
+  trend: [],
 };
 
 function wrapper({ children }: { children: React.ReactNode }) {

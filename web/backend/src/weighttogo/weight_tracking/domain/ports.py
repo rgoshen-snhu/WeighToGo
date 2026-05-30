@@ -93,6 +93,29 @@ class IWeightEntryRepository(Protocol):
         """
         ...
 
+    def list_for_user_in_range(
+        self,
+        user_id: int,
+        start: date,
+        end: date,
+    ) -> list[WeightEntry]:
+        """Return active entries with ``start <= observation_date <= end``.
+
+        Results are ordered ``(observation_date ASC, entry_id ASC)`` — oldest
+        first — which is the order the trend chart and the rate-of-change
+        windows consume.  Backs the trend read paths (FR-D-2, FR-D-3) and uses
+        the ``(user_id, observation_date)`` composite index (ADR-0021).
+
+        Args:
+            user_id: The owning user's ID.
+            start: Inclusive lower bound on ``observation_date``.
+            end: Inclusive upper bound on ``observation_date``.
+
+        Returns:
+            A list of active ``WeightEntry`` entities, oldest first.
+        """
+        ...
+
     def count_for_user(self, user_id: int) -> int:
         """Return the count of active (non-deleted) entries for *user_id*.
 

@@ -32,7 +32,13 @@ test.describe.serial('goal creation flow', () => {
     // Fill target weight (default goal_type=lose, default unit=lbs)
     await page.getByLabel(/target weight/i).fill('150');
     await page.getByLabel(/starting weight/i).fill('200');
+    // Anchor the assertion to the create round-trip so it does not race the
+    // mutation + active-goal refetch under parallel CI load (was flaky).
+    const createGoal = page.waitForResponse(
+      (r) => r.url().includes('/api/v1/goals') && r.request().method() === 'POST',
+    );
     await page.getByRole('button', { name: /set goal/i }).click();
+    await createGoal;
 
     // After successful creation, the progress bar should be visible
     await expect(page.getByRole('progressbar')).toBeVisible({ timeout: 10_000 });

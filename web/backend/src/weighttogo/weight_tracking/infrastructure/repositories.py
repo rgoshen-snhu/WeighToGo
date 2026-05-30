@@ -181,6 +181,42 @@ class SqlAlchemyWeightEntryRepository:
         rows = q.limit(limit).all()
         return [_entry_to_domain(r) for r in rows]
 
+    def list_for_user_in_range(
+        self,
+        user_id: int,
+        start: date,
+        end: date,
+    ) -> list[WeightEntry]:
+        """Return active entries with ``start <= observation_date <= end``.
+
+        Ordered oldest-first to match the trend chart and rate-of-change window
+        consumers.  The ``user_id`` equality plus the ``observation_date`` range
+        are served by the ``(user_id, observation_date)`` composite index
+        (ADR-0021).
+
+        Args:
+            user_id: The owning user's ID.
+            start: Inclusive lower bound on ``observation_date``.
+            end: Inclusive upper bound on ``observation_date``.
+
+        Returns:
+            A list of active ``WeightEntry`` entities, oldest first.
+        """
+        rows = (
+            self._session.query(WeightEntryModel)
+            .filter_by(user_id=user_id, is_deleted=False)
+            .filter(
+                WeightEntryModel.observation_date >= start,
+                WeightEntryModel.observation_date <= end,
+            )
+            .order_by(
+                WeightEntryModel.observation_date.asc(),
+                WeightEntryModel.entry_id.asc(),
+            )
+            .all()
+        )
+        return [_entry_to_domain(r) for r in rows]
+
     def count_for_user(self, user_id: int) -> int:
         """Return the count of active (non-deleted) entries for *user_id*.
 
