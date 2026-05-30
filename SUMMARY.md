@@ -7,6 +7,36 @@ issues were resolved.
 
 ---
 
+## [2026-05-30 08:58] Commit Summary
+
+**Change Type:** Refactor
+**Scope:** Auth frontend test (LoginForm.test.tsx)
+
+**Summary:**
+Replaced the hardcoded `formError="Invalid credentials."` literal in
+LoginForm.test.tsx with the imported `AUTH_INVALID_CREDENTIALS` constant from
+features/auth/messages.ts, so the component test no longer re-types a string the
+messages module owns. Also corrected the GH-47 acceptance criterion #2, which had
+listed only two expected grep sites (messages.ts + api-client.test.ts) and
+overlooked messages.test.ts:15 — the constant's own value-assertion, which must
+restate the literal to avoid a tautological check. Full frontend suite green (377
+tests); the post-fix grep returns the three expected sites.
+
+**Rationale:**
+The messages module docstring mandates importing the constants rather than
+re-typing the literals inline; this test was the last violation in the frontend
+source. Importing the constant makes the test follow any future reword of the
+message instead of silently asserting stale wording. messages.test.ts and
+api-client.test.ts are deliberate exceptions (value-pinning and wire-contract
+tests respectively), which is why the corrected criterion expects three grep
+sites rather than two.
+
+**References:**
+- Issue: GH-47
+- Parent: GH-42 (ADR-0010 message consolidation)
+
+---
+
 ## [2026-05-29 22:05] Commit Summary
 
 **Change Type:** Chore (release automation)
