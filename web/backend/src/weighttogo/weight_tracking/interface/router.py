@@ -185,6 +185,7 @@ def create_weight_entry(
                         current_weight=current_lbs,
                         observation_dates=frozenset(observation_dates),
                         today=date.today(),
+                        goal_created_at=goal.created_at.date(),
                     )
                 )
         except IntegrityError:

@@ -31,7 +31,7 @@ class Streak(NamedTuple):
     length_days: int
 
 
-def _longest_consecutive_run(observation_dates: set[date], today: date) -> int:
+def _longest_consecutive_run(observation_dates: frozenset[date], today: date) -> int:
     """Return the length of the longest run of consecutive calendar days.
 
     Future-dated entries (after *today*) are ignored defensively.  Duplicate
@@ -60,7 +60,7 @@ def _longest_consecutive_run(observation_dates: set[date], today: date) -> int:
     return longest
 
 
-def detect_streaks(observation_dates: set[date], today: date) -> list[Streak]:
+def detect_streaks(observation_dates: frozenset[date], today: date) -> list[Streak]:
     """Return streak thresholds (7, 30) met by the user's logging history.
 
     A threshold T is met when the longest run of consecutive calendar days in

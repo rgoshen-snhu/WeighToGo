@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any, cast
 
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from weighttogo.goals.infrastructure.models import GoalModel
 
 
 def _register_and_login(client: TestClient, email: str = "detect@example.com") -> None:
@@ -92,11 +96,27 @@ def _consecutive_dates(start_day: int, count: int) -> list[str]:
     return [f"2026-01-{start_day + i:02d}" for i in range(count)]
 
 
-def test_seven_consecutive_daily_entries_earn_streak(client: TestClient) -> None:
+def _backdate_active_goal(db_session: Session, when: datetime) -> None:
+    """Move the active goal's ``created_at`` earlier.
+
+    Streaks count only logging on/after the goal's creation (FR-Ach-3), so a
+    goal created "now" in the test must be backdated for past-dated entries to
+    fall inside the streak window.
+    """
+    goal = db_session.query(GoalModel).filter_by(is_active=True).first()
+    assert goal is not None
+    goal.created_at = when
+    db_session.flush()
+
+
+def test_seven_consecutive_daily_entries_earn_streak(
+    client: TestClient, db_session: Session
+) -> None:
     # ARRANGE: lose goal; entries at 199 lbs (delta=1) so no milestone fires
     _register_and_login(client, "streak7@example.com")
     _create_goal(client)
-    dates = _consecutive_dates(1, 7)  # Jan 1..7
+    _backdate_active_goal(db_session, datetime(2025, 12, 1, tzinfo=UTC))
+    dates = _consecutive_dates(1, 7)  # Jan 1..7, after goal creation
     # ACT: post the first six entries, then the seventh completes the streak
     last = None
     for d in dates:
@@ -108,10 +128,13 @@ def test_seven_consecutive_daily_entries_earn_streak(client: TestClient) -> None
     assert float(streaks[0]["threshold"]) == 7.0
 
 
-def test_eighth_consecutive_entry_does_not_re_earn_seven_day_streak(client: TestClient) -> None:
+def test_eighth_consecutive_entry_does_not_re_earn_seven_day_streak(
+    client: TestClient, db_session: Session
+) -> None:
     # ARRANGE: earn the 7-day streak first
     _register_and_login(client, "streak8@example.com")
     _create_goal(client)
+    _backdate_active_goal(db_session, datetime(2025, 12, 1, tzinfo=UTC))
     for d in _consecutive_dates(1, 7):  # Jan 1..7 earns streak(7)
         _post_entry(client, 199.0, d)
     # ACT: an eighth consecutive day extends the run but 7 is already recorded

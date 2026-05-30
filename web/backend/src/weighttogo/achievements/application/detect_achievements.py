@@ -32,6 +32,11 @@ class DetectAchievementsCommand:
             is not requested (preserves the pre-streak call contract).
         today: The reference date for streak detection; defaults to the UTC
             date at execution time when ``None``.
+        goal_created_at: The active goal's creation date.  When set, streak
+            detection counts only observation dates on/after it, so a streak
+            reflects consecutive logging toward *this* goal and a new goal
+            cannot re-award streaks earned under a prior one.  ``None`` uses
+            the full history (preserves the pre-window call contract).
     """
 
     user_id: int
@@ -42,6 +47,7 @@ class DetectAchievementsCommand:
     current_weight: Decimal
     observation_dates: frozenset[date] = field(default_factory=frozenset)
     today: date | None = None
+    goal_created_at: date | None = None
 
 
 class DetectAchievements:
@@ -124,7 +130,14 @@ class DetectAchievements:
         if cmd.observation_dates:
             recorded_streaks = self._repo.get_recorded_streak_thresholds(cmd.goal_id)
             reference_day = cmd.today or now.date()
-            for streak in detect_streaks(set(cmd.observation_dates), reference_day):
+            # Scope the streak to logging toward THIS goal: a new goal must not
+            # re-award streaks earned earlier, because the idempotency guard
+            # above reads only this goal's rows.  Filtering to dates on/after
+            # the goal's creation keeps the run honest to this goal.
+            window = cmd.observation_dates
+            if cmd.goal_created_at is not None:
+                window = frozenset(d for d in cmd.observation_dates if d >= cmd.goal_created_at)
+            for streak in detect_streaks(window, reference_day):
                 threshold = streak_threshold_decimal(streak)
                 if threshold in recorded_streaks:
                     continue
