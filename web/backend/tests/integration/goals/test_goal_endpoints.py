@@ -148,6 +148,27 @@ def test_list_goals_returns_created_goal(client: TestClient) -> None:
     assert len(resp.json()["goals"]) == 1
 
 
+def test_list_goals_history_excludes_active(client: TestClient) -> None:
+    _register_and_login(client, "goal-history@example.com")
+    # Create then abandon one goal (becomes past), then create an active one.
+    first = _create_goal(client)
+    client.delete(f"/api/v1/goals/{first['goal_id']}")
+    _create_goal(client)  # new active goal
+
+    # Default list returns both.
+    all_resp = client.get("/api/v1/goals")
+    assert all_resp.status_code == 200
+    assert len(all_resp.json()["goals"]) == 2
+
+    # History list returns only the abandoned (non-active) goal.
+    hist_resp = client.get("/api/v1/goals?history=true")
+    assert hist_resp.status_code == 200
+    hist = hist_resp.json()["goals"]
+    assert len(hist) == 1
+    assert hist[0]["is_active"] is False
+    assert hist[0]["goal_id"] == first["goal_id"]
+
+
 # ── PUT /goals/{goal_id} ──────────────────────────────────────────────────────
 
 

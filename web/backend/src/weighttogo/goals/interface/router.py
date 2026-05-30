@@ -166,17 +166,25 @@ def get_active_goal(
 def list_goals(
     request: Request,
     limit: int = Query(default=50, ge=1, le=100, description="Maximum goals to return (1–100)."),
+    history: bool = Query(
+        default=False,
+        description="When true, return only past (achieved or abandoned) goals (FR-G-5).",
+    ),
     session: Session = Depends(get_db_session),
     current_user_id: int = Depends(get_current_user_id),
 ) -> GoalListResponse:
-    """Return recent goals (active and historical) for the authenticated user.
+    """Return recent goals for the authenticated user, newest first.
 
-    Results are ordered newest-first and capped at *limit* (max 100) to prevent
-    unbounded DB reads and serialization cost on accounts with large goal histories.
+    By default this returns active and historical goals. When *history* is true,
+    only past (achieved or abandoned) goals are returned — the FR-G-5 history
+    view. Results are capped at *limit* (max 100) to prevent unbounded DB reads
+    and serialization cost on accounts with large goal histories.
 
     Args:
         request: The incoming HTTP request (required by slowapi).
         limit: Maximum number of goals to return (1 – 100, default 50).
+        history: When true, exclude the active goal so only past goals are
+            returned (FR-G-5).
         session: The active database session.
         current_user_id: The authenticated user's ID.
 
@@ -184,7 +192,7 @@ def list_goals(
         A list of at most *limit* goals, newest first.
     """
     goals = ListGoals(goal_repo=_goal_repo(session)).execute(
-        ListGoalsCommand(user_id=current_user_id, limit=limit)
+        ListGoalsCommand(user_id=current_user_id, limit=limit, include_active=not history)
     )
     return GoalListResponse(goals=[GoalResponse.model_validate(g) for g in goals])
 
