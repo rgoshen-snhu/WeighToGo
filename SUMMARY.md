@@ -3643,3 +3643,26 @@ consequence; this closes the code half of that follow-up.
 **References:**
 - Issue: GH-77
 - ADR: 0023
+
+## [2026-05-30] Commit Summary
+
+**Change Type:** Docs
+**Scope:** ADR-0023 (TTL caching strategy)
+
+**Summary:**
+Amended ADR-0023 with a dated Update (2026-05-30) resolving the two follow-ups
+deferred from #62: weight-entry update/delete are now invalidation triggers, and
+the cross-worker strategy is explicitly decided — accept the per-process 30s TTL
+bound now, swap to a shared-cache adapter behind the same get/set/invalidate
+interface only if multi-worker deployment makes the staleness observable. Updated
+the Decision invalidation-triggers list and reframed the per-worker limitation as
+an accepted trade-off with a documented revisit trigger.
+
+**Rationale:**
+A shared backend (Redis) is disproportionate infra for one cached read model and
+out of scope for the milestone (YAGNI); the TTLCache interface is the designed
+swap point if that changes.
+
+**References:**
+- Issue: GH-77
+- ADR: 0023

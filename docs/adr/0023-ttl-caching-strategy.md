@@ -1,6 +1,9 @@
 # ADR-0023: TTL-Based Server-Side Caching Strategy
 
 - **Date**: 2026-05-29
+- **Updated**: 2026-05-30 — issue #77 resolved: weight-entry update and delete
+  are now invalidation triggers, and the cross-worker strategy is decided (see
+  *Update (2026-05-30)* below).
 - **Status**: Accepted
 
 ## Context
@@ -86,9 +89,10 @@ first, which is O(n) worst case (n = `maxsize`) to scan for an expired entry,
 otherwise O(1) to drop the oldest insertion. Space is O(`maxsize`) — growth is
 bounded by the cap, so a flood of distinct keys cannot exhaust memory.
 
-**Invalidation triggers.** A successful **weight-entry create** and a successful
-**goal create, update, or delete (abandon)** each invalidate the requesting
-user's cache key. The cached `DashboardSummary` embeds active-goal progress, so
+**Invalidation triggers.** A successful **weight-entry create, update, or
+delete** and a successful **goal create, update, or delete (abandon)** each
+invalidate the requesting user's cache key. (Update and delete were added in
+issue #77; see *Update (2026-05-30)*.) The cached `DashboardSummary` embeds active-goal progress, so
 goal mutations must bust it or a read in the TTL window serves a stale summary.
 Detection runs at the composition root: the weight-entries and goals routers
 (interface layer) call `invalidate_dashboard_cache(user_id)` after a successful
@@ -140,22 +144,52 @@ touch it through a named function rather than a private attribute.
   safe under the AnyIO threadpool; a pure, fully unit-tested structure with
   documented complexity; no new runtime dependency; Clean Architecture isolation
   preserved (verified by the import-linter architecture test).
-- **Negative** (accepted limitations for a `[SHOULD]` stretch optimisation, all
-  bounded by the ≤ 30 s TTL; tracked in issue #77):
+- **Negative** (accepted limitation for a `[SHOULD]` stretch optimisation,
+  bounded by the ≤ 30 s TTL):
   - The cache is **per worker process** — it is not shared across uvicorn
     workers, so each worker warms its own copy and a write handled by one worker
-    does not invalidate another worker's copy.
-  - **Weight-entry update and delete are not invalidation triggers.** Editing or
-    deleting a weight entry does **not** currently bust the cache, so a dashboard
-    read in the window after such a change may be stale. (Weight-entry *create*
-    and all goal mutations do invalidate.)
-- **Follow-ups** (issue #77):
-  - Add update and delete of a weight entry as invalidation triggers (same
-    `invalidate_dashboard_cache` call at those router edges).
-  - Decide the cross-worker strategy: if multi-worker deployment becomes real,
-    replace the in-process `TTLCache` with a shared-cache adapter behind the same
-    `get`/`set`/`invalidate` interface (the swap point the interface was designed
-    to allow).
+    does not invalidate another worker's copy. This is now an explicitly
+    **accepted** trade-off rather than an open question; see
+    *Update (2026-05-30)*.
+- **Resolved follow-ups** (issue #77, 2026-05-30): weight-entry update and delete
+  are now invalidation triggers, and the cross-worker strategy is decided. See
+  *Update (2026-05-30)*.
+
+## Update (2026-05-30)
+
+Issue #77 closed the two consequences this ADR deferred from #62 (PR #74).
+
+**1. Weight-entry update and delete now invalidate the cache.** Both the PUT and
+DELETE handlers in the weight-tracking router call
+`invalidate_dashboard_cache(user_id)` after a successful mutation, mirroring the
+create path. Integration tests assert that each mutation busts the cache (no
+≤ 30 s stale read on the same worker). This was a one-line change at each router
+edge — the named `invalidate_dashboard_cache` helper was already the abstraction;
+no new structure was introduced.
+
+**2. Cross-worker strategy: accept the per-process TTL bound (no shared backend
+now).** We deliberately keep the in-process `TTLCache` and accept that staleness
+across uvicorn workers is bounded only by the 30 s TTL.
+
+Rationale:
+
+- The dashboard summary is a `[SHOULD]` display-only optimisation. A ≤ 30 s
+  cross-worker staleness on counters and a weekly rate is a tolerable trade for a
+  course-scope deployment; it never affects correctness of writes, only the
+  freshness of a cached read.
+- A shared backend (Redis/Memcached) is a new infrastructure dependency, network
+  round-trip, and operational burden disproportionate to a single cached read
+  model. Cloud/infra tooling is out of scope for this milestone (consistent with
+  the original *Alternatives Considered* rejection of an external cache as
+  premature — YAGNI).
+- The `TTLCache` interface (`get`/`set`/`invalidate`) is the designed swap point:
+  if multi-worker (or multi-instance) deployment becomes real and the staleness
+  bound becomes unacceptable, replace the in-process structure with a shared-cache
+  adapter behind the same interface, with no change to the router call sites.
+
+**Revisit trigger.** Reopen this decision if the app is deployed with more than
+one worker/instance *and* user feedback or monitoring shows the ≤ 30 s
+cross-worker staleness is observable and confusing.
 
 ## Alternatives Considered
 
