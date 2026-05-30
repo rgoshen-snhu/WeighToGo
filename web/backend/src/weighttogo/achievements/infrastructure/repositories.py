@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from weighttogo.achievements.domain.entities import Achievement, AchievementType
@@ -45,14 +46,21 @@ class SqlAlchemyAchievementRepository:
         """Initialise with an active SQLAlchemy session."""
         self._session = session
 
-    def save(self, achievement: Achievement) -> Achievement:
-        """Persist *achievement* and return it with ``achievement_id`` set.
+    def save(self, achievement: Achievement) -> Achievement | None:
+        """Persist *achievement*, or return ``None`` if it already exists.
+
+        The INSERT runs in its own SAVEPOINT so a unique-index conflict (a
+        concurrent duplicate of an idempotent milestone/streak row) rolls back
+        only this insert — not sibling achievements earned in the same request —
+        and surfaces as an idempotent no-op rather than aborting the surrounding
+        transaction.
 
         Args:
             achievement: The domain entity to persist.
 
         Returns:
-            The same entity with the database-assigned ``achievement_id``.
+            The same entity with its ``achievement_id``, or ``None`` when an
+            equivalent row already existed.
         """
         row = AchievementModel(
             user_id=achievement.user_id,
@@ -61,8 +69,12 @@ class SqlAlchemyAchievementRepository:
             threshold=achievement.threshold,
             earned_at=achievement.earned_at,
         )
-        self._session.add(row)
-        self._session.flush()
+        try:
+            with self._session.begin_nested():
+                self._session.add(row)
+                self._session.flush()
+        except IntegrityError:
+            return None
         return _to_domain(row)
 
     def _recorded_thresholds_for(

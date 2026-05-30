@@ -90,6 +90,7 @@ def test_save_assigns_achievement_id(session: Session) -> None:
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
 
 
@@ -157,6 +158,7 @@ def test_get_by_id_returns_achievement_for_correct_user(session: Session) -> Non
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
     found = repo.get_by_id(saved.achievement_id, session._test_user_id)  # type: ignore[attr-defined]
     assert found is not None
@@ -168,6 +170,7 @@ def test_get_by_id_returns_none_for_wrong_user_idor_guard(session: Session) -> N
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
     result = repo.get_by_id(saved.achievement_id, user_id=99999)
     assert result is None

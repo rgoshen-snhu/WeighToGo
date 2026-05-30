@@ -164,14 +164,14 @@ def create_weight_entry(
 
         ach_list: list[Achievement] = []
         try:
-            # Fix 1 (data integrity): run achievement writes inside a SAVEPOINT
-            # so that a duplicate-constraint IntegrityError rolls back only the
-            # achievement inserts, leaving the already-flushed weight entry
-            # intact in the outer transaction.  A plain session.rollback() would
-            # cancel the weight entry too while still returning a 201 to the
-            # client (adversarial review finding).  The SAVEPOINT also makes the
-            # streak-achievement unique-index insert (FR-Ach-3) an idempotent
-            # no-op on a concurrent duplicate.
+            # Idempotency for a concurrent duplicate milestone/streak insert is
+            # handled per-insert in the achievement repository: each save runs in
+            # its own SAVEPOINT and no-ops on the unique-index conflict, so a
+            # duplicate cannot roll back achievements earned alongside it.  This
+            # outer SAVEPOINT remains as defence — any unexpected achievement
+            # write error rolls back only the achievement inserts, leaving the
+            # already-flushed weight entry intact in the outer transaction (a
+            # plain rollback would cancel the entry too while returning 201).
             with session.begin_nested():
                 ach_list = DetectAchievements(
                     achievement_repo=SqlAlchemyAchievementRepository(session)

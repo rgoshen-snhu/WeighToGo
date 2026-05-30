@@ -108,7 +108,8 @@ class DetectAchievements:
                     earned_at=now,
                 )
             )
-            newly_earned.append(ach)
+            if ach is not None:
+                newly_earned.append(ach)
 
         # ── 2. Goal-reached detection (FR-G-4, FR-Ach-1) ─────────────────────
         if self._goal_is_reached(cmd) and not self._repo.has_goal_reached_been_recorded(
@@ -124,7 +125,8 @@ class DetectAchievements:
                     earned_at=now,
                 )
             )
-            newly_earned.append(ach)
+            if ach is not None:
+                newly_earned.append(ach)
 
         # ── 3. Streak detection (FR-Ach-3) ───────────────────────────────────
         if cmd.observation_dates:
@@ -151,7 +153,8 @@ class DetectAchievements:
                         earned_at=now,
                     )
                 )
-                newly_earned.append(ach)
+                if ach is not None:
+                    newly_earned.append(ach)
 
         return newly_earned
 

@@ -197,6 +197,43 @@ def test_detect_achievements_streak_window_excludes_dates_before_goal_creation()
     assert not [a for a in result if a.achievement_type == AchievementType.STREAK]
 
 
+def test_detect_achievements_duplicate_save_does_not_drop_co_earned() -> None:
+    # A duplicate idempotent insert (adapter returns None on the unique-index
+    # conflict) must not discard achievements legitimately earned in the same
+    # request.  Here a streak save is a no-op, but goal_reached must survive.
+    from datetime import date
+
+    from weighttogo.achievements.application.detect_achievements import (
+        DetectAchievements,
+        DetectAchievementsCommand,
+    )
+
+    repo = _make_repo()
+    repo.has_goal_reached_been_recorded.return_value = False
+
+    def _save(ach: Achievement) -> Achievement | None:
+        return None if ach.achievement_type == AchievementType.STREAK else ach
+
+    repo.save.side_effect = _save
+    dates = frozenset(date(2026, 1, d) for d in range(1, 8))
+    result = DetectAchievements(achievement_repo=repo).execute(
+        DetectAchievementsCommand(
+            user_id=1,
+            goal_id=7,
+            goal_type="lose",
+            start_value=Decimal("200"),
+            target_value=Decimal("150"),
+            current_weight=Decimal("150"),  # reaches target → goal_reached
+            observation_dates=dates,
+            today=date(2026, 1, 7),
+            goal_created_at=date(2026, 1, 1),
+        )
+    )
+    types = {a.achievement_type for a in result}
+    assert AchievementType.GOAL_REACHED in types
+    assert AchievementType.STREAK not in types
+
+
 def test_detect_achievements_streak_counts_dates_on_or_after_goal_creation() -> None:
     from datetime import date
 
