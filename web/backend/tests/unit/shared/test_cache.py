@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from weighttogo.shared.cache import DEFAULT_TTL_SECONDS, TTLCache
+from weighttogo.shared.cache import DEFAULT_MAX_SIZE, DEFAULT_TTL_SECONDS, TTLCache
 
 
 def test_get_returns_none_on_miss() -> None:
@@ -151,3 +151,60 @@ def test_invalidate_one_key_leaves_others() -> None:
 
 def test_default_ttl_constant_is_thirty_seconds() -> None:
     assert DEFAULT_TTL_SECONDS == 30.0
+
+
+def test_default_maxsize_constant_is_set() -> None:
+    assert DEFAULT_MAX_SIZE == 1024
+
+
+def test_set_never_grows_past_maxsize() -> None:
+    # ARRANGE — a small bounded cache
+    cache: TTLCache[int, str] = TTLCache(maxsize=3)
+
+    # ACT — insert more distinct keys than the cap
+    for key in range(10):
+        cache.set(key, f"v{key}")
+
+    # ASSERT — storage is bounded, never unbounded growth
+    assert len(cache._store) == 3  # noqa: SLF001 — white-box size check
+
+
+def test_eviction_drops_expired_entries_before_oldest_live() -> None:
+    # ARRANGE — fill the cache, then expire the two oldest entries
+    clock = {"t": 1000.0}
+    cache: TTLCache[int, str] = TTLCache(ttl_seconds=30.0, maxsize=3, now=lambda: clock["t"])
+    cache.set(1, "a")  # expires at 1030
+    cache.set(2, "b")  # expires at 1030
+    clock["t"] = 1010.0
+    cache.set(3, "c")  # expires at 1040, newest live entry
+
+    # ACT — advance so 1 and 2 are expired, then insert into a full cache
+    clock["t"] = 1031.0
+    cache.set(4, "d")
+
+    # ASSERT — an expired entry was reclaimed (not the live newest); still bounded
+    assert len(cache._store) <= 3  # noqa: SLF001
+    assert cache.get(3) == "c"  # live entry preserved
+    assert cache.get(4) == "d"  # newest insert present
+
+
+def test_eviction_drops_oldest_when_none_expired() -> None:
+    # ARRANGE — fill to capacity with all-live entries
+    clock = {"t": 1000.0}
+    cache: TTLCache[int, str] = TTLCache(ttl_seconds=100.0, maxsize=3, now=lambda: clock["t"])
+    cache.set(1, "a")  # oldest
+    clock["t"] = 1001.0
+    cache.set(2, "b")
+    clock["t"] = 1002.0
+    cache.set(3, "c")
+
+    # ACT — insert a fourth while all three are still live
+    clock["t"] = 1003.0
+    cache.set(4, "d")
+
+    # ASSERT — the oldest live entry (1) was evicted, newer ones kept
+    assert len(cache._store) == 3  # noqa: SLF001
+    assert cache.get(1) is None
+    assert cache.get(2) == "b"
+    assert cache.get(3) == "c"
+    assert cache.get(4) == "d"
