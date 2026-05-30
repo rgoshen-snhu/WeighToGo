@@ -65,6 +65,29 @@ class SqlAlchemyAchievementRepository:
         self._session.flush()
         return _to_domain(row)
 
+    def _recorded_thresholds_for(
+        self, goal_id: int, achievement_type: AchievementType
+    ) -> frozenset[Decimal]:
+        """Return recorded thresholds for *goal_id* of the given *achievement_type*.
+
+        Shared by the milestone and streak idempotency reads so the Decimal
+        coercion and the None-filtering can never diverge between them.
+
+        Args:
+            goal_id: The goal's primary key.
+            achievement_type: The achievement type to filter on.
+
+        Returns:
+            A frozenset of ``Decimal`` threshold values.  Empty when none recorded.
+        """
+        rows = (
+            self._session.query(AchievementModel)
+            .filter_by(goal_id=goal_id, achievement_type=achievement_type)
+            .with_entities(AchievementModel.threshold)
+            .all()
+        )
+        return frozenset(Decimal(str(r.threshold)) for r in rows if r.threshold is not None)
+
     def get_recorded_thresholds(self, goal_id: int) -> frozenset[Decimal]:
         """Return the set of milestone thresholds already recorded for *goal_id*.
 
@@ -74,13 +97,7 @@ class SqlAlchemyAchievementRepository:
         Returns:
             A frozenset of ``Decimal`` threshold values.  Empty when none recorded.
         """
-        rows = (
-            self._session.query(AchievementModel)
-            .filter_by(goal_id=goal_id, achievement_type=AchievementType.MILESTONE)
-            .with_entities(AchievementModel.threshold)
-            .all()
-        )
-        return frozenset(Decimal(str(r.threshold)) for r in rows if r.threshold is not None)
+        return self._recorded_thresholds_for(goal_id, AchievementType.MILESTONE)
 
     def get_recorded_streak_thresholds(self, goal_id: int) -> frozenset[Decimal]:
         """Return the set of streak thresholds already recorded for *goal_id*.
@@ -91,13 +108,7 @@ class SqlAlchemyAchievementRepository:
         Returns:
             A frozenset of ``Decimal`` streak thresholds.  Empty when none recorded.
         """
-        rows = (
-            self._session.query(AchievementModel)
-            .filter_by(goal_id=goal_id, achievement_type=AchievementType.STREAK)
-            .with_entities(AchievementModel.threshold)
-            .all()
-        )
-        return frozenset(Decimal(str(r.threshold)) for r in rows if r.threshold is not None)
+        return self._recorded_thresholds_for(goal_id, AchievementType.STREAK)
 
     def get_by_id(self, achievement_id: int, user_id: int) -> Achievement | None:
         """Look up by primary key, scoped to *user_id* (IDOR guard).
