@@ -33,3 +33,24 @@ def test_dashboard_read_populates_the_cache(client: TestClient) -> None:
     # ASSERT — endpoint succeeds and a summary is now cached
     assert resp.status_code == 200
     assert len(_dashboard_cache._store) == 1  # noqa: SLF001
+
+
+def test_creating_a_weight_entry_busts_the_dashboard_cache(client: TestClient) -> None:
+    # ARRANGE — register, add one entry, prime the cache with a read
+    _register_and_login(client)
+    client.post(
+        "/api/v1/weight-entries",
+        json={"weight_value": 180.0, "weight_unit": "lbs", "observation_date": "2026-05-01"},
+    )
+    first = client.get("/api/v1/dashboard/summary")
+    assert first.json()["total_entries"] == 1
+
+    # ACT — add a second entry (must invalidate the cache), then re-read
+    client.post(
+        "/api/v1/weight-entries",
+        json={"weight_value": 179.0, "weight_unit": "lbs", "observation_date": "2026-05-02"},
+    )
+    after = client.get("/api/v1/dashboard/summary")
+
+    # ASSERT — cache was invalidated on create; fresh count returned (not stale 1)
+    assert after.json()["total_entries"] == 2

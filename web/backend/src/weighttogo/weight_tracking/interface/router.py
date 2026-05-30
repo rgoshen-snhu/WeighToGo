@@ -31,6 +31,7 @@ from weighttogo.achievements.interface.schemas import (
     AchievementResponse as AchievementResponseSchema,
 )
 from weighttogo.auth.interface.router import get_current_user_id, limiter
+from weighttogo.dashboard.interface.router import invalidate_dashboard_cache
 from weighttogo.goals.infrastructure.repositories import SqlAlchemyGoalRepository
 from weighttogo.shared.db import get_db_session
 from weighttogo.shared.units import convert_weight
@@ -142,6 +143,10 @@ def create_weight_entry(
         ) from exc
 
     logger.info("weight_entry_created", entry_id=entry.entry_id, user_id=current_user_id)
+
+    # Invalidate the cached dashboard summary so the next read recomputes with
+    # this new entry (NFR-P-5 invalidation trigger, ADR-0023).
+    invalidate_dashboard_cache(current_user_id)
 
     # ── Detect achievements at the composition root (interface layer) ─────────
     # weight_tracking domain never imports achievements — wiring happens here
