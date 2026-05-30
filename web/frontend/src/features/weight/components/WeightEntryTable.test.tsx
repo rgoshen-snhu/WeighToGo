@@ -2,11 +2,31 @@ import { ThemeProvider } from '@mui/material/styles';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { WeightEntryRecord } from '../api/weight-client';
 import { theme } from '../../../theme/theme';
 import { WeightEntryTable } from './WeightEntryTable';
+
+// Mirror the repo's established static-factory mock pattern (WeightEntryForm.test.tsx);
+// a hoisted mutable holder lets each test pick the preferred unit.
+const prefs = { current: 'lbs' as 'lbs' | 'kg' };
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: prefs.current,
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
+beforeEach(() => {
+  prefs.current = 'lbs';
+});
 
 const entries: WeightEntryRecord[] = [
   {
@@ -54,6 +74,14 @@ describe('WeightEntryTable', () => {
     renderTable();
     expect(screen.getByText(/175/)).toBeInTheDocument();
     expect(screen.getByText(/174/)).toBeInTheDocument();
+  });
+
+  it('displays weights converted to the preferred unit (kg) while leaving rows intact', () => {
+    prefs.current = 'kg';
+    renderTable(); // entries are stored in lbs (175.5, 174.0)
+    // 175.5 lb -> 79.6 kg ; 174.0 lb -> 78.9 kg
+    expect(screen.getByText('79.6 kg')).toBeInTheDocument();
+    expect(screen.getByText('78.9 kg')).toBeInTheDocument();
   });
 
   it('calls onDelete when Delete button is clicked', async () => {

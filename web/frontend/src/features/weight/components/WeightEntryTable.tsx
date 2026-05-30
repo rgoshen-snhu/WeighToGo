@@ -20,7 +20,9 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import type { WeightEntryRecord } from '../api/weight-client';
-import { formatObservationDate, formatWeight } from '../../../lib/format';
+import { usePreferences } from '../../../contexts/PreferencesContext';
+import { formatObservationDate, formatWeightInPreferredUnit } from '../../../lib/format';
+import type { WeightUnit } from '../../../lib/unit-conversion';
 
 interface WeightEntryTableProps {
   entries: WeightEntryRecord[];
@@ -35,6 +37,9 @@ interface WeightEntryTableProps {
  * table (the page itself handles the full EmptyState CTA).
  */
 export function WeightEntryTable({ entries, onDelete }: WeightEntryTableProps) {
+  const { preferences } = usePreferences();
+  const preferredUnit = preferences.weightUnit;
+
   if (entries.length === 0) {
     return (
       <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
@@ -59,7 +64,11 @@ export function WeightEntryTable({ entries, onDelete }: WeightEntryTableProps) {
             <TableRow key={entry.entry_id} hover>
               <TableCell>{formatObservationDate(entry.observation_date)}</TableCell>
               <TableCell align="right">
-                {formatWeight(entry.weight_value, entry.weight_unit as 'lbs' | 'kg')}
+                {formatWeightInPreferredUnit(
+                  entry.weight_value,
+                  entry.weight_unit as WeightUnit,
+                  preferredUnit,
+                )}
               </TableCell>
               <TableCell>{entry.notes ?? '—'}</TableCell>
               <TableCell align="center">
