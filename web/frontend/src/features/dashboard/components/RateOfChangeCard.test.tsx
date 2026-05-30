@@ -1,8 +1,26 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { RateOfChangeResponse } from '../api/dashboard-client';
 import { RateOfChangeCard } from './RateOfChangeCard';
+
+const prefs = { current: 'lbs' as 'lbs' | 'kg' };
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: prefs.current,
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
+beforeEach(() => {
+  prefs.current = 'lbs';
+});
 
 const falling: RateOfChangeResponse = {
   weekly_rate: -0.8,
@@ -39,6 +57,26 @@ describe('RateOfChangeCard', () => {
     render(<RateOfChangeCard rateOfChange={rising} isLoading={false} isError={false} />);
     expect(screen.getByText(/up/i)).toBeInTheDocument();
     expect(screen.getByText(/1\.2/)).toBeInTheDocument();
+  });
+
+  it('converts the rate magnitude to the preferred unit (kg)', () => {
+    prefs.current = 'kg';
+    // backend rate is -2 lbs/week -> 0.9 kg/week
+    const fallingLbs: RateOfChangeResponse = { weekly_rate: -2, unit: 'lbs', reason: null };
+    render(<RateOfChangeCard rateOfChange={fallingLbs} isLoading={false} isError={false} />);
+    expect(screen.getByText(/down/i)).toBeInTheDocument();
+    expect(screen.getByText(/0\.9/)).toBeInTheDocument();
+    expect(screen.getByText(/kg\s*\/\s*week/i)).toBeInTheDocument();
+  });
+
+  it('does not convert when the backend unit is null (falls back gracefully)', () => {
+    prefs.current = 'kg';
+    // Non-null rate with null unit is type-possible; treat the magnitude as-is.
+    const nullUnit: RateOfChangeResponse = { weekly_rate: -2, unit: null, reason: null };
+    render(<RateOfChangeCard rateOfChange={nullUnit} isLoading={false} isError={false} />);
+    expect(screen.getByText(/down/i)).toBeInTheDocument();
+    // 2.0 unconverted (no unit suffix when unit is unknown).
+    expect(screen.getByText(/2\.0/)).toBeInTheDocument();
   });
 
   it('renders a no-change message when the rate is zero', () => {
