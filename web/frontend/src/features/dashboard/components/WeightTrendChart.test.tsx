@@ -1,9 +1,27 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { TrendPointResponse } from '../api/dashboard-client';
 import { WeightTrendChart } from './WeightTrendChart';
+
+const prefs = { current: 'lbs' as 'lbs' | 'kg' };
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: prefs.current,
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
+beforeEach(() => {
+  prefs.current = 'lbs';
+});
 
 /** Build a trend point `daysAgo` days before 2026-05-29. */
 function point(daysAgo: number, value: number): TrendPointResponse {
@@ -79,11 +97,9 @@ describe('WeightTrendChart', () => {
     ).toBeInTheDocument();
   });
 
-  it('names the chart region with a kg unit when the series is in kg', () => {
-    const kgSeries: TrendPointResponse[] = [
-      { observation_date: '2026-05-20', weight_value: 80, weight_unit: 'kg' },
-    ];
-    render(<WeightTrendChart trend={kgSeries} today="2026-05-29" />);
+  it('names the chart region with the preferred unit (kg) regardless of stored unit', () => {
+    prefs.current = 'kg';
+    render(<WeightTrendChart trend={series} today="2026-05-29" />);
     expect(screen.getByRole('figure', { name: /measured in kg/i })).toBeInTheDocument();
   });
 
@@ -95,5 +111,16 @@ describe('WeightTrendChart', () => {
     render(<WeightTrendChart trend={single} today="2026-05-29" />);
     const table = screen.getByRole('table', { name: /weight trend/i });
     expect(within(table).getByText('175.0 lbs')).toBeInTheDocument();
+  });
+
+  it('converts table weight values to the preferred unit (kg)', () => {
+    prefs.current = 'kg';
+    // 175 lb stored -> 79.4 kg displayed
+    const single: TrendPointResponse[] = [
+      { observation_date: '2026-05-20', weight_value: 175, weight_unit: 'lbs' },
+    ];
+    render(<WeightTrendChart trend={single} today="2026-05-29" />);
+    const table = screen.getByRole('table', { name: /weight trend/i });
+    expect(within(table).getByText('79.4 kg')).toBeInTheDocument();
   });
 });

@@ -6,6 +6,7 @@
  */
 
 import type { Preferences } from '../contexts/PreferencesContext';
+import { convertWeight, type WeightUnit } from './unit-conversion';
 
 /**
  * Format a numeric weight value with one decimal place and its unit suffix.
@@ -19,6 +20,28 @@ import type { Preferences } from '../contexts/PreferencesContext';
  */
 export function formatWeight(value: number, unit: Preferences['weightUnit']): string {
   return `${value.toFixed(1)} ${unit}`;
+}
+
+/**
+ * Format a stored weight value in the user's preferred unit (FR-W-6).
+ *
+ * Converts `value` from its stored `storedUnit` into `preferredUnit` for
+ * display only, then formats via {@link formatWeight}. The stored value is
+ * never mutated; callers pass the row's original unit unchanged.
+ *
+ * @param value         - The stored weight value.
+ * @param storedUnit    - The unit the value was recorded in.
+ * @param preferredUnit - The unit the user wants to see.
+ *
+ * @example
+ * formatWeightInPreferredUnit(100, 'lbs', 'kg')  // '45.4 kg'
+ */
+export function formatWeightInPreferredUnit(
+  value: number,
+  storedUnit: WeightUnit,
+  preferredUnit: WeightUnit,
+): string {
+  return formatWeight(convertWeight(value, storedUnit, preferredUnit), preferredUnit);
 }
 
 /**

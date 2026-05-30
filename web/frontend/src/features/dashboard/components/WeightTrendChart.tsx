@@ -20,7 +20,8 @@ import {
 } from 'recharts';
 import type { TrendPointResponse } from '../api/dashboard-client';
 import { formatObservationDate, formatWeight } from '../../../lib/format';
-import type { Preferences } from '../../../contexts/PreferencesContext';
+import { usePreferences } from '../../../contexts/PreferencesContext';
+import { convertWeight, type WeightUnit } from '../../../lib/unit-conversion';
 
 /** Selectable trend ranges (FR-D-2). `all` shows the full series. */
 type Range = '7' | '30' | '90' | 'all';
@@ -73,15 +74,23 @@ export function WeightTrendChart({
   const theme = useTheme();
   const referenceDate = today ?? new Date().toISOString().slice(0, 10);
   const [range, setRange] = useState<Range>('all');
+  const { preferences } = usePreferences();
+  const unit = preferences.weightUnit;
 
+  // Filter to the selected range, then convert each plotted value into the
+  // user's preferred unit (FR-W-6). Display-only: the stored points are
+  // untouched. Conversion is folded into the same memo to avoid recomputing it
+  // on every render.
   const visible = useMemo(() => {
     const floor = rangeFloor(range, referenceDate);
-    if (floor === null) return trend;
-    return trend.filter((p) => p.observation_date >= floor);
-  }, [trend, range, referenceDate]);
+    const inRange = floor === null ? trend : trend.filter((p) => p.observation_date >= floor);
+    return inRange.map((p) => ({
+      ...p,
+      weight_value: convertWeight(p.weight_value, p.weight_unit as WeightUnit, unit),
+      weight_unit: unit,
+    }));
+  }, [trend, range, referenceDate, unit]);
 
-  // The series is uniformly lbs from the backend; fall back to lbs when empty.
-  const unit = trend[0]?.weight_unit ?? 'lbs';
   const axisLabel = `Weight (${unit})`;
 
   return (
@@ -157,12 +166,7 @@ export function WeightTrendChart({
                 {visible.map((p) => (
                   <tr key={p.observation_date}>
                     <td>{formatObservationDate(p.observation_date)}</td>
-                    <td>
-                      {formatWeight(
-                        Number(p.weight_value),
-                        p.weight_unit as Preferences['weightUnit'],
-                      )}
-                    </td>
+                    <td>{formatWeight(Number(p.weight_value), unit)}</td>
                   </tr>
                 ))}
               </tbody>

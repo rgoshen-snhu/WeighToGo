@@ -7,6 +7,21 @@ import { dashboardClient } from '../api/dashboard-client';
 import type { DashboardSummaryResponse } from '../api/dashboard-client';
 import { DashboardPage } from './DashboardPage';
 
+// Dashboard cards now read the unit preference; provide a stable lbs value so the
+// page's stored-lbs assertions hold (display matches stored when units agree).
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
 const noTrend = {
   rate_of_change: { weekly_rate: null, unit: null, reason: 'insufficient_data' },
   trend: [],

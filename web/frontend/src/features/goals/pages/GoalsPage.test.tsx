@@ -8,10 +8,11 @@ import * as goalClientModule from '../api/goal-client';
 import * as weightClientModule from '../../weight/api/weight-client';
 import { GoalsPage } from './GoalsPage';
 
+const prefs = { current: 'lbs' as 'lbs' | 'kg' };
 vi.mock('../../../contexts/PreferencesContext', () => ({
   usePreferences: () => ({
     preferences: {
-      weightUnit: 'lbs',
+      weightUnit: prefs.current,
       notifyAchievement: true,
       notifyMilestone: true,
       notifyStreak: true,
@@ -65,6 +66,7 @@ const MOCK_ACTIVE_GOAL: goalClientModule.GoalRecord = {
 };
 
 beforeEach(() => {
+  prefs.current = 'lbs';
   vi.spyOn(weightClientModule.weightClient, 'list').mockResolvedValue({
     items: [],
     next_cursor: null,
@@ -122,6 +124,21 @@ describe('GoalsPage', () => {
     await screen.findByText(/200/);
     expect(screen.getByText(/150/)).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('converts the active-goal summary weights to the preferred unit (kg)', async () => {
+    prefs.current = 'kg';
+    // Goal stored in lbs (start 200, target 150) must render in kg so the
+    // summary is unit-consistent with the rest of the session after a switch:
+    // 200 lb -> 90.7 kg, 150 lb -> 68.0 kg.
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockResolvedValue({
+      goal: MOCK_ACTIVE_GOAL,
+      progress_percent: 50,
+      current_value: 175,
+    });
+    render(<GoalsPage />, { wrapper: Wrapper });
+    await screen.findByText(/90\.7 kg → 68\.0 kg/);
+    expect(screen.queryByText(/200 lbs/)).not.toBeInTheDocument();
   });
 
   it('shows error alert when the query fails', async () => {

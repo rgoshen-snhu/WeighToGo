@@ -1,6 +1,8 @@
 import { Card, CardContent, Skeleton, Typography } from '@mui/material';
 import type { WeightEntryRecord } from '../../weight/api/weight-client';
-import { formatObservationDate } from '../../../lib/format';
+import { usePreferences } from '../../../contexts/PreferencesContext';
+import { formatObservationDate, formatWeightInPreferredUnit } from '../../../lib/format';
+import type { WeightUnit } from '../../../lib/unit-conversion';
 
 interface LatestEntryCardProps {
   entry: WeightEntryRecord | null | undefined;
@@ -9,6 +11,8 @@ interface LatestEntryCardProps {
 
 /** Card displaying the user's most recent weight entry. */
 export function LatestEntryCard({ entry, isLoading }: LatestEntryCardProps) {
+  const { preferences } = usePreferences();
+  const preferredUnit = preferences.weightUnit;
   return (
     <Card>
       <CardContent>
@@ -20,7 +24,11 @@ export function LatestEntryCard({ entry, isLoading }: LatestEntryCardProps) {
         ) : entry ? (
           <>
             <Typography variant="h5">
-              {entry.weight_value} {entry.weight_unit}
+              {formatWeightInPreferredUnit(
+                entry.weight_value,
+                entry.weight_unit as WeightUnit,
+                preferredUnit,
+              )}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {formatObservationDate(entry.observation_date)}

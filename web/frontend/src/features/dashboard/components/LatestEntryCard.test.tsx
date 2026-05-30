@@ -1,8 +1,26 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { WeightEntryRecord } from '../../weight/api/weight-client';
 import { LatestEntryCard } from './LatestEntryCard';
+
+const prefs = { current: 'lbs' as 'lbs' | 'kg' };
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: prefs.current,
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
+beforeEach(() => {
+  prefs.current = 'lbs';
+});
 
 const entry: WeightEntryRecord = {
   entry_id: 1,
@@ -23,6 +41,13 @@ describe('LatestEntryCard', () => {
   it('renders weight value when entry is provided', () => {
     render(<LatestEntryCard entry={entry} isLoading={false} />);
     expect(screen.getByText(/175/)).toBeInTheDocument();
+  });
+
+  it('renders the latest entry converted to the preferred unit (kg)', () => {
+    prefs.current = 'kg';
+    // 175.5 lb -> 79.6 kg
+    render(<LatestEntryCard entry={entry} isLoading={false} />);
+    expect(screen.getByText('79.6 kg')).toBeInTheDocument();
   });
 
   it('renders empty state when entry is null', () => {

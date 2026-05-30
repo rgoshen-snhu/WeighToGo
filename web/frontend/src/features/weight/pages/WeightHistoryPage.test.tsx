@@ -8,6 +8,21 @@ import { weightClient } from '../api/weight-client';
 import type { WeightEntryListResponse } from '../api/weight-client';
 import { WeightHistoryPage } from './WeightHistoryPage';
 
+// WeightEntryTable now reads the unit preference; provide a stable lbs value so
+// the page's stored-lbs assertions hold (display matches stored when units agree).
+vi.mock('../../../contexts/PreferencesContext', () => ({
+  usePreferences: () => ({
+    preferences: {
+      weightUnit: 'lbs',
+      notifyAchievement: true,
+      notifyMilestone: true,
+      notifyStreak: true,
+    },
+    isLoading: false,
+    setPreference: () => {},
+  }),
+}));
+
 const emptyList: WeightEntryListResponse = { items: [], next_cursor: null };
 const populatedList: WeightEntryListResponse = {
   items: [
