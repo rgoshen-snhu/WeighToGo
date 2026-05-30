@@ -174,3 +174,26 @@ def test_list_for_user_respects_limit(db_session: Session) -> None:
 
     goals = repo.list_for_user(user_id=1, limit=2)
     assert len(goals) == 2
+
+
+def test_list_for_user_excludes_active_when_include_active_false(
+    db_session: Session,
+) -> None:
+    # ARRANGE: one abandoned (past) goal and one active goal for the same user
+    repo = SqlAlchemyGoalRepository(db_session)
+    first = repo.save(_make_goal())
+    db_session.commit()
+    first.abandon()
+    repo.save(first)
+    db_session.commit()
+    repo.save(_make_goal())  # new active goal
+    db_session.commit()
+
+    # ACT
+    history = repo.list_for_user(user_id=1, limit=50, include_active=False)
+    everything = repo.list_for_user(user_id=1, limit=50)
+
+    # ASSERT
+    assert len(history) == 1
+    assert history[0].is_active is False
+    assert len(everything) == 2

@@ -53,8 +53,8 @@ class IGoalRepository(Protocol):
         """
         ...
 
-    def list_for_user(self, user_id: int, *, limit: int) -> list[Goal]:
-        """Return the most recent goals (active and historical) for *user_id*.
+    def list_for_user(self, user_id: int, *, limit: int, include_active: bool = True) -> list[Goal]:
+        """Return the most recent goals for *user_id*, newest first.
 
         Results are ordered by ``created_at DESC``.  The *limit* cap prevents
         unbounded DB reads on accounts that have created and abandoned many goals.
@@ -62,6 +62,8 @@ class IGoalRepository(Protocol):
         Args:
             user_id: The owning user's ID.
             limit: Maximum number of goals to return (caller-supplied, 1 – 100).
+            include_active: When ``False``, exclude the active goal so only past
+                (achieved or abandoned) goals are returned (FR-G-5 history view).
 
         Returns:
             At most *limit* ``Goal`` entities for the user, newest first.
