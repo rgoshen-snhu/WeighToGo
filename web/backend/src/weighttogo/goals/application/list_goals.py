@@ -19,10 +19,13 @@ class ListGoalsCommand:
         user_id: The requesting user's ID.
         limit: Maximum goals to return.  Capped at 100 to prevent unbounded
             DB reads on accounts with large goal histories.
+        include_active: When ``False``, return only past (achieved or
+            abandoned) goals — the FR-G-5 history view.
     """
 
     user_id: int
     limit: int = _DEFAULT_LIMIT
+    include_active: bool = True
 
 
 class ListGoals:
@@ -46,4 +49,8 @@ class ListGoals:
             At most ``command.limit`` goals for the user, newest first.
         """
         effective_limit = min(command.limit, _MAX_LIMIT)
-        return self._repo.list_for_user(command.user_id, limit=effective_limit)
+        return self._repo.list_for_user(
+            command.user_id,
+            limit=effective_limit,
+            include_active=command.include_active,
+        )
