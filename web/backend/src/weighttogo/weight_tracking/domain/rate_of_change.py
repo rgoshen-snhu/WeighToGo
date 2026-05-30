@@ -75,9 +75,14 @@ def weekly_rate_of_change(entries: Sequence[RateEntry]) -> RateOfChange:
     ``mean(recent) - mean(prior)``.  Both windows must contain at least one
     entry; otherwise the result is insufficient-data.
 
+    All entries are expected to share a single weight unit; the caller is
+    responsible for normalising mixed units before calling. The reported
+    ``unit`` is taken from the first entry, which is therefore safe.
+
     Args:
-        entries: Weight entries for one user.  Order is not assumed; the
-            function reads the maximum observation date as the anchor.
+        entries: Weight entries for one user, all in the same unit.  Order is
+            not assumed; the function reads the maximum observation date as the
+            anchor.
 
     Returns:
         A :class:`RateOfChange`.  ``weekly_rate`` is ``None`` with

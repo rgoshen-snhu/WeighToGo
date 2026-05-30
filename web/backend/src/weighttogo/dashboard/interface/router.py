@@ -21,7 +21,6 @@ from weighttogo.goals.application.get_active_goal_with_progress import GetActive
 from weighttogo.goals.infrastructure.repositories import SqlAlchemyGoalRepository
 from weighttogo.goals.interface.schemas import to_active_goal_response
 from weighttogo.shared.db import get_db_session
-from weighttogo.weight_tracking.application.get_rate_of_change import GetRateOfChange
 from weighttogo.weight_tracking.infrastructure.repositories import (
     SqlAlchemyWeightEntryRepository,
 )
@@ -56,11 +55,9 @@ def get_dashboard_summary(
     weight_repo = SqlAlchemyWeightEntryRepository(session)
     goal_repo = SqlAlchemyGoalRepository(session)
     get_active_goal = GetActiveGoalWithProgress(goal_repo=goal_repo)
-    get_rate_of_change = GetRateOfChange(weight_repo=weight_repo)
     uc = BuildDashboardSummary(
         weight_repo=weight_repo,
         get_active_goal_with_progress=get_active_goal,
-        get_rate_of_change=get_rate_of_change,
     )
     summary = uc.execute(user_id=current_user_id)
 
