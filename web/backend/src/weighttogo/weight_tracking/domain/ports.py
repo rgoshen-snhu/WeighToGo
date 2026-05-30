@@ -136,3 +136,17 @@ class IWeightEntryRepository(Protocol):
             ``True`` when a conflicting non-deleted entry exists.
         """
         ...
+
+    def list_observation_dates(self, user_id: int) -> set[date]:
+        """Return the set of distinct active observation dates for *user_id*.
+
+        Duplicate same-day entries collapse to one date via set semantics; this
+        feeds streak detection (FR-Ach-3). Soft-deleted entries are excluded.
+
+        Args:
+            user_id: The owning user's ID.
+
+        Returns:
+            A set of distinct ``date`` values for non-deleted entries.
+        """
+        ...

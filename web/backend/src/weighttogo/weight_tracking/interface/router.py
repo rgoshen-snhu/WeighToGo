@@ -158,14 +158,20 @@ def create_weight_entry(
         target_lbs = convert_weight(goal.target_value, goal.target_unit, "lbs")
         current_lbs = convert_weight(entry.weight_value, entry.weight_unit, "lbs")
 
+        # Streak detection (FR-Ach-3) needs the user's logging history as a set
+        # of calendar days; the set collapses any duplicate same-day entries.
+        observation_dates = repo.list_observation_dates(current_user_id)
+
         ach_list: list[Achievement] = []
         try:
-            # Fix 1 (data integrity): run achievement writes inside a SAVEPOINT
-            # so that a duplicate-constraint IntegrityError rolls back only the
-            # achievement inserts, leaving the already-flushed weight entry
-            # intact in the outer transaction.  A plain session.rollback() would
-            # cancel the weight entry too while still returning a 201 to the
-            # client (Codex adversarial review finding).
+            # Idempotency for a concurrent duplicate milestone/streak insert is
+            # handled per-insert in the achievement repository: each save runs in
+            # its own SAVEPOINT and no-ops on the unique-index conflict, so a
+            # duplicate cannot roll back achievements earned alongside it.  This
+            # outer SAVEPOINT remains as defence — any unexpected achievement
+            # write error rolls back only the achievement inserts, leaving the
+            # already-flushed weight entry intact in the outer transaction (a
+            # plain rollback would cancel the entry too while returning 201).
             with session.begin_nested():
                 ach_list = DetectAchievements(
                     achievement_repo=SqlAlchemyAchievementRepository(session)
@@ -177,6 +183,9 @@ def create_weight_entry(
                         start_value=start_lbs,
                         target_value=target_lbs,
                         current_weight=current_lbs,
+                        observation_dates=frozenset(observation_dates),
+                        today=date.today(),
+                        goal_created_at=goal.created_at.date(),
                     )
                 )
         except IntegrityError:

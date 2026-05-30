@@ -47,5 +47,8 @@ def test_concrete_class_satisfying_port_passes_isinstance_check() -> None:
         ) -> bool:
             return False
 
+        def list_observation_dates(self, user_id: int) -> set[date]:
+            return set()
+
     repo = _StubRepo()
     assert isinstance(repo, IWeightEntryRepository)

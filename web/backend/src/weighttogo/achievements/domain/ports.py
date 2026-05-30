@@ -17,14 +17,19 @@ from weighttogo.achievements.domain.entities import Achievement
 class IAchievementRepository(Protocol):
     """Read/write port for the ``achievements`` table."""
 
-    def save(self, achievement: Achievement) -> Achievement:
+    def save(self, achievement: Achievement) -> Achievement | None:
         """Persist *achievement* and return it with ``achievement_id`` set.
+
+        Returns ``None`` when the insert duplicates an existing idempotent
+        achievement (the unique-index conflict is swallowed as a no-op), so a
+        concurrent duplicate never rolls back achievements earned alongside it.
 
         Args:
             achievement: The entity to persist.
 
         Returns:
-            The same entity with the database-assigned ``achievement_id``.
+            The persisted entity with its ``achievement_id``, or ``None`` when
+            an equivalent row already existed.
         """
         ...
 
@@ -40,6 +45,21 @@ class IAchievementRepository(Protocol):
         Returns:
             A frozenset of ``Decimal`` threshold values already persisted.
             Empty frozenset when no milestones have been recorded yet.
+        """
+        ...
+
+    def get_recorded_streak_thresholds(self, goal_id: int) -> frozenset[Decimal]:
+        """Return the set of streak thresholds already recorded for *goal_id*.
+
+        Used by ``DetectAchievements`` to build the idempotency guard before
+        running ``detect_streaks``.
+
+        Args:
+            goal_id: The goal's primary key.
+
+        Returns:
+            A frozenset of ``Decimal`` streak thresholds already persisted.
+            Empty frozenset when no streaks have been recorded yet.
         """
         ...
 

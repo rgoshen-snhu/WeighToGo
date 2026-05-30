@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from weighttogo.achievements.domain.entities import Achievement, AchievementType
@@ -45,14 +46,21 @@ class SqlAlchemyAchievementRepository:
         """Initialise with an active SQLAlchemy session."""
         self._session = session
 
-    def save(self, achievement: Achievement) -> Achievement:
-        """Persist *achievement* and return it with ``achievement_id`` set.
+    def save(self, achievement: Achievement) -> Achievement | None:
+        """Persist *achievement*, or return ``None`` if it already exists.
+
+        The INSERT runs in its own SAVEPOINT so a unique-index conflict (a
+        concurrent duplicate of an idempotent milestone/streak row) rolls back
+        only this insert — not sibling achievements earned in the same request —
+        and surfaces as an idempotent no-op rather than aborting the surrounding
+        transaction.
 
         Args:
             achievement: The domain entity to persist.
 
         Returns:
-            The same entity with the database-assigned ``achievement_id``.
+            The same entity with its ``achievement_id``, or ``None`` when an
+            equivalent row already existed.
         """
         row = AchievementModel(
             user_id=achievement.user_id,
@@ -61,9 +69,36 @@ class SqlAlchemyAchievementRepository:
             threshold=achievement.threshold,
             earned_at=achievement.earned_at,
         )
-        self._session.add(row)
-        self._session.flush()
+        try:
+            with self._session.begin_nested():
+                self._session.add(row)
+                self._session.flush()
+        except IntegrityError:
+            return None
         return _to_domain(row)
+
+    def _recorded_thresholds_for(
+        self, goal_id: int, achievement_type: AchievementType
+    ) -> frozenset[Decimal]:
+        """Return recorded thresholds for *goal_id* of the given *achievement_type*.
+
+        Shared by the milestone and streak idempotency reads so the Decimal
+        coercion and the None-filtering can never diverge between them.
+
+        Args:
+            goal_id: The goal's primary key.
+            achievement_type: The achievement type to filter on.
+
+        Returns:
+            A frozenset of ``Decimal`` threshold values.  Empty when none recorded.
+        """
+        rows = (
+            self._session.query(AchievementModel)
+            .filter_by(goal_id=goal_id, achievement_type=achievement_type)
+            .with_entities(AchievementModel.threshold)
+            .all()
+        )
+        return frozenset(Decimal(str(r.threshold)) for r in rows if r.threshold is not None)
 
     def get_recorded_thresholds(self, goal_id: int) -> frozenset[Decimal]:
         """Return the set of milestone thresholds already recorded for *goal_id*.
@@ -74,13 +109,18 @@ class SqlAlchemyAchievementRepository:
         Returns:
             A frozenset of ``Decimal`` threshold values.  Empty when none recorded.
         """
-        rows = (
-            self._session.query(AchievementModel)
-            .filter_by(goal_id=goal_id, achievement_type=AchievementType.MILESTONE)
-            .with_entities(AchievementModel.threshold)
-            .all()
-        )
-        return frozenset(Decimal(str(r.threshold)) for r in rows if r.threshold is not None)
+        return self._recorded_thresholds_for(goal_id, AchievementType.MILESTONE)
+
+    def get_recorded_streak_thresholds(self, goal_id: int) -> frozenset[Decimal]:
+        """Return the set of streak thresholds already recorded for *goal_id*.
+
+        Args:
+            goal_id: The goal's primary key.
+
+        Returns:
+            A frozenset of ``Decimal`` streak thresholds.  Empty when none recorded.
+        """
+        return self._recorded_thresholds_for(goal_id, AchievementType.STREAK)
 
     def get_by_id(self, achievement_id: int, user_id: int) -> Achievement | None:
         """Look up by primary key, scoped to *user_id* (IDOR guard).

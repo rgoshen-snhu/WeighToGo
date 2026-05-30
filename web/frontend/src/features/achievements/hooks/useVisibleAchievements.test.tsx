@@ -34,6 +34,14 @@ const milestone: AchievementRecord = {
   earned_at: '2026-05-29T07:00:00Z',
 };
 
+const streak: AchievementRecord = {
+  achievement_id: 3,
+  goal_id: 10,
+  achievement_type: 'streak',
+  threshold: 7,
+  earned_at: '2026-05-29T07:00:00Z',
+};
+
 describe('useVisibleAchievements', () => {
   it('returns all achievements when both toggles are on', () => {
     mockPreferences.notifyAchievement = true;
@@ -70,6 +78,19 @@ describe('useVisibleAchievements', () => {
     mockPreferences.notifyMilestone = true;
     const { result } = renderHook(() => useVisibleAchievements([]));
     expect(result.current).toHaveLength(0);
+  });
+
+  it('shows streak when notifyStreak is on', () => {
+    mockPreferences.notifyStreak = true;
+    const { result } = renderHook(() => useVisibleAchievements([streak]));
+    expect(result.current).toHaveLength(1);
+  });
+
+  it('suppresses streak when notifyStreak is false', () => {
+    mockPreferences.notifyStreak = false;
+    const { result } = renderHook(() => useVisibleAchievements([streak]));
+    expect(result.current).toHaveLength(0);
+    mockPreferences.notifyStreak = true; // restore for subsequent tests
   });
 
   it('passes through unknown achievement types (future-proofing)', () => {

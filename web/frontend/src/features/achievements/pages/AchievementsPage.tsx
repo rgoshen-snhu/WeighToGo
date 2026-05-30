@@ -15,14 +15,17 @@ import {
 } from '@mui/material';
 
 import { useAchievements } from '../hooks/useAchievements';
-import type { AchievementRecord } from '../schemas/achievement';
+import { parseThreshold, type AchievementRecord } from '../schemas/achievement';
 
 function achievementLabel(ach: AchievementRecord): string {
   if (ach.achievement_type === 'goal_reached') return 'Goal Reached';
-  // parseFloat strips trailing decimal zeros from the Pydantic-serialised
-  // Numeric(6,2) string (e.g. "5.00" → 5) for clean display.
-  const lbs = parseFloat(String(ach.threshold));
-  return `${lbs} lb Milestone`;
+  // parseThreshold strips trailing decimal zeros from the Pydantic-serialised
+  // Numeric(6,2) string (e.g. "5.00" → 5) and guards against a null/NaN value.
+  const value = parseThreshold(ach.threshold);
+  if (ach.achievement_type === 'streak') {
+    return value === null ? 'Streak' : `${value}-day Streak`;
+  }
+  return value === null ? 'Milestone' : `${value} lb Milestone`;
 }
 
 function achievementDate(ach: AchievementRecord): string {

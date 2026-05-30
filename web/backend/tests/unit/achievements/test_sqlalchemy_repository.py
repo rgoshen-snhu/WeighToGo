@@ -90,6 +90,7 @@ def test_save_assigns_achievement_id(session: Session) -> None:
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
 
 
@@ -114,6 +115,41 @@ def test_get_recorded_thresholds_returns_empty_when_none(session: Session) -> No
     assert result == frozenset()
 
 
+# ── get_recorded_streak_thresholds ────────────────────────────────────────────
+
+
+def _make_streak(s: Session, threshold: Decimal) -> Achievement:
+    return Achievement(
+        achievement_id=None,
+        user_id=s._test_user_id,  # type: ignore[attr-defined]
+        goal_id=s._test_goal_id,  # type: ignore[attr-defined]
+        achievement_type=AchievementType.STREAK,
+        threshold=threshold,
+        earned_at=datetime.now(UTC),
+    )
+
+
+def test_get_recorded_streak_thresholds_returns_only_streak_rows(session: Session) -> None:
+    from weighttogo.achievements.infrastructure.repositories import SqlAlchemyAchievementRepository
+
+    # ARRANGE: a streak(7) and a milestone(5) on the same goal
+    repo = SqlAlchemyAchievementRepository(session)
+    repo.save(_make_streak(session, Decimal("7")))
+    repo.save(_make_milestone(session, Decimal("5")))
+    # ACT
+    result = repo.get_recorded_streak_thresholds(session._test_goal_id)  # type: ignore[attr-defined]
+    # ASSERT: only the streak threshold comes back
+    assert result == frozenset({Decimal("7")})
+
+
+def test_get_recorded_streak_thresholds_returns_empty_when_none(session: Session) -> None:
+    from weighttogo.achievements.infrastructure.repositories import SqlAlchemyAchievementRepository
+
+    repo = SqlAlchemyAchievementRepository(session)
+    result = repo.get_recorded_streak_thresholds(session._test_goal_id)  # type: ignore[attr-defined]
+    assert result == frozenset()
+
+
 # ── get_by_id ─────────────────────────────────────────────────────────────────
 
 
@@ -122,6 +158,7 @@ def test_get_by_id_returns_achievement_for_correct_user(session: Session) -> Non
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
     found = repo.get_by_id(saved.achievement_id, session._test_user_id)  # type: ignore[attr-defined]
     assert found is not None
@@ -133,6 +170,7 @@ def test_get_by_id_returns_none_for_wrong_user_idor_guard(session: Session) -> N
 
     repo = SqlAlchemyAchievementRepository(session)
     saved = repo.save(_make_milestone(session))
+    assert saved is not None
     assert saved.achievement_id is not None
     result = repo.get_by_id(saved.achievement_id, user_id=99999)
     assert result is None

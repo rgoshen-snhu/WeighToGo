@@ -1725,12 +1725,12 @@ Milestone 3 introduces algorithmic complexity that the architecture is designed 
 
 1. **Goal management.** All FR-G requirements implemented with database persistence.
 2. **Achievement detection.** All FR-Ach requirements with milestone detection running on every weight entry.
-3. **Streak detection.** FR-Ach-3 with efficient rolling window algorithm.
+3. **Streak detection.** FR-Ach-3 with an efficient single-pass longest-run scan over a set-backed sorted date sequence (see ADR-0022 for the algorithm choice and the longest-run vs. rolling-window rationale).
 4. **Cursor-based pagination.** FR-W-2 upgraded from naive to cursor-based with full ADR documentation.
 5. **TTL-based caching layer.** NFR-P-5 implemented for rate-of-change calculations.
 6. **Weekly rate of change.** FR-D-3 using two indexed lookups against composite indexes.
 7. **Charts on dashboard.** FR-D-2 with Recharts or equivalent.
-8. **ADRs covering algorithmic choices.** Pagination strategy, caching strategy, milestone detection algorithm.
+8. **ADRs covering algorithmic choices.** Pagination strategy, caching strategy, milestone detection algorithm, streak detection algorithm.
 
 ### 13.3 Milestone 4: Databases
 

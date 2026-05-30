@@ -20,6 +20,14 @@ const goalReached: AchievementRecord = {
   earned_at: '2026-01-01T00:00:00Z',
 };
 
+const streak7: AchievementRecord = {
+  achievement_id: 4,
+  goal_id: 7,
+  achievement_type: 'streak',
+  threshold: 7,
+  earned_at: '2026-01-07T00:00:00Z',
+};
+
 describe('AchievementNotification', () => {
   it('renders nothing when achievements array is empty', () => {
     const { container } = render(
@@ -36,6 +44,25 @@ describe('AchievementNotification', () => {
   it('shows goal reached copy for goal_reached achievement', () => {
     render(<AchievementNotification achievements={[goalReached]} onDismissOne={() => undefined} />);
     expect(screen.getByText(/goal reached/i)).toBeInTheDocument();
+  });
+
+  it('shows streak toast copy for a streak achievement', () => {
+    render(<AchievementNotification achievements={[streak7]} onDismissOne={() => undefined} />);
+    expect(screen.getByText(/7-day logging streak/i)).toBeInTheDocument();
+  });
+
+  it('falls back to plain streak copy when threshold is null (no NaN)', () => {
+    const nullStreak: AchievementRecord = { ...streak7, achievement_id: 5, threshold: null };
+    render(<AchievementNotification achievements={[nullStreak]} onDismissOne={() => undefined} />);
+    expect(screen.getByText('Logging streak! Keep it up.')).toBeInTheDocument();
+  });
+
+  it('falls back to plain milestone copy when threshold is null (no NaN)', () => {
+    const nullMilestone: AchievementRecord = { ...milestone5, achievement_id: 6, threshold: null };
+    render(
+      <AchievementNotification achievements={[nullMilestone]} onDismissOne={() => undefined} />,
+    );
+    expect(screen.getByText('Milestone reached!')).toBeInTheDocument();
   });
 
   it('has role status for ARIA live region (NFR-A-3)', () => {
