@@ -11,7 +11,10 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from weighttogo.auth.interface.router import get_current_user_id
-from weighttogo.dashboard.application.build_dashboard_summary import BuildDashboardSummary
+from weighttogo.dashboard.application.build_dashboard_summary import (
+    BuildDashboardSummary,
+    DashboardSummary,
+)
 from weighttogo.dashboard.interface.schemas import (
     DashboardSummaryResponse,
     RateOfChangeResponse,
@@ -20,6 +23,7 @@ from weighttogo.dashboard.interface.schemas import (
 from weighttogo.goals.application.get_active_goal_with_progress import GetActiveGoalWithProgress
 from weighttogo.goals.infrastructure.repositories import SqlAlchemyGoalRepository
 from weighttogo.goals.interface.schemas import to_active_goal_response
+from weighttogo.shared.cache import TTLCache
 from weighttogo.shared.db import get_db_session
 from weighttogo.weight_tracking.infrastructure.repositories import (
     SqlAlchemyWeightEntryRepository,
@@ -27,6 +31,27 @@ from weighttogo.weight_tracking.infrastructure.repositories import (
 from weighttogo.weight_tracking.interface.schemas import WeightEntryResponse
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
+
+# Process-global read-through cache for the per-user dashboard summary
+# (NFR-P-5, ADR-0023).  Caching the composed summary covers both values the
+# requirement names — the weekly rate of change and the entry counter — with a
+# single entry and a single invalidation point.  Survives across requests within
+# a worker process; bounded staleness is the cache's TTL.
+_dashboard_cache: TTLCache[int, DashboardSummary] = TTLCache()
+
+
+def invalidate_dashboard_cache(user_id: int) -> None:
+    """Evict a user's cached dashboard summary (NFR-P-5 invalidation trigger).
+
+    Args:
+        user_id: The user whose cached summary should be dropped.
+    """
+    _dashboard_cache.invalidate(user_id)
+
+
+def clear_dashboard_cache() -> None:
+    """Empty the entire dashboard cache (used for test isolation)."""
+    _dashboard_cache.clear()
 
 
 @router.get(
@@ -59,7 +84,12 @@ def get_dashboard_summary(
         weight_repo=weight_repo,
         get_active_goal_with_progress=get_active_goal,
     )
-    summary = uc.execute(user_id=current_user_id)
+    # Read-through cache (NFR-P-5): serve a cached summary when present and live,
+    # otherwise recompute and store it.  Invalidated on weight-entry create.
+    summary = _dashboard_cache.get(current_user_id)
+    if summary is None:
+        summary = uc.execute(user_id=current_user_id)
+        _dashboard_cache.set(current_user_id, summary)
 
     latest = (
         WeightEntryResponse.model_validate(summary.latest_entry)

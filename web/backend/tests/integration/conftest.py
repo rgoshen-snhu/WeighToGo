@@ -85,6 +85,14 @@ def client(db_session: Session) -> Iterator[TestClient]:
             db_session.rollback()
             raise
 
+    # Reset the process-global dashboard cache so a summary cached under a
+    # user_id in a prior test cannot leak into this one (the app, and therefore
+    # the cache, is shared across the whole integration run; each test gets a
+    # fresh DB but re-uses low user_ids).  NFR-P-5 / ADR-0023.
+    from weighttogo.dashboard.interface.router import clear_dashboard_cache
+
+    clear_dashboard_cache()
+
     app.dependency_overrides[get_db_session] = _override_db
     limiter.enabled = False
     # Include Origin so CSRF middleware treats requests as coming from the
