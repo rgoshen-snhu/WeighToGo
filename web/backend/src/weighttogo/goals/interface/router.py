@@ -22,6 +22,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from weighttogo.auth.interface.router import get_current_user_id, limiter
+from weighttogo.dashboard.interface.router import invalidate_dashboard_cache
 from weighttogo.goals.application.abandon_goal import AbandonGoal, AbandonGoalCommand
 from weighttogo.goals.application.get_active_goal_with_progress import (
     GetActiveGoalWithProgress,
@@ -112,6 +113,11 @@ def create_goal(
         ) from exc
 
     logger.info("goal_created", goal_id=goal.goal_id, user_id=current_user_id)
+
+    # The cached dashboard summary embeds active-goal progress, so a new goal
+    # must bust it or the next read serves a stale (goal-less) summary
+    # (NFR-P-5 invalidation trigger, ADR-0023).
+    invalidate_dashboard_cache(current_user_id)
     return GoalResponse.model_validate(goal)
 
 
@@ -258,6 +264,10 @@ def update_goal(
         )
 
     logger.info("goal_updated", goal_id=goal.goal_id, user_id=current_user_id)
+
+    # Target/date changes alter the cached dashboard's goal progress; invalidate
+    # so the next read recomputes (NFR-P-5 invalidation trigger, ADR-0023).
+    invalidate_dashboard_cache(current_user_id)
     return GoalResponse.model_validate(goal)
 
 
@@ -304,4 +314,8 @@ def abandon_goal(
         ) from exc
 
     logger.info("goal_abandoned", goal_id=goal_id, user_id=current_user_id)
+
+    # Abandoning removes the active goal the cached dashboard shows; invalidate
+    # so the next read reflects the deactivation (NFR-P-5 trigger, ADR-0023).
+    invalidate_dashboard_cache(current_user_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
