@@ -69,6 +69,9 @@ beforeEach(() => {
     items: [],
     next_cursor: null,
   });
+  // GoalsPage now fetches goal history via goalClient.list({ history: true });
+  // default to an empty history so existing tests don't hit an unstubbed call.
+  vi.spyOn(goalClientModule.goalClient, 'list').mockResolvedValue({ goals: [] });
 });
 
 describe('GoalsPage', () => {
@@ -254,5 +257,34 @@ describe('GoalsPage', () => {
     const abandonBtn = await screen.findByRole('button', { name: /abandon goal/i });
     await userEvent.click(abandonBtn);
     await screen.findByText(/server error|unexpected error/i);
+  });
+
+  it('renders past goals in a history section', async () => {
+    vi.spyOn(goalClientModule.goalClient, 'getActive').mockResolvedValue({
+      goal: null,
+      progress_percent: null,
+      current_value: null,
+    });
+    vi.spyOn(goalClientModule.goalClient, 'list').mockResolvedValue({
+      goals: [
+        {
+          goal_id: 99,
+          user_id: 1,
+          target_value: 150,
+          target_unit: 'lbs',
+          start_value: 200,
+          goal_type: 'lose',
+          target_date: null,
+          is_active: false,
+          is_achieved: true,
+          achieved_at: '2026-02-01T00:00:00Z',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-02-01T00:00:00Z',
+        },
+      ],
+    });
+    render(<GoalsPage />, { wrapper: Wrapper });
+    expect(await screen.findByRole('list', { name: /goal history/i })).toBeInTheDocument();
+    expect(screen.getByText(/achieved/i)).toBeInTheDocument();
   });
 });

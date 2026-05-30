@@ -24,9 +24,11 @@ import {
 import { weightClient } from '../../weight/api/weight-client';
 import { ApiError } from '../../../lib/api-client';
 import { GoalForm } from '../components/GoalForm';
+import { GoalHistoryList } from '../components/GoalHistoryList';
 import { GoalProgressBar } from '../components/GoalProgressBar';
 import { useActiveGoal } from '../hooks/useActiveGoal';
 import { useAbandonGoal } from '../hooks/useAbandonGoal';
+import { useGoals } from '../hooks/useGoals';
 import { useSetGoal } from '../hooks/useSetGoal';
 import { useUpdateGoal } from '../hooks/useUpdateGoal';
 import type { GoalFormValues } from '../schemas/goal-schemas';
@@ -46,11 +48,21 @@ export function GoalsPage() {
   const setGoal = useSetGoal();
   const updateGoal = useUpdateGoal();
   const abandonGoal = useAbandonGoal();
+  const goalHistory = useGoals({ history: true });
   const { preferences } = usePreferences();
 
   const [isEditing, setIsEditing] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  const historySection = (
+    <Box sx={{ mt: 4 }}>
+      <Typography variant="h6" component="h2" gutterBottom>
+        Goal history
+      </Typography>
+      <GoalHistoryList goals={goalHistory.data?.goals ?? []} />
+    </Box>
+  );
 
   if (isLoading) {
     return (
@@ -135,6 +147,7 @@ export function GoalsPage() {
           isSubmitting={setGoal.isPending}
           defaultUnit={preferences.weightUnit}
         />
+        {historySection}
       </Box>
     );
   }
@@ -220,6 +233,8 @@ export function GoalsPage() {
           </Stack>
         </CardContent>
       </Card>
+
+      {historySection}
     </Box>
   );
 }
