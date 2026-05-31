@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.2.1...v0.3.0) (2026-05-31)
+
+
+### Added
+
+* rate-limit achievements list endpoint to match goals (GH-79) ([#84](https://github.com/rgoshen-snhu/WeighToGo/issues/84)) ([b33f959](https://github.com/rgoshen-snhu/WeighToGo/commit/b33f95989c3841ad6b10dc700a036e7cfdcf64bb))
+
 ## [0.2.1](https://github.com/rgoshen-snhu/WeighToGo/compare/v0.2.0...v0.2.1) (2026-05-30)
 
 
