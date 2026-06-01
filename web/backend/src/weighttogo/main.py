@@ -30,7 +30,7 @@ configure_logging()
 
 app = FastAPI(
     title="Weigh to Go! API",
-    version="0.2.1",  # x-release-please-version
+    version="0.3.0",  # x-release-please-version
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/v1/openapi.json",
