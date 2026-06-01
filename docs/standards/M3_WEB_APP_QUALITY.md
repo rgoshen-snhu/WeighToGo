@@ -182,6 +182,8 @@ Input validation, authentication, CSRF, CORS, security headers, cookie attribute
 
 ## Recommended Remediation Order
 
+> Tracked as the **M3 remediation effort**, scoped separately from Milestone Four. See `docs/plans/milestone-three-plan.md` §9 for the work items and the M4 ownership boundary.
+
 1. Resolve the achievement write-flow contract: create-only/permanent vs create/update/delete recomputation.
 2. Align rate-of-change implementation with the documented indexed-window design or update the SRS/ADR to reflect the full-series dashboard read.
 3. Add route-level code splitting and a bundle-size guard.
