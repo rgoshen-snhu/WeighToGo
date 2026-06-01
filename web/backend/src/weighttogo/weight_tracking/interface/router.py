@@ -388,6 +388,10 @@ def update_weight_entry(
     # this edit (NFR-P-5 invalidation trigger, ADR-0023).
     invalidate_dashboard_cache(current_user_id)
 
+    # Achievement detection is intentionally not run on update per the create-only &
+    # permanent contract (ADR-0026): achievements earned on entry creation are permanent
+    # and are not recomputed or revoked when entries are later modified.
+
     return WeightEntryResponse.model_validate(entry)
 
 
@@ -438,5 +442,9 @@ def delete_weight_entry(
     # Invalidate the cached dashboard summary so the next read recomputes without
     # this deleted entry (NFR-P-5 invalidation trigger, ADR-0023).
     invalidate_dashboard_cache(current_user_id)
+
+    # Achievement detection is intentionally not run on delete per the create-only &
+    # permanent contract (ADR-0026): achievements earned on entry creation are permanent
+    # and are not revoked when entries are deleted.
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
